@@ -2,7 +2,7 @@ from database.db import db
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-class Games(db.Model):
+class Game(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     # publisher_id = db.Column(ForeignKey('publishers.id'))
     # developer_id = db.Column(ForeignKey('developers.id'))
