@@ -36,6 +36,18 @@ def get_engine_url():
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
+
+from models.user_model import User
+from models.bought_game_model import Bought_Game
+from models.game_genre_model import Game_Genre
+from models.game_model import Game
+from models.genre_model import Genre
+from models.shop_order_model import Shop_Order
+from models.order_item_model import Order_Item
+from models.partner_subscription_model import Partner_Subscription
+from models.review_model import Review
+from models.wishlist_item_model import Wishlist_Item
+
 config.set_main_option('sqlalchemy.url', get_engine_url())
 target_db = current_app.extensions['migrate'].db
 

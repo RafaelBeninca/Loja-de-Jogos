@@ -36,6 +36,8 @@ def user_controller(id):
                 user.password = generate_password_hash(password)
             
             user.email_address = data.get('email_address', user.email_address)
+            user.profile_picture = data.get('profile_picture', user.profile_picture)
+            user.summary = data.get('summary', user.summary)
 
             db.session.commit()
         except Exception as e:
@@ -76,9 +78,9 @@ def users_controller():
                 return jsonify({'message': 'informações já existem'}), 400
         except Exception as e:
             return jsonify({'message': f'{str(e)}'}), 400
-
+        
         password_hash = generate_password_hash(data['password'])
-        user = User(data['username'], password_hash, data['email_address'])
+        user = User(data['username'], password_hash, data['email_address'], data.get('profile_picture'), data.get('summary'))
         
         try:
             db.session.add(user)
