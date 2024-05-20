@@ -4,10 +4,11 @@ import UserContext from '../contexts/UserContext.tsx'
 import axios from "axios"
 import { UserContextInterface } from "../types/types.tsx"
 
-export default function Login() {
+export default function Signup() {
     const [formUser, setFormUser] = useState({
+        username: '',
         email_address: '',
-        password: ''
+        password: '',
     })
     const [isLoggedIn, setIsLoggedIn] = useState(true)
     const { getUser, logoutUser, loginUser } = useContext<UserContextInterface>(UserContext)
@@ -16,15 +17,17 @@ export default function Login() {
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
-        axios.post(import.meta.env.VITE_API_BASE_URL + '/api/auth', formUser).then((response) => {
-            loginUser(response.data.token, response.data.user)
-            navigate('/')
+        axios.post(import.meta.env.VITE_API_BASE_URL + '/api/users', formUser).then((response) => {
+            console.log(response)
+
+            alert('Conta criada com sucesso!')
+            navigate('/login')
         }).catch((error) => {
-            if (error.response.status === 401) {
-                alert('Email e/ou senha incorretos! \n\nTente novamente.')
+            if (error.response.status === 400) {
+                alert('Nome de usuário e/ou email já existem! \n\nTente novamente.')
             }
             else {
-                alert('Erro')
+                alert('Erro. Tente novamente')
             }
 
             console.error(error)
@@ -45,14 +48,18 @@ export default function Login() {
         });
     }
 
+
     useEffect(() => { loginIfToken() }, [])
 
     return (
         <>
             {!isLoggedIn &&
                 <div>
-                    <h1>Login</h1>
+                    <h1>Signup</h1>
                     <form onSubmit={onSubmit}>
+                        <label htmlFor="username">Username</label>
+                        <input type="text" name="username" id="username-input" required value={formUser.username} onChange={(e) => setFormUser({ ...formUser, username: e.target.value })} />
+                        <br /><br />
 
                         <label htmlFor="email">Email</label>
                         <input type="text" name="email" id="email-input" required value={formUser.email_address} onChange={(e) => setFormUser({ ...formUser, email_address: e.target.value })} />
@@ -62,7 +69,7 @@ export default function Login() {
                         <input type="password" name="password" id="password-input" required value={formUser.password} onChange={(e) => setFormUser({ ...formUser, password: e.target.value })} />
                         <br /><br />
 
-                        <button type="submit">Login</button>
+                        <button type="submit">Signup</button>
                     </form>
                 </div>
             }

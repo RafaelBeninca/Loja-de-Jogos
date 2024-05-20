@@ -1,10 +1,11 @@
-import { useEffect, useState, useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { OriginalGame } from '../types/types.tsx'
 import GameList from '../components/GameList.tsx'
 import GameForm from '../components/GameForm.tsx'
 import Modal from '../components/Modal.tsx'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { emptyOriginalGame } from '../utils/defaultValues.tsx'
 import UserContext from '../contexts/UserContext.tsx'
 
 interface Games {
@@ -14,22 +15,33 @@ interface Games {
 export default function Home() {
     const [games, setGames] = useState<Games>({ gameList: [] })
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [currentGame, setCurrentGame] = useState<OriginalGame>({
-        id: 0,
-        title: "",
-        price: 0
-    })
-    const { token } = useContext(UserContext)
-    
+    const [currentGame, setCurrentGame] = useState<OriginalGame>(emptyOriginalGame)
+    const { getUser, logoutUser, loginUser } = useContext(UserContext)
+
     const navigate = useNavigate()
 
+    const loginIfToken = () => {
+        getUser().then(({ user, token }) => {
+            if (token) {
+                loginUser(token, user)
+            }
+            else {
+                logoutUser()
+            }
+        });
+    }
+
+    useEffect(() => { loginIfToken() }, [])
+
     function fetchGames() {
+        const token = localStorage.getItem('token')
         const config = {
             headers: {
                 'Authorization': 'Bearer ' + token
             }
         }
-        axios.get<Games>("http://localhost:5000/games", config).then((response) => {
+
+        axios.get<Games>(import.meta.env.VITE_API_BASE_URL + "/api/games", config).then((response) => {
             setGames(response.data)
             console.log(response)
         }).catch((error) => {
@@ -44,11 +56,7 @@ export default function Home() {
 
     const closeModal = () => {
         setIsModalOpen(false)
-        setCurrentGame({
-            id: 0,
-            title: "",
-            price: 0
-        })
+        setCurrentGame(emptyOriginalGame)
     }
 
     const openModal = () => {
@@ -57,6 +65,7 @@ export default function Home() {
 
     const openUpdateModal = (game: OriginalGame) => {
         if (isModalOpen) return
+        console.log(game)
         setCurrentGame(game)
         setIsModalOpen(true)
     }

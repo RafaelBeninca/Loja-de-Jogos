@@ -1,7 +1,8 @@
 import React from "react";
 import { createContext, useState } from "react";
-import { UserContextInterface } from '../types/types'
+import { User, UserContextInterface } from '../types/types'
 import { emptyUser } from "../utils/defaultValues";
+import axios from "axios";
 
 interface UserProviderProps {
     children: React.ReactElement
@@ -9,23 +10,85 @@ interface UserProviderProps {
 
 const UserContext = createContext<UserContextInterface>({
     user: emptyUser,
-    setUser: () => { },
+    getUser: async () => { return { user: emptyUser, token: '' } },
+    logoutUser: () => { },
+    loginUser: () => { },
     token: '',
-    setToken: () => { }
+    cartId: '',
+    setCartId: () => { }
 })
 
 export function UserProvider({ children }: UserProviderProps) {
-    const [user, setUser] = useState({
-        id: '',
-        username: '',
-        email_address: '',
-        created_at: '',
-        updated_at: ''
-    })
+    const [user, setUser] = useState(emptyUser)
     const [token, setToken] = useState('')
+    const [cartId, setCartId] = useState('')
+
+    const getUser = async () => {
+        const localToken = localStorage.getItem('token') || ''
+
+        if (localToken === "") {
+            return {
+                user: emptyUser,
+                token: ''
+            }
+        }
+
+        const data = {}
+
+        const config = {
+            headers: {
+                Authorization: "Bearer " + localToken
+            }
+        }
+
+        try {
+            const response = await axios.post(import.meta.env.VITE_API_BASE_URL + '/api/check_token', data, config)
+
+            console.log(response)
+            return {
+                user: response.data.user,
+                token: localToken
+            }
+        }
+        catch (error) {
+            console.log(error)
+            return {
+                user: emptyUser,
+                token: ''
+            }
+        }
+    }
+
+    const logoutUser = () => {
+        localStorage.removeItem('token')
+        setToken('')
+
+        setUser(emptyUser)
+    }
+
+    const loginUser = (newToken: string, newUser: User) => {
+        localStorage.setItem('token', newToken)
+        setToken(newToken)
+
+        setUser(newUser)
+        checkForNewCartId(newUser.id)
+    }
+
+    const checkForNewCartId = (userId: string) => {
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+            }
+        }
+        axios.get(import.meta.env.VITE_API_BASE_URL + `/api/cart-id/${userId}`, config).then((response) => {
+            setCartId(response.data.cart_id)
+        }).catch((error) => {
+            console.error(error.response)
+        })
+    }
 
     return (
-        <UserContext.Provider value={{ user, setUser, token, setToken }}>
+        <UserContext.Provider value={{ user, getUser, logoutUser, loginUser, token, cartId, setCartId }}>
             {children}
         </UserContext.Provider>
     )

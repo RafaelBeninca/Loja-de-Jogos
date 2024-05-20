@@ -5,6 +5,8 @@ import Layout from './pages/Layout';
 import NoPage from './pages/NoPage';
 import Home from './pages/Home';
 import { UserProvider } from "./contexts/UserContext";
+import Signup from "./pages/Signup";
+import Cart from "./pages/Cart";
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
             <Route index element={<Home />} />
             <Route path='login' element={<Login />} />
             <Route path='logout' element={<Logout />} />
+            <Route path='signup' element={<Signup />} />
+            <Route path='cart' element={<Cart />} />
             <Route path='*' element={<NoPage />} />
           </Route>
         </Routes>

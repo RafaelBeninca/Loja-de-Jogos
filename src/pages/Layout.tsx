@@ -3,10 +3,8 @@ import { Outlet, Link } from "react-router-dom";
 import UserContext from "../contexts/UserContext";
 
 export default function Layout() {
-  // const { token } = useContext(UserContext)
-  const token = localStorage.getItem('token') || ''
-  const { user } = useContext(UserContext)
-
+  const { user, token, cartId } = useContext(UserContext)
+  
   return (
     <>
       <nav>
@@ -20,16 +18,25 @@ export default function Layout() {
               <Link to="/login">Login</Link>
             }
           </li>
+          {!token &&
+            <li>
+              <Link to='/signup'>Signup</Link>
+            </li>
+          }
+          {token &&
+            <li>
+              <Link to='/cart' id={cartId}>Cart</Link>
+            </li>
+          }
           <li>
-            {token}
+            token: {token}
           </li>
           <li>
             <ul>
-              <li>{user.id}</li>
-              <li>{user.username}</li>
-              <li>{user.email_address}</li>
-              <li>{user.created_at}</li>
-              <li>{user.updated_at}</li>
+              <li>id: {user.id}</li>
+              <li>username: {user.username}</li>
+              <li>email: {user.email_address}</li>
+              <li><img src={user.profile_picture} alt="" width={'100px'} height={'100px'} /></li>
             </ul>
           </li>
         </ul>

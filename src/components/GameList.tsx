@@ -1,9 +1,8 @@
 import { useNavigate } from 'react-router-dom'
-import { OriginalGame } from '../types/types'
+import { CartItem, OriginalGame } from '../types/types'
 import axios from "axios"
-import { useContext } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import UserContext from '../contexts/UserContext'
-import { emptyUser } from '../utils/defaultValues'
 
 export interface GameListProps {
     games: OriginalGame[],
@@ -12,7 +11,8 @@ export interface GameListProps {
 }
 
 export default function GameList({ games, onUpdate, updateCallback }: GameListProps) {
-    const { setUser } = useContext(UserContext)
+    const [cartItems, setCartItems] = useState<CartItem[]>([])
+    const { cartId } = useContext(UserContext)
     const navigate = useNavigate()
 
     const onDelete = (id: number) => {
@@ -21,7 +21,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.delete(`http://localhost:5000/games/${id}`, config).then((response) => {
+        axios.delete(import.meta.env.VITE_API_BASE_URL + `/api/games/${id}`, config).then((response) => {
             console.log(response);
             updateCallback()
 
@@ -29,8 +29,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
         }).catch((error) => {
             console.log(error);
             if (error.response.status === 401) {
-                setUser(emptyUser)
-                navigate('/login')
+                navigate('/logout')
             }
             else {
                 alert(`${error.response.data}. \n\nTente novamente.`)
@@ -38,24 +37,66 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
         });
     }
 
-    const onBuy = (game: OriginalGame) => {
-        axios.post('http://localhost:5000/carts', {
-            gameList: [{
-                id: game.id.toString(),
-                title: game.title,
-                currency_id: "BRL",
-                quantity: 1,
-                unit_price: game.price
-            }]
-        }).then((response) => {
-            console.log(response);
-
-            window.location.href = response.data;
+    const onAddToCart = (game: OriginalGame) => {
+        const data = {
+            shop_order_id: cartId,
+            game_id: game.id
+        }
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+            }
+        }
+        axios.post(import.meta.env.VITE_API_BASE_URL + '/api/cart-item', data, config).then((response) => {
+            console.log(response.data);
+            setCartItems([...cartItems, response.data.cart_item])
         }).catch((error) => {
-            console.log(error);
+            console.error(error.data);
+            if (error.response.status === 401) {
+                navigate('/logout')
+            }
+            else {
+                alert(`${error.response.data}. \n\nTente novamente.`)
+            }
+        });
+    }
+
+    const onRemoveFromCart = (cartItemId: number) => {
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+            }
+        }
+        axios.delete(import.meta.env.VITE_API_BASE_URL + `/api/cart-item/${cartItemId}`, config).then((response) => {
+            console.log(response.data);
+            setCartItems(cartItems.filter(cartItem => cartItem.id !== cartItemId))
+        }).catch((error) => {
+            console.error(error.data);
 
             alert(`${error.response.data}. \n\nTente novamente.`)
         });
+    }
+
+    const getCartItems = () => {
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
+            }
+        }
+        axios.get(import.meta.env.VITE_API_BASE_URL + `/api/carts/${cartId}`, config).then((response) => {
+            setCartItems(response.data.items)
+            console.log(response.data)
+        }).catch((error) => {
+            console.error(error.data)
+        })
+    }
+
+    useEffect(getCartItems, [cartId])
+
+    const getCartItem = (game: OriginalGame) => {
+        const cartItem = cartItems.find((item) => item.game_id === game.id)
+
+        return cartItem!
     }
 
     return (
@@ -79,7 +120,10 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                             <td>
                                 <button onClick={() => onUpdate(game)}>Update</button>
                                 <button onClick={() => onDelete(game.id)}>Delete</button>
-                                <button onClick={() => onBuy(game)}>Buy</button>
+                                {getCartItem(game) ?
+                                    <button onClick={() => onRemoveFromCart(getCartItem(game).id)}>Remove from Cart</button> :
+                                    <button onClick={() => onAddToCart(game)}>Add to Cart</button>
+                                }
                             </td>
                         </tr>
                     ))}
