@@ -2,7 +2,6 @@ from flask import jsonify, request
 from database.db import db
 from models.shop_order_model import Shop_Order
 from models.order_item_model import Order_Item
-from werkzeug.security import generate_password_hash
 
 def get_cart_controller(cart_id):
     if request.method == 'GET':

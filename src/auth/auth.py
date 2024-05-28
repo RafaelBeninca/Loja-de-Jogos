@@ -11,11 +11,9 @@ def get_user_by_email(email):
     except Exception as e:
         return None
 
-def auth():
-    from main import app
-    
+def auth(app):
     auth = request.get_json()
-    if not auth or not auth['email_address'] or not auth['password']:
+    if not auth or not auth.get('email_address') or not auth.get('password'):
         return jsonify({'message': 'não foi possível verificar', 'WWW-Authenticate': 'Basic auth="Login required"'}), 401
     
     user = get_user_by_email(auth['email_address'])

@@ -1,8 +1,10 @@
-from routes.games_route import games_route
-from routes.users_route import users_route
-from routes.carts_route import carts_route
+from routes.game_routes import game_routes
+from routes.user_routes import user_routes
+from routes.cart_routes import cart_routes
+from routes.wishlist_routes import wishlist_routes
 
 def route_index(app):
-    games_route(app)
-    users_route(app)
-    carts_route(app)
+    game_routes(app)
+    user_routes(app)
+    cart_routes(app)
+    wishlist_routes(app)

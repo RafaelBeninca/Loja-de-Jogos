@@ -19,7 +19,11 @@ def game_controller(id):
             game.developer = data.get('developer', game.developer)
             game.title = data.get('title', game.title)
             game.price = data.get('price', game.price)
-            game.release_date = data.get('release_date', game.release_date)
+
+            release_date = data.get('release_date') 
+            if not release_date:
+                release_date = None
+            game.release_date = data.get(release_date, game.release_date)
             game.summary = data.get('summary', game.summary)
             game.about = data.get('about', game.about)
             game.game_file = data.get('game_file', game.game_file)

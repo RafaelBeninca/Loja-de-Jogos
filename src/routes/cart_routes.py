@@ -1,8 +1,8 @@
 from controllers.carts_controller import post_cart_item_controller, delete_cart_item_controller, get_cart_id_controller, get_cart_controller
-from auth.auth import auth, token_required
+from auth.auth import token_required
 from flask import jsonify
 
-def carts_route(app):
+def cart_routes(app):
     # Get all the items in the cart
     @app.route('/api/carts/<cart_id>', methods=['GET'])
     @token_required(app)

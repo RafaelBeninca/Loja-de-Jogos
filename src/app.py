@@ -6,12 +6,10 @@ from dotenv import load_dotenv
 from flask_migrate import Migrate
 import os
 
-load_dotenv()
-
 def create_app():
     app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("DATABASE_CONNECTION")
-    app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_CONNECTION")
+    app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY')
     db.init_app(app)
     with app.app_context():
         db.create_all()
