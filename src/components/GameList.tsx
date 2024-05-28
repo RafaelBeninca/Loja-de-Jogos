@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { CartItem, OriginalGame, WishlistItem } from '../types/types'
-import axios from "axios"
+import axiosInstance from '../utils/axiosInstance'
 import { useContext, useEffect, useState } from 'react'
 import UserContext from '../contexts/UserContext'
 
@@ -22,7 +22,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.delete(`/api/games/${id}`, config).then((response) => {
+        axiosInstance.delete(`/api/games/${id}`, config).then((response) => {
             console.log(response);
             updateCallback()
 
@@ -48,7 +48,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.post('/api/cart-item', data, config).then((response) => {
+        axiosInstance.post('/api/cart-item', data, config).then((response) => {
             console.log(response.data);
             setCartItems([...cartItems, response.data.cart_item])
         }).catch((error) => {
@@ -68,7 +68,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.delete(`/api/cart-item/${cartItemId}`, config).then((response) => {
+        axiosInstance.delete(`/api/cart-item/${cartItemId}`, config).then((response) => {
             console.log(response.data);
             setCartItems(cartItems.filter(cartItem => cartItem.id !== cartItemId))
         }).catch((error) => {
@@ -87,7 +87,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.post('/api/wishlist', data, config).then((response) => {
+        axiosInstance.post('/api/wishlist', data, config).then((response) => {
             console.log(response.data);
             setWishlistItems([...wishlistItems, response.data.wishlist_item])
         }).catch((error) => {
@@ -107,7 +107,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.delete(`/api/wishlist-item/${wishlistItemId}`, config).then((response) => {
+        axiosInstance.delete(`/api/wishlist-item/${wishlistItemId}`, config).then((response) => {
             console.log(response.data);
             setWishlistItems(wishlistItems.filter(wishlistItem => wishlistItem.id !== wishlistItemId))
         }).catch((error) => {
@@ -123,7 +123,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.get(`/api/wishlist`, config).then((response) => {
+        axiosInstance.get(`/api/wishlist`, config).then((response) => {
             setWishlistItems(response.data.items)
             console.log(response.data)
         }).catch((error) => {
@@ -137,7 +137,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.get(`/api/carts/${cartId}`, config).then((response) => {
+        axiosInstance.get(`/api/carts/${cartId}`, config).then((response) => {
             setCartItems(response.data.items)
             console.log(response.data)
         }).catch((error) => {

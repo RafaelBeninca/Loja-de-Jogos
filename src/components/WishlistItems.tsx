@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from "react"
 import UserContext from "../contexts/UserContext"
-import axios from "axios"
+import axiosInstance from "../utils/axiosInstance"
 import { WishlistItem } from "../types/types"
 import { useNavigate } from "react-router-dom"
 
@@ -16,7 +16,7 @@ export default function CartItems() {
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.get(`/api/wishlist`, config).then((response) => {
+        axiosInstance.get(`/api/wishlist`, config).then((response) => {
             setWishlistItems(response.data.items)
             console.log(response.data)
         }).catch((error) => {
@@ -30,7 +30,7 @@ export default function CartItems() {
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.delete(`/api/wishlist-item/${wishlistItemId}`, config).then((response) => {
+        axiosInstance.delete(`/api/wishlist-item/${wishlistItemId}`, config).then((response) => {
             console.log(response.data);
             setWishlistItems(wishlistItems.filter(wishlistItem => wishlistItem.id !== wishlistItemId))
         }).catch((error) => {

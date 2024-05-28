@@ -3,7 +3,7 @@ import { OriginalGame } from '../types/types.tsx'
 import GameList from '../components/GameList.tsx'
 import GameForm from '../components/GameForm.tsx'
 import Modal from '../components/Modal.tsx'
-import axios from 'axios'
+import axiosInstance from '../utils/axiosInstance.tsx'
 import { useNavigate } from 'react-router-dom'
 import { emptyOriginalGame } from '../utils/defaultValues.tsx'
 import UserContext from '../contexts/UserContext.tsx'
@@ -41,7 +41,7 @@ export default function Home() {
             }
         }
 
-        axios.get<Games>("/api/games", config).then((response) => {
+        axiosInstance.get<Games>("/api/games", config).then((response) => {
             setGames(response.data)
             console.log(response)
         }).catch((error) => {

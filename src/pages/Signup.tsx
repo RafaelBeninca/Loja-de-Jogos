@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import UserContext from '../contexts/UserContext.tsx'
-import axios from "axios"
+import axiosInstance from "../utils/axiosInstance.tsx"
 import { UserContextInterface } from "../types/types.tsx"
 
 export default function Signup() {
@@ -17,7 +17,7 @@ export default function Signup() {
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
-        axios.post('/api/users', formUser).then((response) => {
+        axiosInstance.post('/api/users', formUser).then((response) => {
             console.log(response)
 
             alert('Conta criada com sucesso!')

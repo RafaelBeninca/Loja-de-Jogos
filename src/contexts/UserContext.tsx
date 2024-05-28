@@ -2,7 +2,7 @@ import React from "react";
 import { createContext, useState } from "react";
 import { User, UserContextInterface } from '../types/types'
 import { emptyUser } from "../utils/defaultValues";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 
 interface UserProviderProps {
     children: React.ReactElement
@@ -42,7 +42,7 @@ export function UserProvider({ children }: UserProviderProps) {
         }
 
         try {
-            const response = await axios.post('/api/check_token', data, config)
+            const response = await axiosInstance.post('/api/check_token', data, config)
 
             console.log(response)
             return {
@@ -80,7 +80,7 @@ export function UserProvider({ children }: UserProviderProps) {
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.get(`/api/cart-id/${userId}`, config).then((response) => {
+        axiosInstance.get(`/api/cart-id/${userId}`, config).then((response) => {
             setCartId(response.data.cart_id)
         }).catch((error) => {
             console.error(error.response)

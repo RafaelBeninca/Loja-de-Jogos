@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import UserContext from '../contexts/UserContext.tsx'
-import axios from "axios"
+import axiosInstance from "../utils/axiosInstance.tsx"
 import { UserContextInterface } from "../types/types.tsx"
 
 export default function Login() {
@@ -16,7 +16,7 @@ export default function Login() {
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
-        axios.post('/api/auth', formUser).then((response) => {
+        axiosInstance.post('/api/auth', formUser).then((response) => {
             loginUser(response.data.token, response.data.user)
             navigate('/')
         }).catch((error) => {

@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import axios from "axios"
+import axiosInstance from "../utils/axiosInstance"
 import { OriginalGame, SimpleGame } from "../types/types"
 import { useNavigate } from "react-router-dom"
 
@@ -43,7 +43,7 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
             return
         }
 
-        let request = axios.post
+        let request = axiosInstance.post
         let url = '/api/games'
         const token = localStorage.getItem('token') || ''
 
@@ -74,7 +74,7 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
         }
 
         if (isUpdating) {
-            request = axios.patch
+            request = axiosInstance.patch
             url += `/${game.id}`
         }
 
