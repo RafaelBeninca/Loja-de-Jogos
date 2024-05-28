@@ -35,8 +35,6 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
 
     const isUpdating = existingGame.id !== 0
 
-    console.log(game.release_date)
-
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 

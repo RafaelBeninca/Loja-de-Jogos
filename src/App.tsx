@@ -1,12 +1,13 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { UserProvider } from "./contexts/UserContext";
 import Login from './pages/Login'
 import Logout from './pages/Logout'
 import Layout from './pages/Layout';
 import NoPage from './pages/NoPage';
 import Home from './pages/Home';
-import { UserProvider } from "./contexts/UserContext";
 import Signup from "./pages/Signup";
 import Cart from "./pages/Cart";
+import Wishlist from "./pages/Wishlist";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path='logout' element={<Logout />} />
             <Route path='signup' element={<Signup />} />
             <Route path='cart' element={<Cart />} />
+            <Route path='wishlist' element={<Wishlist />} />
             <Route path='*' element={<NoPage />} />
           </Route>
         </Routes>

@@ -3,7 +3,7 @@ import { Outlet, Link } from "react-router-dom";
 import UserContext from "../contexts/UserContext";
 
 export default function Layout() {
-  const { user, token, cartId } = useContext(UserContext)
+  const { user, token } = useContext(UserContext)
   
   return (
     <>
@@ -25,7 +25,12 @@ export default function Layout() {
           }
           {token &&
             <li>
-              <Link to='/cart' id={cartId}>Cart</Link>
+              <Link to='/cart'>Cart</Link>
+            </li>
+          }
+          {token &&
+            <li>
+              <Link to='/wishlist'>Wishlist</Link>
             </li>
           }
           <li>

@@ -68,3 +68,10 @@ export interface CartItem {
     game_id: number,
     created_at: string
 }
+
+export interface WishlistItem {
+    id: number,
+    user_id: number,
+    game_id: number,
+    created_at: string
+}
