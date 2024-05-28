@@ -41,7 +41,7 @@ export default function Home() {
             }
         }
 
-        axios.get<Games>(import.meta.env.VITE_API_BASE_URL + "/api/games", config).then((response) => {
+        axios.get<Games>("/api/games", config).then((response) => {
             setGames(response.data)
             console.log(response)
         }).catch((error) => {

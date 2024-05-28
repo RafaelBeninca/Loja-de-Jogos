@@ -17,7 +17,7 @@ export default function Signup() {
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
 
-        axios.post(import.meta.env.VITE_API_BASE_URL + '/api/users', formUser).then((response) => {
+        axios.post('/api/users', formUser).then((response) => {
             console.log(response)
 
             alert('Conta criada com sucesso!')

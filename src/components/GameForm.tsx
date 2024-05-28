@@ -44,7 +44,7 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
         }
 
         let request = axios.post
-        let url = import.meta.env.VITE_API_BASE_URL + '/api/games'
+        let url = '/api/games'
         const token = localStorage.getItem('token') || ''
 
         const data = {

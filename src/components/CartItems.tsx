@@ -16,7 +16,7 @@ export default function CartItems() {
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.get(import.meta.env.VITE_API_BASE_URL + `/api/carts/${cartId}`, config).then((response) => {
+        axios.get(`/api/carts/${cartId}`, config).then((response) => {
             setCartItems(response.data.items)
             console.log(response.data)
         }).catch((error) => {
@@ -30,7 +30,7 @@ export default function CartItems() {
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.delete(import.meta.env.VITE_API_BASE_URL + `/api/cart-item/${cartItemId}`, config).then((response) => {
+        axios.delete(`/api/cart-item/${cartItemId}`, config).then((response) => {
             console.log(response.data);
             setCartItems(cartItems.filter(cartItem => cartItem.id !== cartItemId))
         }).catch((error) => {

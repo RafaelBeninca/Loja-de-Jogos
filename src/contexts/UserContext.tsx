@@ -42,7 +42,7 @@ export function UserProvider({ children }: UserProviderProps) {
         }
 
         try {
-            const response = await axios.post(import.meta.env.VITE_API_BASE_URL + '/api/check_token', data, config)
+            const response = await axios.post('/api/check_token', data, config)
 
             console.log(response)
             return {
@@ -80,7 +80,7 @@ export function UserProvider({ children }: UserProviderProps) {
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axios.get(import.meta.env.VITE_API_BASE_URL + `/api/cart-id/${userId}`, config).then((response) => {
+        axios.get(`/api/cart-id/${userId}`, config).then((response) => {
             setCartId(response.data.cart_id)
         }).catch((error) => {
             console.error(error.response)
