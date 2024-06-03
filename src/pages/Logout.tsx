@@ -8,7 +8,7 @@ export default function Logout() {
 
     const logout = () => {
         logoutUser()    
-        navigate('/login')
+        navigate('/')
     }
 
     useEffect(logout, [])

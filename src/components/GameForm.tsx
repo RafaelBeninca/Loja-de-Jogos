@@ -1,7 +1,11 @@
-import React, { useState } from "react"
+import React, { useContext, useState } from "react"
 import axiosInstance from "../utils/axiosInstance"
 import { OriginalGame, SimpleGame } from "../types/types"
 import { useNavigate } from "react-router-dom"
+import UserContext from "../contexts/UserContext"
+import ImageInput from "./ImageInput"
+import TrailerInput from "./VideoInput"
+import ExeInput from "./ExeInput"
 
 interface GameFormProps {
     existingGame: OriginalGame,
@@ -9,8 +13,10 @@ interface GameFormProps {
 }
 
 export default function GameForm({ existingGame, updateCallback }: GameFormProps) {
+    const { user } = useContext(UserContext);
     const [game, setGame] = useState<SimpleGame>({
         id: existingGame.id || 0,
+        creator_id: parseInt(user.id),
         publisher: existingGame.publisher || "",
         developer: existingGame.developer || "",
         title: existingGame.title || "",
@@ -18,67 +24,83 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
         release_date: existingGame.release_date ? new Date(existingGame.release_date).toISOString().substring(0, 16) : "",
         summary: existingGame.summary || "",
         about: existingGame.about || "",
-        game_file: existingGame.game_file || "",
-        banner_image: existingGame.banner_image || "",
-        trailer_1: existingGame.trailer_1 || "",
-        trailer_2: existingGame.trailer_1 || "",
-        trailer_3: existingGame.trailer_1 || "",
-        preview_image_1: existingGame.preview_image_1 || "",
-        preview_image_2: existingGame.preview_image_2 || "",
-        preview_image_3: existingGame.preview_image_3 || "",
-        preview_image_4: existingGame.preview_image_4 || "",
-        preview_image_5: existingGame.preview_image_5 || "",
-        preview_image_6: existingGame.preview_image_6 || "",
-    })
-    const [submitMessage, setSubmitMessage] = useState("")
-    const navigate = useNavigate()
+        game_file: existingGame.game_file,
+        banner_image: existingGame.banner_image,
+        trailer_1: existingGame.trailer_1,
+        trailer_2: existingGame.trailer_1,
+        trailer_3: existingGame.trailer_1,
+        preview_image_1: existingGame.preview_image_1,
+        preview_image_2: existingGame.preview_image_2,
+        preview_image_3: existingGame.preview_image_3,
+        preview_image_4: existingGame.preview_image_4,
+        preview_image_5: existingGame.preview_image_5,
+        preview_image_6: existingGame.preview_image_6,
+    });
+    const [submitMessage, setSubmitMessage] = useState("");
+    const navigate = useNavigate();
 
-    const isUpdating = existingGame.id !== 0
+    const isUpdating = existingGame.id !== 0;
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
+        e.preventDefault();
 
         if (!parseFloat(game.price)) {
-            setSubmitMessage("Digite valores válidos.")
-            return
+            setSubmitMessage("Digite valores válidos.");
+            return;
         }
 
-        let request = axiosInstance.post
-        let url = '/api/games'
-        const token = localStorage.getItem('token') || ''
-
-        const data = {
-            publisher: game.publisher,
-            developer: game.developer,
-            title: game.title,
-            price: parseFloat(game.price),
-            release_date: game.release_date,
-            summary: game.summary,
-            about: game.about,
-            game_file: game.game_file,
-            banner_image: game.banner_image,
-            trailer_1: game.trailer_1,
-            trailer_2: game.trailer_2,
-            trailer_3: game.trailer_3,
-            preview_image_1: game.preview_image_1,
-            preview_image_2: game.preview_image_2,
-            preview_image_3: game.preview_image_3,
-            preview_image_4: game.preview_image_4,
-            preview_image_5: game.preview_image_5,
-            preview_image_6: game.preview_image_6,
-        }
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
-        }
+        let request = axiosInstance.post;
+        let url = '/api/games';
+        const token = localStorage.getItem('token') || '';
 
         if (isUpdating) {
             request = axiosInstance.patch
             url += `/${game.id}`
         }
 
-        request(url, data, config)
+        const formData = new FormData();
+        
+        formData.append('creator_id', game.creator_id.toString());
+        formData.append('publisher', game.publisher);
+        formData.append('developer', game.developer);
+        formData.append('title', game.title);
+        formData.append('price', game.price);
+        formData.append('release_date', game.release_date);
+        formData.append('summary', game.summary);
+        formData.append('about', game.about);
+
+        if (game.game_file && game.game_file instanceof File) {
+            formData.append('game_file', game.game_file);
+        }
+        if (game.banner_image && game.banner_image instanceof File) {
+            formData.append('banner_image', game.banner_image);
+        }
+        if (game.trailer_1 && game.trailer_1 instanceof File) {
+            formData.append('trailer_1', game.trailer_1);
+        }
+        if (game.trailer_2 && game.trailer_2 instanceof File) {
+            formData.append('trailer_2', game.trailer_2);
+        }
+        if (game.trailer_3 && game.trailer_3 instanceof File) {
+            formData.append('trailer_3', game.trailer_3);
+        }
+
+        for (let i = 1; i < 7; i++) {
+            const field = game[`preview_image_${i}` as keyof SimpleGame]
+
+            if (field && field instanceof File) {
+                formData.append(`preview_image_${i}`, field as File)
+            }
+        }
+
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-type': "multipart/form-data"
+            }
+        };
+
+        request(url, formData, config)
             .then((response) => {
                 console.log(response);
                 updateCallback()
@@ -91,10 +113,20 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
                     navigate('/logout')
                 }
                 else {
-                    alert(`${error.response.data}. \n\nTente novamente.`)
+                    alert(`Erro. \n\nTente novamente.`)
                 }
             });
 
+    }
+
+    const trailerInputs = [];
+    for (let i = 0; i < 3; i++) {
+        trailerInputs.push(<TrailerInput name={`Trailer ${i + 1}`} id={`trailer_${i+1}`} setGame={setGame} game={game} key={i+1} />)
+    }
+
+    const previewImageInputs = [];
+    for (let i = 0; i < 6; i++) {
+        previewImageInputs.push(<ImageInput name={`Preview Image ${i + 1}`} id={`preview_image_${i+1}`} setGame={setGame} game={game} required={false} key={i+1} />)
     }
 
     return (
@@ -127,49 +159,25 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
             <input type="text" name="about" id="about" value={game.about} onChange={(e) => setGame({ ...game, about: e.target.value })} />
             <br /><br />
 
-            {/* <label htmlFor="game_file">Game File </label>
-            <input type="file" name="game_file" id="game_file" required value={game.game_file} onChange={(e) => setGame({ ...game, game_file: e.target.value })} />
+            <ExeInput name="Game File" id="game_file" required={isUpdating ? false : true} game={game} setGame={setGame}/>
             <br /><br />
 
-            <label htmlFor="banner_image">Banner Image </label>
-            <input type="file" name="banner_image" id="banner_image" required value={game.banner_image} onChange={(e) => setGame({ ...game, banner_image: e.target.value })} />
-            <br /><br /> */}
-
-            <label htmlFor="trailer_1">Trailer 1 </label>
-            <input type="file" name="trailer_1" id="trailer_1" value={game.trailer_1} onChange={(e) => setGame({ ...game, trailer_1: e.target.value })} />
+            <ImageInput name="Banner Image" id="banner_image" setGame={setGame} game={game} required={isUpdating ? false : true} />
             <br /><br />
 
-            <label htmlFor="trailer_2">Trailer 2 </label>
-            <input type="file" name="trailer_2" id="trailer_2" value={game.trailer_2} onChange={(e) => setGame({ ...game, trailer_2: e.target.value })} />
-            <br /><br />
+            {trailerInputs.map(trailerInput => (
+                <>
+                    {trailerInput}
+                    <br /><br />
+                </>
+            ))}
 
-            <label htmlFor="trailer_3">Trailer 3 </label>
-            <input type="file" name="trailer_3" id="trailer_3" value={game.trailer_3} onChange={(e) => setGame({ ...game, trailer_3: e.target.value })} />
-            <br /><br />
-
-            <label htmlFor="preview_image_1">Preview Image 1 </label>
-            <input type="file" name="preview_image_1" id="preview_image_1" value={game.preview_image_1} onChange={(e) => setGame({ ...game, preview_image_1: e.target.value })} />
-            <br /><br />
-
-            <label htmlFor="preview_image_2">Preview Image 2 </label>
-            <input type="file" name="preview_image_2" id="preview_image_2" value={game.preview_image_2} onChange={(e) => setGame({ ...game, preview_image_2: e.target.value })} />
-            <br /><br />
-
-            <label htmlFor="preview_image_3">Preview Image 3 </label>
-            <input type="file" name="preview_image_3" id="preview_image_3" value={game.preview_image_3} onChange={(e) => setGame({ ...game, preview_image_3: e.target.value })} />
-            <br /><br />
-
-            <label htmlFor="preview_image_4">Preview Image 4 </label>
-            <input type="file" name="preview_image_4" id="preview_image_4" value={game.preview_image_4} onChange={(e) => setGame({ ...game, preview_image_4: e.target.value })} />
-            <br /><br />
-
-            <label htmlFor="preview_image_5">Preview Image 5 </label>
-            <input type="file" name="preview_image_5" id="preview_image_5" value={game.preview_image_5} onChange={(e) => setGame({ ...game, preview_image_5: e.target.value })} />
-            <br /><br />
-
-            <label htmlFor="preview_image_6">Preview Image 6 </label>
-            <input type="file" name="preview_image_6" id="preview_image_6" value={game.preview_image_6} onChange={(e) => setGame({ ...game, preview_image_6: e.target.value })} />
-            <br /><br />
+            {previewImageInputs.map(previewImageInput => (
+                <>
+                    {previewImageInput}
+                    <br /><br />
+                </>
+            ))}
 
             <button type="submit">{isUpdating ? 'Update' : 'Create'} Game</button>
 

@@ -4,7 +4,7 @@ import UserContext from '../contexts/UserContext.tsx'
 import axiosInstance from "../utils/axiosInstance.tsx"
 import { UserContextInterface } from "../types/types.tsx"
 
-export default function Login() {
+export default function PartnerLogin() {
     const [formUser, setFormUser] = useState({
         email_address: '',
         password: ''
@@ -18,7 +18,7 @@ export default function Login() {
 
         axiosInstance.post('/api/auth', formUser).then((response) => {
             loginUser(response.data.token, response.data.user)
-            navigate('/')
+            navigate('/partner')
         }).catch((error) => {
             if (error.response.status === 401) {
                 alert('Email e/ou senha incorretos! \n\nTente novamente.')
@@ -36,7 +36,7 @@ export default function Login() {
             if (token) {
                 setIsLoggedIn(true)
                 loginUser(token, user)
-                navigate('/')
+                navigate('/partner')
             }
             else {
                 setIsLoggedIn(false)
@@ -51,7 +51,7 @@ export default function Login() {
         <>
             {!isLoggedIn &&
                 <div>
-                    <h1>Login</h1>
+                    <h1>Login as partner</h1>
                     <form onSubmit={onSubmit}>
 
                         <label htmlFor="email">Email</label>

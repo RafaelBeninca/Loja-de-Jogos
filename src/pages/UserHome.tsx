@@ -1,21 +1,17 @@
 import { useContext, useEffect, useState } from 'react'
 import { OriginalGame } from '../types/types.tsx'
-import GameList from '../components/GameList.tsx'
-import GameForm from '../components/GameForm.tsx'
-import Modal from '../components/Modal.tsx'
+import UserHomeGameList from '../components/UserHomeGameList.tsx'
 import axiosInstance from '../utils/axiosInstance.tsx'
 import { useNavigate } from 'react-router-dom'
-import { emptyOriginalGame } from '../utils/defaultValues.tsx'
 import UserContext from '../contexts/UserContext.tsx'
 
 interface Games {
     gameList: OriginalGame[]
 }
 
-export default function Home() {
+export default function UserHome() {
     const [games, setGames] = useState<Games>({ gameList: [] })
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [currentGame, setCurrentGame] = useState<OriginalGame>(emptyOriginalGame)
+    const [loading, setLoading] = useState(true)
     const { getUser, logoutUser, loginUser } = useContext(UserContext)
 
     const navigate = useNavigate()
@@ -43,6 +39,7 @@ export default function Home() {
 
         axiosInstance.get<Games>("/api/games", config).then((response) => {
             setGames(response.data)
+            setLoading(false)
             console.log(response)
         }).catch((error) => {
             console.error(error)
@@ -54,35 +51,12 @@ export default function Home() {
 
     useEffect(fetchGames, [])
 
-    const closeModal = () => {
-        setIsModalOpen(false)
-        setCurrentGame(emptyOriginalGame)
-    }
-
-    const openModal = () => {
-        if (!isModalOpen) setIsModalOpen(true)
-    }
-
-    const openUpdateModal = (game: OriginalGame) => {
-        if (isModalOpen) return
-        console.log(game)
-        setCurrentGame(game)
-        setIsModalOpen(true)
-    }
-
-    const onUpdate = () => {
-        closeModal()
-        fetchGames()
-    }
-
     return (
         <div>
-            <GameList games={games.gameList} onUpdate={openUpdateModal} updateCallback={onUpdate} />
-            <button onClick={openModal}>Create Game</button>
-
-            {isModalOpen && <Modal closeModal={closeModal}>
-                <GameForm existingGame={currentGame} updateCallback={onUpdate} />
-            </Modal>}
+            {loading ? 
+                <p><b>Carregando...</b></p> :
+                <UserHomeGameList games={games.gameList} />
+            }
         </div>
     )
 }

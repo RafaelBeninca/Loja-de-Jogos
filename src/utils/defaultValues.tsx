@@ -10,6 +10,7 @@ export const emptyUser = {
 
 export const emptyOriginalGame = {
     id: 0,
+    creator_id: 0,
     publisher: "",
     developer: "",
     title: "",

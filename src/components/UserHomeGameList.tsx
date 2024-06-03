@@ -4,39 +4,15 @@ import axiosInstance from '../utils/axiosInstance'
 import { useContext, useEffect, useState } from 'react'
 import UserContext from '../contexts/UserContext'
 
-export interface GameListProps {
-    games: OriginalGame[],
-    onUpdate: (game: OriginalGame) => void,
-    updateCallback: () => void
+export interface UserHomeGameListProps {
+    games: OriginalGame[]
 }
 
-export default function GameList({ games, onUpdate, updateCallback }: GameListProps) {
+export default function UserHomeGameList({ games }: UserHomeGameListProps) {
     const [cartItems, setCartItems] = useState<CartItem[]>([])
     const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
     const { cartId } = useContext(UserContext)
     const navigate = useNavigate()
-
-    const onDelete = (id: number) => {
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-            }
-        }
-        axiosInstance.delete(`/api/games/${id}`, config).then((response) => {
-            console.log(response);
-            updateCallback()
-
-            alert(`Jogo deletado com sucesso.`)
-        }).catch((error) => {
-            console.log(error);
-            if (error.response.status === 401) {
-                navigate('/logout')
-            }
-            else {
-                alert(`${error.response.data}. \n\nTente novamente.`)
-            }
-        });
-    }
 
     const onAddToCart = (game: OriginalGame) => {
         const data = {
@@ -166,6 +142,7 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
             <table>
                 <thead>
                     <tr>
+                        <th>Banner Image</th>
                         <th>Id</th>
                         <th>Title</th>
                         <th>Price</th>
@@ -175,12 +152,11 @@ export default function GameList({ games, onUpdate, updateCallback }: GameListPr
                 <tbody>
                     {games.map((game) => (
                         <tr key={game.id}>
+                            <td><img src={game.banner_image} alt="" style={{width: "6rem"}} /></td>
                             <td>{game.id}</td>
                             <td>{game.title}</td>
                             <td>{game.price}</td>
                             <td>
-                                <button onClick={() => onUpdate(game)}>Update</button>
-                                <button onClick={() => onDelete(game.id)}>Delete</button>
                                 {getCartItem(game) ?
                                     <button onClick={() => onRemoveFromCart(getCartItem(game).id)}>Remove from cart</button> :
                                     <button onClick={() => onAddToCart(game)}>Add to cart</button>
