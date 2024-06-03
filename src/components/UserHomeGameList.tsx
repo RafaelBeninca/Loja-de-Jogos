@@ -11,7 +11,7 @@ export interface UserHomeGameListProps {
 export default function UserHomeGameList({ games }: UserHomeGameListProps) {
     const [cartItems, setCartItems] = useState<CartItem[]>([])
     const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
-    const { cartId } = useContext(UserContext)
+    const { cartId, logoutUser } = useContext(UserContext)
     const navigate = useNavigate()
 
     const onAddToCart = (game: OriginalGame) => {
@@ -30,7 +30,8 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
         }).catch((error) => {
             console.error(error.data);
             if (error.response.status === 401) {
-                navigate('/logout')
+                logoutUser()
+                navigate("/login")
             }
             else {
                 alert(`${error.response.data}. \n\nTente novamente.`)
@@ -69,7 +70,8 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
         }).catch((error) => {
             console.error(error.data);
             if (error.response.status === 401) {
-                navigate('/logout')
+                logoutUser()
+                navigate("/login")
             }
             else {
                 alert(`${error.response.data}. \n\nTente novamente.`)
