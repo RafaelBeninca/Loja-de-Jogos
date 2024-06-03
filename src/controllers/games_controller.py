@@ -1,95 +1,179 @@
 from flask import jsonify, request
 from database.db import db
 from models.game_model import Game
+from werkzeug.utils import secure_filename
+from gcloud.buckets.game_data_bucket.game_data_upload import upload_directory_with_transfer_manager, upload_blob_from_memory
+from gcloud.buckets.game_data_bucket.game_data_download import generate_download_signed_url_v4
+from gcloud.buckets.game_data_bucket.game_data_delete import delete_storage_folder, delete_blob
+from datetime import datetime
+import os
 
-def game_controller(id):
+def game_controller(game_id, user_id):
     if request.method == 'PATCH':
         try:
-            data = request.get_json()
-        except Exception as e:
-            return f"ERROR: {str(e)}", 400
-        
-        try:
-            game = Game.query.get(id) # Could also cause a 400, but idk
+            game: Game = Game.query.get(game_id)
+            games_with_same_title: list[Game] = Game.query.filter(Game.title == request.form['title']).all()
 
             if not game:
-                return f"ERROR: Jogo não existe", 400
-            
-            game.publisher = data.get('publisher', game.publisher)
-            game.developer = data.get('developer', game.developer)
-            game.title = data.get('title', game.title)
-            game.price = data.get('price', game.price)
+                raise Exception("esse jogo não existe")
 
-            release_date = data.get('release_date') 
+            if games_with_same_title and game.id != games_with_same_title[0].id: 
+                raise Exception("um jogo com esse nome já existe")
+        except Exception as e:
+            return jsonify({"message": f"{str(e)}"}), 400
+        
+        try:
+            files = request.files
+
+            now = datetime.now()
+            now_str = now.strftime("%d-%m-%Y_%H-%M-%S")
+
+            media = {}
+
+            for i, (field_name, file) in enumerate(files.items()):
+                sec_filename = secure_filename(file.filename)
+
+                if field_name != "game_file":
+                    filename_sep, ext = os.path.splitext(sec_filename)
+                    filename_sep += '-' + now_str + "-" + str(i)
+
+                    filename = filename_sep + ext
+                else:
+                    filename = sec_filename
+
+                print(file, filename)
+
+                print(getattr(game, field_name))
+                delete_blob('fgs-game-data', getattr(game, field_name))
+
+                blob_name = f"{game.blob_name_prefix}{filename}"
+                upload_blob_from_memory("fgs-game-data", file.read(), blob_name)
+
+                media[field_name] = blob_name
+                setattr(game, field_name, blob_name)
+
+            print(media)
+
+            game.creator_id = request.form.get('creator_id', game.creator_id)
+            game.publisher = request.form.get('publisher', game.publisher)
+            game.developer = request.form.get('developer', game.developer)
+            game.title = request.form.get('title', game.title)
+            game.price = request.form.get('price', game.price)
+
+            release_date = request.form.get('release_date') 
             if not release_date:
                 release_date = None
-            game.release_date = data.get(release_date, game.release_date)
-            game.summary = data.get('summary', game.summary)
-            game.about = data.get('about', game.about)
-            game.game_file = data.get('game_file', game.game_file)
-            game.banner_image = data.get('banner_image', game.banner_image)
-            game.trailer_1 = data.get('trailer_1', game.trailer_1)
-            game.trailer_2 = data.get('trailer_2', game.trailer_2)
-            game.trailer_3 = data.get('trailer_3', game.trailer_3)
-            game.preview_image_1 = data.get('preview_image_1', game.preview_image_1)
-            game.preview_image_2 = data.get('preview_image_2', game.preview_image_2)
-            game.preview_image_3 = data.get('preview_image_3', game.preview_image_3)
-            game.preview_image_4 = data.get('preview_image_4', game.preview_image_4)
-            game.preview_image_5 = data.get('preview_image_5', game.preview_image_5)
-            game.preview_image_6 = data.get('preview_image_6', game.preview_image_6)
+
+            game.release_date = request.form.get(release_date, game.release_date)
+            game.summary = request.form.get('summary', game.summary)
+            game.about = request.form.get('about', game.about)
 
             db.session.commit()
         except Exception as e:
-            return f'ERROR: {str(e)}', 500
+            return jsonify({"message": f"{str(e)}"}), 500
         
-        return f"Jogo alterado com sucesso", 200
+        return jsonify({"message": "jogo alterado com sucesso"}), 200
     elif request.method == 'DELETE':
         try:
-            game = Game.query.get(id)
+            game: Game = Game.query.get(game_id)
             
             if not game:
-                return f'ERROR: Jogo não existe', 400
-        
+                return jsonify({"message": "jogo não existe"}), 400
+            
+            if game.creator_id != user_id:
+                return jsonify({"message": "usuário não tem permissão para deletar esse jogo"}), 403
+
+            delete_storage_folder('fgs-game-data', game.blob_name_prefix)
+
             db.session.delete(game)
             db.session.commit()
         except Exception as e:
-            return f'ERROR: {str(e)}', 500
+            return jsonify({"message": f"{str(e)}"}), 500
         
-        return f'Jogo deletado com sucesso', 200
+        return jsonify({"message": "jogo deletado com sucesso"}), 200
+
 
 def post_game_controller():
     try:
-        data = request.get_json()
-        isRepeatedTitle = Game.query.filter(Game.title == data['title']).all()
+        isRepeatedTitle = Game.query.filter(Game.title == request.form['title']).all()
 
         if isRepeatedTitle: 
-            return f'ERROR: Um jogo com esse nome já existe', 400
+            return jsonify({"message": "um jogo com esse nome já existe"}), 400
 
     except Exception as e:
-        return f'ERROR: {str(e)}', 400
+        return jsonify({"message": f"{str(e)}"}), 400
     
-    release_date = data.get('release_date') 
+    release_date = request.form.get('release_date')
     if not release_date:
         release_date = None
-    
-    game = Game(data['publisher'], data['developer'], data['title'], data['price'], release_date, data['summary'], data['about'], data['game_file'], data['banner_image'], data.get('trailer_1'), data.get('trailer_2'), data.get('trailer_3'), data.get('preview_image_1'), data.get('preview_image_2'), data.get('preview_image_3'), data.get('preview_image_4'), data.get('preview_image_5'), data.get('preview_image_6'))
+
+    try:
+        files = request.files
+
+        now = datetime.now()
+        now_str = now.strftime("%d-%m-%Y_%H-%M-%S")
+
+        media = {}
+
+        for i, (field_name, file) in enumerate(files.items()):
+            sec_filename = secure_filename(file.filename)
+
+            if field_name != "game_file":
+                filename_sep, ext = os.path.splitext(sec_filename)
+                filename_sep += '-' + now_str + "-" + str(i)
+
+                filename = filename_sep + ext
+            else:
+                filename = sec_filename
+
+            print(file, filename)
+
+            blob_name = f"{now_str}/{filename}" 
+            upload_blob_from_memory("fgs-game-data", file.read(), blob_name)
+
+            media[field_name] = f"{now_str}/{filename}"
+
+        print(media)
+    except Exception as e:
+        return jsonify({"message": f"{str(e)}"}), 400
     
     try:
+        game = Game(request.form.get('creator_id'), request.form.get('publisher'), request.form.get('developer'), request.form.get('title'), request.form.get('price'), release_date, request.form.get('summary'), request.form.get('about'), media.get('game_file'), media.get('banner_image'), media.get('trailer_1'), media.get('trailer_2'), media.get('trailer_3'), media.get('preview_image_1'), media.get('preview_image_2'), media.get('preview_image_3'), media.get('preview_image_4'), media.get('preview_image_5'), media.get('preview_image_6'), f"{now_str}/")
+        
         db.session.add(game)
         db.session.commit()
     except Exception as e:
-        return f"ERROR: {str(e)}", 500
+        return jsonify({"message": f"{str(e)}"}), 500
 
-    return "Jogo criado com sucesso", 200
+    return jsonify({"message": "jogo criado com sucesso"}), 200
     
 
 def get_games_controller():
     try:
-        data = Game.query.all()
+        data: list[Game] = Game.query.all()
         games = [game.to_dict() for game in data]
-        print(games)
+
+        for game in games:
+            for field_name in game.keys():
+                if ("trailer" in field_name or "image" in field_name or "file" in field_name) and game[field_name]:
+                    game[field_name] = generate_download_signed_url_v4("fgs-game-data", game[field_name])
+
+        return jsonify({"gameList": games}), 200
+    except Exception as e:
+        return jsonify({"message": f"{str(e)}"}), 500
+        
+
+def get_partner_games_controller(user_id):
+    try:
+        data: list[Game] = Game.query.filter(Game.creator_id == user_id).all()
+        games = [game.to_dict() for game in data]
+
+        for game in games:
+            for field_name in game.keys():
+                if ("trailer" in field_name or "image" in field_name or "file" in field_name) and game[field_name]:
+                    game[field_name] = generate_download_signed_url_v4("fgs-game-data", game[field_name])
 
         return jsonify({"gameList": games})
     except Exception as e:
-        return f"ERROR: {str(e)}", 500
+        return jsonify({"message": f"{str(e)}"}), 500
         

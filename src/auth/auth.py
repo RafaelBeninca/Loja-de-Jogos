@@ -39,7 +39,6 @@ def token_required(app):
                 return jsonify({'message': 'token está faltando', 'data': {}}), 401
             try:
                 token = auth.split(' ')[1]
-                print(token)
                 data = jwt.decode(token, app.config['JWT_SECRET_KEY'], ['HS256'])
                 current_user = get_user_by_email(data['email_address'])
             except Exception as e:
