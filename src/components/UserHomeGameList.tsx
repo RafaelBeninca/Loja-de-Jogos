@@ -3,6 +3,8 @@ import { CartItem, OriginalGame, WishlistItem } from '../types/types'
 import axiosInstance from '../utils/axiosInstance'
 import { useContext, useEffect, useState } from 'react'
 import UserContext from '../contexts/UserContext'
+import { getWishlistItems, onRemoveFromWishlist } from '../funcs/async/WishlistFunctions'
+import { getCartItems, onRemoveFromCart } from '../funcs/async/CartFunctions'
 
 export interface UserHomeGameListProps {
     games: OriginalGame[]
@@ -39,22 +41,6 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
         });
     }
 
-    const onRemoveFromCart = (cartItemId: number) => {
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-            }
-        }
-        axiosInstance.delete(`/api/cart-item/${cartItemId}`, config).then((response) => {
-            console.log(response.data);
-            setCartItems(cartItems.filter(cartItem => cartItem.id !== cartItemId))
-        }).catch((error) => {
-            console.error(error.data);
-
-            alert(`${error.response.data}. \n\nTente novamente.`)
-        });
-    }
-
     const onAddToWishlist = (game: OriginalGame) => {
         const data = {
             game_id: game.id
@@ -79,52 +65,8 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
         });
     }
 
-    const onRemoveFromWishlist = (wishlistItemId: number) => {
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-            }
-        }
-        axiosInstance.delete(`/api/wishlist-item/${wishlistItemId}`, config).then((response) => {
-            console.log(response.data);
-            setWishlistItems(wishlistItems.filter(wishlistItem => wishlistItem.id !== wishlistItemId))
-        }).catch((error) => {
-            console.error(error.data);
-
-            alert(`${error.response.data}. \n\nTente novamente.`)
-        });
-    }
-
-    const getWishlistItems = () => {
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-            }
-        }
-        axiosInstance.get(`/api/wishlist`, config).then((response) => {
-            setWishlistItems(response.data.items)
-            console.log(response.data)
-        }).catch((error) => {
-            console.error(error.data)
-        })
-    }
-
-    const getCartItems = () => {
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-            }
-        }
-        axiosInstance.get(`/api/carts/${cartId}`, config).then((response) => {
-            setCartItems(response.data.items)
-            console.log(response.data)
-        }).catch((error) => {
-            console.error(error.data)
-        })
-    }
-
-    useEffect(getCartItems, [cartId])
-    useEffect(getWishlistItems, [])
+    useEffect(() => getCartItems(setCartItems, cartId), [cartId])
+    useEffect(() => getWishlistItems(setWishlistItems), [])
 
     const getCartItem = (game: OriginalGame) => {
         const cartItem = cartItems.find((item) => item.game_id === game.id)
@@ -160,11 +102,11 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
                             <td>{game.price}</td>
                             <td>
                                 {getCartItem(game) ?
-                                    <button onClick={() => onRemoveFromCart(getCartItem(game).id)}>Remove from cart</button> :
+                                    <button onClick={() => onRemoveFromCart(setCartItems, cartItems, getCartItem(game).id)}>Remove from cart</button> :
                                     <button onClick={() => onAddToCart(game)}>Add to cart</button>
                                 }
                                 {getWishlistItem(game) ?
-                                    <button onClick={() => onRemoveFromWishlist(getWishlistItem(game).id)}>Remove from wishlist</button> :
+                                    <button onClick={() => onRemoveFromWishlist(setWishlistItems, wishlistItems, getWishlistItem(game).id)}>Remove from wishlist</button> :
                                     <button onClick={() => onAddToWishlist(game)}>Add to wishlist</button>
                                 }
                             </td>

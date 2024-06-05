@@ -2,13 +2,15 @@ import React, { useState, useContext, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import UserContext from '../contexts/UserContext.tsx'
 import axiosInstance from "../utils/axiosInstance.tsx"
-import { UserContextInterface } from "../types/types.tsx"
+import { FormUser, UserContextInterface } from "../types/types.tsx"
 
 export default function Signup() {
-    const [formUser, setFormUser] = useState({
+    const [formUser, setFormUser] = useState<FormUser>({
         username: '',
         email_address: '',
         password: '',
+        profile_picture: '',
+        summary: ''
     })
     const [isLoggedIn, setIsLoggedIn] = useState(true)
     const { getUser, logoutUser, loginUser } = useContext<UserContextInterface>(UserContext)

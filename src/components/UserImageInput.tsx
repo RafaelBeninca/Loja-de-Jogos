@@ -2,17 +2,18 @@ import React, { useEffect, useState } from "react"
 import "../styles/mediaInput.css"
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faImage } from '@fortawesome/free-regular-svg-icons'
-import { SimpleGame } from "../types/types"
+import { FormUser } from "../types/types"
 
-interface ImageInputProps {
+interface UserImageInputProps {
     name: string,
     id: string,
-    setGame: (arg0: SimpleGame) => void,
-    game: SimpleGame,
+    setUser: (arg0: FormUser) => void,
+    user: FormUser,
+    defaultImage: string,
     required: boolean
 }
 
-export default function ImageInput({ name, id, setGame, game, required }: ImageInputProps) {
+export default function UserImageInput({ name, id, setUser, user, defaultImage, required }: UserImageInputProps) {
     const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null)
     
     const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
@@ -20,7 +21,7 @@ export default function ImageInput({ name, id, setGame, game, required }: ImageI
             files: FileList
         }
 
-        setGame({...game, [id]: target.files[0]});
+        setUser({...user, [id]: target.files[0]});
         changeBgImage(target.files[0])
     }
 
@@ -36,7 +37,7 @@ export default function ImageInput({ name, id, setGame, game, required }: ImageI
         reader.readAsDataURL(image)
     }
 
-    useEffect(() => setBgImage(game[id as keyof SimpleGame] as string), [])
+    useEffect(() => setBgImage(defaultImage as string), [])
 
     return (
         <label htmlFor={id} className="custom-file-upload">

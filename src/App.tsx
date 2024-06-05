@@ -12,6 +12,8 @@ import PartnerLayout from "./pages/PartnerLayout";
 import PartnerLogin from "./pages/PartnerLogin";
 import PartnerHome from "./pages/PartnerHome";
 import LoginLayout from "./pages/LoginLayout";
+import Profile from "./pages/Profile";
+import ProfileConfig from "./pages/ProfileConfig";
 
 function App() {
   return (
@@ -27,6 +29,8 @@ function App() {
           </Route>
           <Route path='/' element={<UserLayout />}>
             <Route index element={<UserHome />} />
+            <Route path="profile" element={<Profile />}/>
+            <Route path="profile/config" element={<ProfileConfig />}/>
             <Route path='cart' element={<Cart />} />
             <Route path='wishlist' element={<Wishlist />} />
           </Route>

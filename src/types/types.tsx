@@ -44,22 +44,6 @@ export interface SimpleGame {
     preview_image_6: File | undefined | string,
 }
 
-// export interface SimpleGame {
-//     id: number,
-//     creator_id: number,
-//     publisher: string,
-//     developer: string,
-//     title: string,
-//     price: string,
-//     release_date: string,
-//     summary: string,
-//     about: string,
-//     game_file: File | undefined,
-//     banner_image: File | undefined,
-//     trailers: FileList | undefined,
-//     preview_images: FileList | undefined,
-// }
-
 export interface User {
     id: string,
     username: string,
@@ -68,6 +52,14 @@ export interface User {
     summary: string,
     created_at: string,
     updated_at: string
+}
+
+export interface FormUser {
+    username: string,
+    email_address: string,
+    password: string,
+    profile_picture: File | undefined | string,
+    summary: string,
 }
 
 export interface UserContextInterface {

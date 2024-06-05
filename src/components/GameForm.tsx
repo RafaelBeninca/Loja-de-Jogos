@@ -3,7 +3,7 @@ import axiosInstance from "../utils/axiosInstance"
 import { OriginalGame, SimpleGame } from "../types/types"
 import { useNavigate } from "react-router-dom"
 import UserContext from "../contexts/UserContext"
-import ImageInput from "./ImageInput"
+import GameImageInput from "./GameImageInput"
 import TrailerInput from "./VideoInput"
 import ExeInput from "./ExeInput"
 
@@ -49,15 +49,6 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
             return;
         }
 
-        let request = axiosInstance.post;
-        let url = '/api/games';
-        const token = localStorage.getItem('token') || '';
-
-        if (isUpdating) {
-            request = axiosInstance.patch
-            url += `/${game.id}`
-        }
-
         const formData = new FormData();
         
         formData.append('creator_id', game.creator_id.toString());
@@ -93,6 +84,15 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
             }
         }
 
+        let request = axiosInstance.post;
+        let url = '/api/games';
+        const token = localStorage.getItem('token') || '';
+
+        if (isUpdating) {
+            request = axiosInstance.patch
+            url += `/${game.id}`
+        }
+
         const config = {
             headers: {
                 'Authorization': 'Bearer ' + token,
@@ -103,17 +103,17 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
         request(url, formData, config)
             .then((response) => {
                 console.log(response);
-                updateCallback()
+                updateCallback();
 
-                alert(`Jogo ${isUpdating ? 'alterado' : 'criado'} com sucesso.`)
+                alert(`Jogo ${isUpdating ? 'alterado' : 'criado'} com sucesso.`);
             })
             .catch((error) => {
                 console.log(error);
                 if (error.response.status === 401) {
-                    navigate('/logout')
+                    navigate('/logout');
                 }
                 else {
-                    alert(`Erro. \n\nTente novamente.`)
+                    alert(`Erro. \n\nTente novamente.`);
                 }
             });
 
@@ -126,7 +126,7 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
 
     const previewImageInputs = [];
     for (let i = 0; i < 6; i++) {
-        previewImageInputs.push(<ImageInput name={`Preview Image ${i + 1}`} id={`preview_image_${i+1}`} setGame={setGame} game={game} required={false} key={i+1} />)
+        previewImageInputs.push(<GameImageInput name={`Preview Image ${i + 1}`} id={`preview_image_${i+1}`} setGame={setGame} game={game} required={false} key={i+1} />)
     }
 
     return (
@@ -162,7 +162,7 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
             <ExeInput name="Game File" id="game_file" required={isUpdating ? false : true} game={game} setGame={setGame}/>
             <br /><br />
 
-            <ImageInput name="Banner Image" id="banner_image" setGame={setGame} game={game} required={isUpdating ? false : true} />
+            <GameImageInput name="Banner Image" id="banner_image" setGame={setGame} game={game} required={isUpdating ? false : true} />
             <br /><br />
 
             {trailerInputs.map(trailerInput => (

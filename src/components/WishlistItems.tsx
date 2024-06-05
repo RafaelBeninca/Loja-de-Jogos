@@ -1,8 +1,8 @@
 import { useContext, useState, useEffect } from "react"
 import UserContext from "../contexts/UserContext"
-import axiosInstance from "../utils/axiosInstance"
 import { WishlistItem } from "../types/types"
 import { useNavigate } from "react-router-dom"
+import { getWishlistItems, onRemoveFromWishlist } from "../funcs/async/WishlistFunctions"
 
 export default function CartItems() {
     const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
@@ -10,37 +10,7 @@ export default function CartItems() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const navigate = useNavigate()
 
-    const getWishlistItems = () => {
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-            }
-        }
-        axiosInstance.get(`/api/wishlist`, config).then((response) => {
-            setWishlistItems(response.data.items)
-            console.log(response.data)
-        }).catch((error) => {
-            console.error(error.data)
-        })
-    }
-
-    const onRemoveFromWishlist = (wishlistItemId: number) => {
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-            }
-        }
-        axiosInstance.delete(`/api/wishlist-item/${wishlistItemId}`, config).then((response) => {
-            console.log(response.data);
-            setWishlistItems(wishlistItems.filter(wishlistItem => wishlistItem.id !== wishlistItemId))
-        }).catch((error) => {
-            console.error(error.data);
-
-            alert(`${error.response.data}. \n\nTente novamente.`)
-        });
-    }
-
-    useEffect(getWishlistItems, [])
+    useEffect(() => getWishlistItems(setWishlistItems), [])
 
     const loginIfToken = () => {
         getUser().then(({ user, token }) => {
@@ -79,7 +49,7 @@ export default function CartItems() {
                                     <td>{item.user_id}</td>
                                     <td>{item.game_id}</td>
                                     <td>
-                                        <button onClick={() => onRemoveFromWishlist(item.id)}>Remove from wishlist</button>
+                                        <button onClick={() => onRemoveFromWishlist(setWishlistItems, wishlistItems, item.id)}>Remove from wishlist</button>
                                     </td>
                                 </tr>
                             ))}

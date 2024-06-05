@@ -41,19 +41,9 @@ export default function UserLayout() {
             </li>
             }
             {token && 
-            <>
-                <li>
-                token: {token}
-                </li>
-                <li>
-                <ul>
-                    <li>id: {user.id}</li>
-                    <li>username: {user.username}</li>
-                    <li>email: {user.email_address}</li>
-                    <li><img src={user.profile_picture} alt="" width={'100px'} height={'100px'} /></li>
-                </ul>
-                </li>
-            </>
+            <li>
+                <a href="/profile"><img src={user.profile_picture} alt="" width={'50px'} height={'50px'}/></a>
+            </li>
             }
         </ul>
         </nav>
