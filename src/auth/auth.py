@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash
 from flask import request, jsonify
 from functools import wraps
 from models.user_model import User
+from gcloud.buckets.game_data_bucket.game_data_download import generate_download_signed_url_v4
 
 def get_user_by_email(email):
     try:
@@ -16,7 +17,7 @@ def auth(app):
     if not auth or not auth.get('email_address') or not auth.get('password'):
         return jsonify({'message': 'não foi possível verificar', 'WWW-Authenticate': 'Basic auth="Login required"'}), 401
     
-    user = get_user_by_email(auth['email_address'])
+    user: User = get_user_by_email(auth['email_address'])
 
     if not user:
         return jsonify({'message': 'usuário não encontrado', 'data': {}}), 401
@@ -25,9 +26,10 @@ def auth(app):
         token = jwt.encode({'email_address': user.email_address, 'exp': datetime.now() + timedelta(hours=12)}, 
                            app.config['JWT_SECRET_KEY'])
         print(token)
+
         return jsonify({'message': 'validado com sucesso', 'token': token,
                         'exp': datetime.now() + timedelta(hours=12), 'user': user.to_dict()}), 200
-
+    
     return jsonify({'message': 'senha incorreta', 'WWW-Authenticate': 'Basic auth="Login required"'}), 401
 
 def token_required(app):

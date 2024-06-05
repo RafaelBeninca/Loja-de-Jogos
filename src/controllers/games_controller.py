@@ -16,6 +16,9 @@ def game_controller(game_id, user_id):
 
             if not game:
                 raise Exception("esse jogo não existe")
+            
+            if game.creator_id != user_id:
+                return jsonify({"message": "usuário não tem permissão para deletar esse jogo"}), 403
 
             if games_with_same_title and game.id != games_with_same_title[0].id: 
                 raise Exception("um jogo com esse nome já existe")
@@ -44,10 +47,12 @@ def game_controller(game_id, user_id):
                 print(file, filename)
 
                 print(getattr(game, field_name))
-                delete_blob('fgs-game-data', getattr(game, field_name))
+                if getattr(game, field_name):
+                    delete_blob('fgs-data', getattr(game, field_name))
+                    
 
                 blob_name = f"{game.blob_name_prefix}{filename}"
-                upload_blob_from_memory("fgs-game-data", file.read(), blob_name)
+                upload_blob_from_memory("fgs-data", file.read(), blob_name)
 
                 media[field_name] = blob_name
                 setattr(game, field_name, blob_name)
@@ -83,7 +88,7 @@ def game_controller(game_id, user_id):
             if game.creator_id != user_id:
                 return jsonify({"message": "usuário não tem permissão para deletar esse jogo"}), 403
 
-            delete_storage_folder('fgs-game-data', game.blob_name_prefix)
+            delete_storage_folder('fgs-data', game.blob_name_prefix)
 
             db.session.delete(game)
             db.session.commit()
@@ -107,6 +112,7 @@ def post_game_controller():
     if not release_date:
         release_date = None
 
+    
     try:
         files = request.files
 
@@ -128,17 +134,17 @@ def post_game_controller():
 
             print(file, filename)
 
-            blob_name = f"{now_str}/{filename}" 
-            upload_blob_from_memory("fgs-game-data", file.read(), blob_name)
+            blob_name = f"games/{now_str}/{filename}" 
+            upload_blob_from_memory("fgs-data", file.read(), blob_name)
 
-            media[field_name] = f"{now_str}/{filename}"
+            media[field_name] = f"games/{now_str}/{filename}"
 
         print(media)
     except Exception as e:
         return jsonify({"message": f"{str(e)}"}), 400
     
     try:
-        game = Game(request.form.get('creator_id'), request.form.get('publisher'), request.form.get('developer'), request.form.get('title'), request.form.get('price'), release_date, request.form.get('summary'), request.form.get('about'), media.get('game_file'), media.get('banner_image'), media.get('trailer_1'), media.get('trailer_2'), media.get('trailer_3'), media.get('preview_image_1'), media.get('preview_image_2'), media.get('preview_image_3'), media.get('preview_image_4'), media.get('preview_image_5'), media.get('preview_image_6'), f"{now_str}/")
+        game = Game(request.form.get('creator_id'), request.form.get('publisher'), request.form.get('developer'), request.form.get('title'), request.form.get('price'), release_date, request.form.get('summary'), request.form.get('about'), media.get('game_file'), media.get('banner_image'), media.get('trailer_1'), media.get('trailer_2'), media.get('trailer_3'), media.get('preview_image_1'), media.get('preview_image_2'), media.get('preview_image_3'), media.get('preview_image_4'), media.get('preview_image_5'), media.get('preview_image_6'), f"games/{now_str}/")
         
         db.session.add(game)
         db.session.commit()
@@ -156,7 +162,7 @@ def get_games_controller():
         for game in games:
             for field_name in game.keys():
                 if ("trailer" in field_name or "image" in field_name or "file" in field_name) and game[field_name]:
-                    game[field_name] = generate_download_signed_url_v4("fgs-game-data", game[field_name])
+                    game[field_name] = generate_download_signed_url_v4("fgs-data", game[field_name])
 
         return jsonify({"gameList": games}), 200
     except Exception as e:
@@ -171,7 +177,7 @@ def get_partner_games_controller(user_id):
         for game in games:
             for field_name in game.keys():
                 if ("trailer" in field_name or "image" in field_name or "file" in field_name) and game[field_name]:
-                    game[field_name] = generate_download_signed_url_v4("fgs-game-data", game[field_name])
+                    game[field_name] = generate_download_signed_url_v4("fgs-data", game[field_name])
 
         return jsonify({"gameList": games})
     except Exception as e:

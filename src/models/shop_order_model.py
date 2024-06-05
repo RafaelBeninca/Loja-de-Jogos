@@ -1,6 +1,6 @@
 from database.db import db
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql.functions import func
 
 class Shop_Order(db.Model):
@@ -12,7 +12,7 @@ class Shop_Order(db.Model):
     order_date = db.Column(db.DateTime(timezone=True))
     status = db.Column(db.String(20), unique=False, nullable=False)
 
-    user = relationship('User')
+    user = relationship('User', backref=backref("shop_order", cascade="all,delete"))
 
     def __init__(self, user_id, order_total, order_date, status) -> None:
         self.user_id = user_id

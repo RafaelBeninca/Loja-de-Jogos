@@ -30,7 +30,7 @@ class Game(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
-    creator = relationship('User')
+    creator = relationship('User', backref=backref("game", cascade="all,delete"))
 
     def __init__(self, creator_id, publisher, developer, title, price, release_date, summary, about, game_file, banner_image, trailer_1, trailer_2, trailer_3, preview_image_1, preview_image_2, preview_image_3, preview_image_4, preview_image_5, preview_image_6, blob_name_prefix) -> None:
         self.creator_id = creator_id

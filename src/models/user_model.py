@@ -12,6 +12,7 @@ class User(db.Model):
     email_address = db.Column(db.String(50), unique=True, nullable=False)
     profile_picture = db.Column(db.String(200), unique=False, nullable=True)
     summary = db.Column(db.String(1000), unique=False, nullable=True)
+    blob_name_prefix = db.Column(db.String(200), unique=False, nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
 
@@ -30,6 +31,7 @@ class User(db.Model):
             'email_address': self.email_address,
             'profile_picture': self.profile_picture,
             'summary': self.summary,
+            'blob_name_prefix': self.blob_name_prefix,
             'created_at': self.created_at,
             'updated_at': self.updated_at
         }
