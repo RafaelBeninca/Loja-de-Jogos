@@ -8,4 +8,4 @@ const baseURL = "https://backend-kqnasaoyha-uc.a.run.app";
 
 const axiosInstance = axios.create({ baseURL: baseURL });
 
-export default axiosInstance
+export default axiosInstance;

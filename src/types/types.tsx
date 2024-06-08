@@ -85,3 +85,20 @@ export interface WishlistItem {
     game_id: number,
     created_at: string
 }
+
+export interface Review {
+    id: number,
+    user_id: number, 
+    game_id: number,
+    rating: number,
+    comment: string,
+    created_at: string,
+    updated_at: string
+}
+
+export interface BoughtGame {
+    id: number,
+    user_id: number,
+    game_id: number,
+    created_at: string
+}

@@ -14,6 +14,7 @@ import PartnerHome from "./pages/PartnerHome";
 import LoginLayout from "./pages/LoginLayout";
 import Profile from "./pages/Profile";
 import ProfileConfig from "./pages/ProfileConfig";
+import Game from "./pages/Game";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
             <Route path="profile/config" element={<ProfileConfig />}/>
             <Route path='cart' element={<Cart />} />
             <Route path='wishlist' element={<Wishlist />} />
+            <Route path='game/:title' element={<Game />} />
           </Route>
           <Route path='/partner' element={<PartnerLayout />}>
             <Route index element={<PartnerHome />} />

@@ -1,10 +1,11 @@
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { CartItem, OriginalGame, WishlistItem } from '../types/types'
 import axiosInstance from '../utils/axiosInstance'
 import { useContext, useEffect, useState } from 'react'
 import UserContext from '../contexts/UserContext'
 import { getWishlistItems, onRemoveFromWishlist } from '../funcs/async/WishlistFunctions'
 import { getCartItems, onRemoveFromCart } from '../funcs/async/CartFunctions'
+import '../styles/userHome.css'
 
 export interface UserHomeGameListProps {
     games: OriginalGame[]
@@ -83,37 +84,27 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
     return (
         <div>
             <h1>Game List</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Banner Image</th>
-                        <th>Id</th>
-                        <th>Title</th>
-                        <th>Price</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {games.map((game) => (
-                        <tr key={game.id}>
-                            <td><img src={game.banner_image} alt="" style={{width: "6rem"}} /></td>
-                            <td>{game.id}</td>
-                            <td>{game.title}</td>
-                            <td>{game.price}</td>
-                            <td>
-                                {getCartItem(game) ?
-                                    <button onClick={() => onRemoveFromCart(setCartItems, cartItems, getCartItem(game).id)}>Remove from cart</button> :
-                                    <button onClick={() => onAddToCart(game)}>Add to cart</button>
-                                }
-                                {getWishlistItem(game) ?
-                                    <button onClick={() => onRemoveFromWishlist(setWishlistItems, wishlistItems, getWishlistItem(game).id)}>Remove from wishlist</button> :
-                                    <button onClick={() => onAddToWishlist(game)}>Add to wishlist</button>
-                                }
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            <div className='game-carroussel'>
+                {games.map(game => (
+                    <Link key={game.id} className='game-card' to={`game/${game.title}`}>
+                        <img src={game.banner_image} alt="" className='game-banner-img' />
+                        <br />
+                        {game.title}
+                        <span>   </span>
+                        {game.price}
+                        <br />
+                        
+                            {getCartItem(game) ?
+                                <button onClick={(e) => {e.preventDefault(); onRemoveFromCart(setCartItems, cartItems, getCartItem(game).id)}}>Remove from cart</button> :
+                                <button onClick={(e) => {e.preventDefault(); onAddToCart(game)}}>Add to cart</button>
+                            }
+                            {getWishlistItem(game) ?
+                                <button onClick={(e) => {e.preventDefault(); onRemoveFromWishlist(setWishlistItems, wishlistItems, getWishlistItem(game).id)}}>Remove from wishlist</button> :
+                                <button onClick={(e) => {e.preventDefault(); onAddToWishlist(game)}}>Add to wishlist</button>
+                            }
+                    </Link>
+                ))}
+            </div>
         </div>
     )
 }
