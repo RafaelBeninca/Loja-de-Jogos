@@ -2,9 +2,9 @@ from flask import jsonify, request
 from database.db import db
 from models.game_model import Game
 from werkzeug.utils import secure_filename
-from gcloud.buckets.game_data_bucket.game_data_upload import upload_directory_with_transfer_manager, upload_blob_from_memory
-from gcloud.buckets.game_data_bucket.game_data_download import generate_download_signed_url_v4
-from gcloud.buckets.game_data_bucket.game_data_delete import delete_storage_folder, delete_blob
+from gcloud.buckets.fgs_data_bucket.game_data_upload import upload_directory_with_transfer_manager, upload_blob_from_memory
+from gcloud.buckets.fgs_data_bucket.game_data_download import generate_download_signed_url_v4
+from gcloud.buckets.fgs_data_bucket.game_data_delete import delete_storage_folder, delete_blob
 from datetime import datetime
 import os
 
@@ -183,3 +183,15 @@ def get_partner_games_controller(user_id):
     except Exception as e:
         return jsonify({"message": f"{str(e)}"}), 500
         
+
+def get_game_with_title_controller(game_title):
+    try:
+        game: Game = Game.query.filter(Game.title == game_title).one().to_dict()
+
+        for field_name in game.keys():
+            if ("trailer" in field_name or "image" in field_name or "file" in field_name) and game[field_name]:
+                game[field_name] = generate_download_signed_url_v4("fgs-data", game[field_name])
+
+        return jsonify({"game": game})
+    except Exception as e:
+        return jsonify({"message": f"{str(e)}"}), 500

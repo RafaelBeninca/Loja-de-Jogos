@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash
 from flask import request, jsonify
 from functools import wraps
 from models.user_model import User
-from gcloud.buckets.game_data_bucket.game_data_download import generate_download_signed_url_v4
+from gcloud.buckets.fgs_data_bucket.game_data_download import generate_download_signed_url_v4
 
 def get_user_by_email(email):
     try:

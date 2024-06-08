@@ -132,3 +132,4 @@ dist
 .pnp.*
 
 secrets/
+test.py

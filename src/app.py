@@ -3,8 +3,8 @@ from flask_cors import CORS
 from database.db import db
 from routes.route_index import route_index
 from flask_migrate import Migrate
-from gcloud.buckets.game_data_bucket.game_data_delete import delete_blob, delete_storage_folder
-from gcloud.buckets.game_data_bucket.game_data_download import generate_download_signed_url_v4
+from gcloud.buckets.fgs_data_bucket.game_data_delete import delete_blob, delete_storage_folder
+from gcloud.buckets.fgs_data_bucket.game_data_download import generate_download_signed_url_v4
 import os
 
 def create_app():

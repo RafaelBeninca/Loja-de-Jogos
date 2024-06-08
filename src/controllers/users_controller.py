@@ -3,9 +3,9 @@ from database.db import db
 from models.user_model import User
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
-from gcloud.buckets.game_data_bucket.game_data_delete import delete_blob
-from gcloud.buckets.game_data_bucket.game_data_upload import upload_blob_from_memory
-from gcloud.buckets.game_data_bucket.game_data_download import generate_download_signed_url_v4
+from gcloud.buckets.fgs_data_bucket.game_data_delete import delete_blob
+from gcloud.buckets.fgs_data_bucket.game_data_upload import upload_blob_from_memory
+from gcloud.buckets.fgs_data_bucket.game_data_download import generate_download_signed_url_v4
 from controllers.carts_controller import post_cart_controller
 from datetime import datetime, timedelta
 import jwt
