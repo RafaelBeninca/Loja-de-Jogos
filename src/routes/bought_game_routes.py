@@ -7,7 +7,7 @@ def bought_game_routes(app):
     def is_game_bought(user, game_id):
         return get_bought_game_controller(user.id, game_id)
     
-    @app.rout('/api/bought_games', methods=['GET'])
+    @app.route('/api/bought_games', methods=['GET'])
     @token_required(app)
     def get_bought_games(user):
         return get_bought_games_controller(user.id)
