@@ -68,8 +68,6 @@ export interface UserContextInterface {
     logoutUser: () => void,
     loginUser: (token: string, user: User) => void,
     token: string,
-    cartId: string,
-    setCartId: (cartId: string) => void
 }
 
 export interface CartItem {

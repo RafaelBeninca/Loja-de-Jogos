@@ -1,17 +1,20 @@
-import { useNavigate, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import axiosInstance from "../utils/axiosInstance";
-import React, { useContext, useEffect, useState } from "react";
-import { OriginalGame, Review } from "../types/types";
+import { useContext, useEffect, useState } from "react";
+import { OriginalGame, Review, User } from "../types/types";
 import UserContext from "../contexts/UserContext";
 import ReviewForm from "../components/ReviewForm";
+import { emptyOriginalGame } from "../utils/defaultValues";
 
 export default function Game() {
-    const [game, setGame] = useState<OriginalGame>();
+    const [game, setGame] = useState<OriginalGame>(emptyOriginalGame);
     const [reviews, setReviews] = useState<Review[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [userReview, setUserReview] = useState<Review | null>(null);
     const [isUpdatingReview, setIsUpdatingReview] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isBoughtGame, setIsBoughtGame] = useState(false);
+    const [developerUser, setDeveloperUser] = useState<User>();
+    const [publisherUser, setPublisherUser] = useState<User>();
     const { getUser, loginUser, logoutUser, user } = useContext(UserContext);
     const params = useParams();
     const navigate = useNavigate();
@@ -20,7 +23,6 @@ export default function Game() {
         getUser().then(({ user, token }) => {
             if (token) {
                 loginUser(token, user)
-                setIsLoggedIn(true)
             }
             else {
                 logoutUser()
@@ -29,11 +31,10 @@ export default function Game() {
     }
     
     const getReviews = () => {
-        if (!game) return
-
-        axiosInstance.get(`/api/reviews/${game.id}`).then(response => {
+        axiosInstance.get(`/api/reviews?game_id=${game.id}`).then(response => {
             console.log(response);
             setReviews(response.data.reviews)
+            setUsers(response.data.users)
             setUserReview(null)
         }).catch(error => {
             console.error(error);
@@ -41,7 +42,7 @@ export default function Game() {
     }
 
     const getGameWithTitle = () => {
-        axiosInstance.get(`/api/game/${params.title}`).then(response => {
+        axiosInstance.get(`/api/games?game_title=${params.title}`).then(response => {
             console.log(response);
             setGame(response.data.game)
         }).catch(error => {
@@ -51,15 +52,13 @@ export default function Game() {
     }
 
     const getBoughtGame = () => {
-        if (!game) return
-
         const config = {
             headers: {
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
 
-        axiosInstance.get(`/api/bought_game/${game.id}`, config).then(response => {
+        axiosInstance.get(`/api/bought_games?user_id=${user.id}&&game_id=${game.id}`, config).then(response => {
             console.log(response)
             setIsBoughtGame(true)
         }).catch(error => {
@@ -67,32 +66,32 @@ export default function Game() {
         })
     }
 
-    const handlePurchase = () => {
-        if (!isLoggedIn) navigate('/login')
-
-        if (!game) return
-
+    const handleOnClickBuy = () => {
         const config = {
             headers: {
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-            }
+                }
+        }
+        const data = {
+            game_id: game.id
         }
 
-        axiosInstance.post('/api/bought_games', {
-            game_id: game.id
-        }, config).then(response => {
-            console.log(response)
-            setIsBoughtGame(true)
-            alert("Compra realizada com sucesso!")
-        }).catch(error => {
-            console.error(error)
+        axiosInstance.post('/api/cart-item', data, config).then((response) => {
+            console.log(response.data);
+            navigate('/cart', {relative: 'route'})
+        }).catch((error) => {
+            console.error(error.data);
             if (error.response.status === 401) {
-                navigate('/logout');
+                logoutUser()
+                navigate("/login", {relative: "route"})
+            }
+            else if (error.response.status === 409) {
+                navigate("/cart", {relative: "route"})
             }
             else {
-                alert(`Erro. \n\nTente novamente.`);
+                alert(`Erro. \n\nTente novamente.`)
             }
-        })
+        });
     }
 
     const handleOnDeleteReview = (reviewId: number) => {
@@ -102,7 +101,7 @@ export default function Game() {
             }
         }
 
-        axiosInstance.delete(`/api/review/${reviewId}`, config).then(response => {
+        axiosInstance.delete(`/api/reviews?review_id=${reviewId}`, config).then(response => {
             console.log(response)
             alert("Review excluída com sucesso!")
             getReviews()
@@ -117,25 +116,58 @@ export default function Game() {
         })
     }
 
+    const getReviewUser = (review: Review) => {
+        return users.filter(user => parseInt(user.id) === review.user_id)[0]
+    }
+
+    const getDeveloperUser = () => {
+        axiosInstance.get(`/api/users?username=${game.developer}`).then(response => {
+            console.log(response)
+            setDeveloperUser(response.data.user)
+        }).catch(error => {
+            console.error(error)
+        })
+    }
+
+    const getPublisherUser = () => {
+        axiosInstance.get(`/api/users?username=${game.publisher}`).then(response => {
+            console.log(response)
+            setPublisherUser(response.data.user)
+        }).catch(error => {
+            console.error(error)
+        })
+    }
+
     useEffect(loginIfToken, [])
     useEffect(getGameWithTitle, [])
-    useEffect(getReviews, [game])
-    useEffect(getBoughtGame, [game])
-
-    console.log(userReview)
+    useEffect(getReviews, [game.id])
+    useEffect(getDeveloperUser, [game.developer])
+    useEffect(getPublisherUser, [game.publisher])
+    useEffect(getBoughtGame, [user.id, game.id])
 
     return (
         <>
-        {!game ?
+        {game.id === 0 ?
         <p><b>Carregando...</b></p> :
         <div>
             <h1>{params.title}</h1>
             <img src={game?.banner_image} alt="" style={{width: "30rem"}} />
             <br /><br />
+            Developer: {developerUser ? 
+                <Link to={`/partner/${developerUser.username}`}>{developerUser.username}</Link> :
+                game.developer
+            }
+            <br />
+
+            Publisher: {publisherUser ? 
+                <Link to={`/partner/${publisherUser.username}`}>{publisherUser.username}</Link> :
+                game.publisher
+            }
+            <br /><br />
 
             {isBoughtGame ? 
             <a href={game?.game_file}>Download</a> :
-            <button onClick={handlePurchase}>Comprar</button>
+            <button onClick={handleOnClickBuy}>Comprar</button>
             }
             <br /><br />
 
@@ -149,6 +181,10 @@ export default function Game() {
             <div>
                 {reviews.map(review => (
                     <div>
+                        <Link key={review.id} to={`/user/${getReviewUser(review).username}`} >
+                            <img src={getReviewUser(review).profile_picture} alt="" style={{width: "2rem", height: "2rem", borderRadius: '1rem'}} />
+                            <p style={{display: 'inline'}}><b>{getReviewUser(review).username}</b></p>
+                        </Link>
                         <p>Rating: {review.rating}</p>
                         <p>{review.comment}</p>
                         {review.updated_at &&
@@ -162,10 +198,9 @@ export default function Game() {
                             <button onClick={() => handleOnDeleteReview(review.id)}>Delete</button>
                             <button onClick={() => setIsUpdatingReview(true)}>Update</button>
                             {!userReview && setUserReview(review)}
-                            {!userReview && console.log('is setting')}
                         </>
                         }
-                        <br />
+                        <br /><br />
                     </div>
                 ))}
             </div>

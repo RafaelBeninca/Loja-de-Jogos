@@ -40,9 +40,14 @@ export default function UserLayout() {
                 <Link to='/wishlist'>Wishlist</Link>
             </li>
             }
+            {token &&
+            <li>
+                <Link to='/library'>Library</Link>
+            </li>
+            }
             {token && 
             <li>
-                <a href="/profile"><img src={user.profile_picture} alt="" width={'50px'} height={'50px'}/></a>
+                <a href={`/user/${user.username}`}><img src={user.profile_picture} alt="" width={'50px'} height={'50px'}/></a>
             </li>
             }
         </ul>

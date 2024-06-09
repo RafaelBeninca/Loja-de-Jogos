@@ -1,41 +1,32 @@
-import { useContext, useState, useEffect } from "react"
-import UserContext from "../contexts/UserContext"
-import { CartItem } from "../types/types"
-import { getCartItems, onRemoveFromCart } from "../funcs/async/CartFunctions"
+import { onRemoveFromCart } from "../funcs/async/CartFunctions"
+import { Link } from "react-router-dom"
+import { CartItem, OriginalGame } from "../types/types"
 
-export default function CartItems() {
-    const [cartItems, setCartItems] = useState<CartItem[]>([])
-    const { cartId } = useContext(UserContext)
+interface CartItemsProps {
+    setCartItems: (items: CartItem[]) => void,
+    cartItems: CartItem[],
+    setGames: (games: OriginalGame[]) => void,
+    games: OriginalGame[]
+}
 
-    useEffect(() => getCartItems(setCartItems, cartId), [cartId])
-
+export default function CartItems({setCartItems, cartItems, setGames, games}: CartItemsProps) {
     return (
-        <>
         <div>
-            <h1>Carrinho</h1>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Id</th>
-                        <th>Cart Id</th>
-                        <th>Game Id</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {cartItems.map((item) => (
-                        <tr key={item.id}>
-                            <td>{item.id}</td>
-                            <td>{item.shop_order_id}</td>
-                            <td>{item.game_id}</td>
-                            <td>
-                                <button onClick={() => onRemoveFromCart(setCartItems, cartItems, item.id)}>Remove from cart</button>
-                            </td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table>
+            {games.map((game) => (
+                <Link key={game.id} to={`../game/${game.title}`}>
+                    <div key={game.id}>
+                        <img src={game.banner_image} alt="" style={{width: "6rem"}}/>
+                        <br />
+                        
+                        {game.title}
+                        <br />
+                        R${game.price}
+                        <br />
+
+                        <button onClick={(e) => {e.preventDefault(); onRemoveFromCart(setCartItems, cartItems, cartItems.filter((cartItem) => cartItem.game_id == game.id)[0], setGames, games)}}>Remove from cart</button>
+                    </div>
+                </Link>
+            ))}
         </div>
-        </>
     )
 }

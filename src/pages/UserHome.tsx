@@ -4,12 +4,8 @@ import UserHomeGameList from '../components/UserHomeGameList.tsx'
 import axiosInstance from '../utils/axiosInstance.tsx'
 import UserContext from '../contexts/UserContext.tsx'
 
-interface Games {
-    gameList: OriginalGame[]
-}
-
 export default function UserHome() {
-    const [games, setGames] = useState<Games>({ gameList: [] })
+    const [games, setGames] = useState<OriginalGame[]>([])
     const [loading, setLoading] = useState(true)
     const { getUser, logoutUser, loginUser } = useContext(UserContext)
 
@@ -24,25 +20,27 @@ export default function UserHome() {
         });
     }
 
-    useEffect(() => { loginIfToken() }, [])
-
     function fetchGames() {
-        axiosInstance.get<Games>("/api/games").then((response) => {
-            setGames(response.data)
+        axiosInstance.get("/api/games").then((response) => {
+            setGames(response.data.gameList)
             setLoading(false)
             console.log(response)
         }).catch((error) => {
             console.error(error)
         })
     }
-
+                
     useEffect(fetchGames, [])
+    useEffect(() => { loginIfToken() }, [])
 
     return (
         <div>
             {loading ? 
                 <p><b>Carregando...</b></p> :
-                <UserHomeGameList games={games.gameList} />
+                <div>
+                    <h1>Games</h1>
+                    <UserHomeGameList games={games} />
+                </div>
             }
         </div>
     )

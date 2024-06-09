@@ -14,12 +14,11 @@ export interface UserHomeGameListProps {
 export default function UserHomeGameList({ games }: UserHomeGameListProps) {
     const [cartItems, setCartItems] = useState<CartItem[]>([])
     const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
-    const { cartId, logoutUser } = useContext(UserContext)
+    const { logoutUser } = useContext(UserContext)
     const navigate = useNavigate()
 
     const onAddToCart = (game: OriginalGame) => {
         const data = {
-            shop_order_id: cartId,
             game_id: game.id
         }
         const config = {
@@ -36,8 +35,11 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
                 logoutUser()
                 navigate("/login")
             }
+            else if (error.response.status === 409) {
+                alert('Você já comprou este jogo')
+            }
             else {
-                alert(`${error.response.data}. \n\nTente novamente.`)
+                alert(`Erro. \n\nTente novamente.`)
             }
         });
     }
@@ -51,7 +53,7 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axiosInstance.post('/api/wishlist', data, config).then((response) => {
+        axiosInstance.post('/api/wishlist-item', data, config).then((response) => {
             console.log(response.data);
             setWishlistItems([...wishlistItems, response.data.wishlist_item])
         }).catch((error) => {
@@ -66,7 +68,7 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
         });
     }
 
-    useEffect(() => getCartItems(setCartItems, cartId), [cartId])
+    useEffect(() => getCartItems(setCartItems), [])
     useEffect(() => getWishlistItems(setWishlistItems), [])
 
     const getCartItem = (game: OriginalGame) => {
@@ -82,8 +84,6 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
     }
 
     return (
-        <div>
-            <h1>Game List</h1>
             <div className='game-carroussel'>
                 {games.map(game => (
                     <Link key={game.id} className='game-card' to={`game/${game.title}`}>
@@ -95,16 +95,15 @@ export default function UserHomeGameList({ games }: UserHomeGameListProps) {
                         <br />
                         
                             {getCartItem(game) ?
-                                <button onClick={(e) => {e.preventDefault(); onRemoveFromCart(setCartItems, cartItems, getCartItem(game).id)}}>Remove from cart</button> :
+                                <button onClick={(e) => {e.preventDefault(); onRemoveFromCart(setCartItems, cartItems, getCartItem(game))}}>Remove from cart</button> :
                                 <button onClick={(e) => {e.preventDefault(); onAddToCart(game)}}>Add to cart</button>
                             }
                             {getWishlistItem(game) ?
-                                <button onClick={(e) => {e.preventDefault(); onRemoveFromWishlist(setWishlistItems, wishlistItems, getWishlistItem(game).id)}}>Remove from wishlist</button> :
+                                <button onClick={(e) => {e.preventDefault(); onRemoveFromWishlist(setWishlistItems, wishlistItems, getWishlistItem(game))}}>Remove from wishlist</button> :
                                 <button onClick={(e) => {e.preventDefault(); onAddToWishlist(game)}}>Add to wishlist</button>
                             }
                     </Link>
                 ))}
             </div>
-        </div>
     )
 }

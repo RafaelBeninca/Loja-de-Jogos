@@ -1,9 +1,9 @@
-import { useContext, useEffect, useState } from "react";
-import WishlistItems from "../components/WishlistItems";
-import UserContext from "../contexts/UserContext";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react"
+import LibraryGameList from "../components/LibraryGameList"
+import { useNavigate } from "react-router-dom"
+import UserContext from "../contexts/UserContext"
 
-export default function Wishlist() {
+export default function GameLibrary() {
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const { getUser, loginUser } = useContext(UserContext)
     const navigate = useNavigate()
@@ -28,8 +28,8 @@ export default function Wishlist() {
         <>
         {isLoggedIn &&
         <div>
-            <h1>Wishlist</h1>
-            <WishlistItems />
+            <h1>Library</h1>
+            <LibraryGameList />
         </div>
         }
         </>

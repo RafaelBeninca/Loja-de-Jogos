@@ -9,11 +9,11 @@ export default function ProfileConfig() {
     const { user, getUser, loginUser } = useContext(UserContext)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [formUser, setFormUser] = useState<FormUser>({
-        username: user.username,
-        email_address: user.email_address,
+        username: "",
+        email_address: "",
         password: "",
         profile_picture: "",
-        summary: user.summary
+        summary: ""
     })
     const navigate = useNavigate()
 
@@ -30,9 +30,6 @@ export default function ProfileConfig() {
             }
         });
     }
-
-    useEffect(() => { loginIfToken() }, [])
-
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -60,7 +57,7 @@ export default function ProfileConfig() {
             loginUser(response.data.token, response.data.user)
 
             alert("Informações alteradas com sucesso!")
-            navigate('/profile')
+            navigate(`/user/${user.username}`)
         }).catch(error => {
             console.error(error)
             if (error.response.status === 401) {
@@ -71,28 +68,74 @@ export default function ProfileConfig() {
             }
         })
     }
+
+    const onDeleteAccount = () => {
+        if (confirm('Tem certeza que deseja deletar sua conta? (essa ação é irreversível)')) {
+            // Continuar
+        } else {
+            // Cancelar
+            return
+        }
+
+        const config = {
+            headers: {
+                'Authorization': 'Bearer ' + (localStorage.getItem('token') || "")
+            }
+        }
+
+        axiosInstance.delete('/api/users', config).then(response => {
+            console.log(response)
+
+            alert("Conta deletada com sucesso!")
+            navigate('/logout')
+        }).catch(error => {
+            console.error(error)
+
+            if (error.response.status === 401) {
+                navigate('/logout')
+            }
+            if (error.response.status === 403) {
+                console.error("Usuário não tem permissão para deletar essa conta")
+            }
+            else {
+                alert(`${error.response.data}. \n\nTente novamente.`)
+            }
+        })
+    }
+
+    useEffect(loginIfToken, [])
+    useEffect(() => setFormUser({
+        username: user.username,
+        email_address: user.email_address,
+        password: "",
+        profile_picture: "",
+        summary: user.summary
+    }), [isLoggedIn])
+
     
     return (
         <>
         {isLoggedIn &&
-        <form onSubmit={onSubmit} encType="multipart/form-data">
-            <UserImageInput name="Profile Picture" id="profile_picture" setUser={setFormUser} user={formUser} defaultImage={user.profile_picture} required={false} />
-            <br /><br />
-
-            <input type="text" placeholder="Nome de usuário" required value={formUser.username} onChange={e => setFormUser({...formUser, username: e.target.value})}/>
-            <br /><br />
+        <div>
+            <form onSubmit={onSubmit} encType="multipart/form-data">
+                <UserImageInput name="Profile Picture" id="profile_picture" setUser={setFormUser} user={formUser} defaultImage={user.profile_picture} required={false} />
+                <br /><br />
+                <input type="text" placeholder="Nome de usuário" required value={formUser.username} onChange={e => setFormUser({...formUser, username: e.target.value})}/>
+                <br /><br />
             
-            <input type="text" placeholder="Email" required value={formUser.email_address} onChange={e => setFormUser({...formUser, email_address: e.target.value})}/>
-            <br /><br />
+                <input type="text" placeholder="Email" required value={formUser.email_address} onChange={e => setFormUser({...formUser, email_address: e.target.value})}/>
+                <br /><br />
             
-            <input type="password" placeholder="Senha" value={formUser.password} onChange={e => setFormUser({...formUser, password: e.target.value})}/>
-            <br /><br />
-
-            <textarea placeholder="Sobre você" value={formUser.summary} onChange={e => setFormUser({...formUser, summary: e.target.value})}/>
-            <br /><br />
-
-            <button type="submit">Alterar informações</button>
-        </form>
+                <input type="password" placeholder="Senha" value={formUser.password} onChange={e => setFormUser({...formUser, password: e.target.value})}/>
+                <br /><br />
+                <textarea placeholder="Sobre você" value={formUser.summary} onChange={e => setFormUser({...formUser, summary: e.target.value})}/>
+                <br /><br />
+                <button type="submit">Alterar informações</button>
+                <br /><br /><br />
+            
+            </form>
+            <button type="button" onClick={onDeleteAccount}>Deletar Conta</button>
+        </div>
         }
         </>
     )

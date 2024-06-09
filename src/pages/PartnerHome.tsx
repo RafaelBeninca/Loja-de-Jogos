@@ -8,15 +8,11 @@ import { useNavigate } from 'react-router-dom'
 import { emptyOriginalGame } from '../utils/defaultValues.tsx'
 import UserContext from '../contexts/UserContext.tsx'
 
-interface Games {
-    gameList: OriginalGame[]
-}
-
 export default function PartnerHome() {
-    const [games, setGames] = useState<Games>({ gameList: [] })
+    const [games, setGames] = useState<OriginalGame[]>([])
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [currentGame, setCurrentGame] = useState<OriginalGame>(emptyOriginalGame)
-    const { getUser, loginUser } = useContext(UserContext)
+    const { getUser, loginUser, user } = useContext(UserContext)
     const [isLoggedIn, setIsLoggedIn] = useState(false)
     const [loading, setLoading] = useState(true)
 
@@ -25,6 +21,8 @@ export default function PartnerHome() {
     useEffect(() => { loginIfToken() }, [])
 
     function fetchPartnerGames() {
+        if (!isLoggedIn) return
+
         const token = localStorage.getItem('token')
         const config = {
             headers: {
@@ -32,19 +30,19 @@ export default function PartnerHome() {
             }
         }
 
-        axiosInstance.get<Games>("/api/partner-games", config).then((response) => {
-            setGames(response.data)
+        axiosInstance.get(`/api/games?creator_id=${user.id}`, config).then((response) => {
+            setGames(response.data.gameList)
             setLoading(false)
             console.log(response)
         }).catch((error) => {
             console.error(error)
             if (error.response.status === 401) {
-                navigate('/login')
+                navigate('/partner/login', {relative: 'route'})
             }
         })
     }
 
-    useEffect(fetchPartnerGames, [])
+    useEffect(fetchPartnerGames, [isLoggedIn])
 
     const closeModal = () => {
         setIsModalOpen(false)
@@ -86,10 +84,11 @@ export default function PartnerHome() {
     return (
         <>
         {isLoggedIn &&
-            games.gameList.length === 0 && loading ? 
+            games.length === 0 && loading ? 
                 <p><b>Carregando...</b></p> : 
                 <div>
-                    <PartnerHomeGameList games={games.gameList} onUpdate={openUpdateModal} updateCallback={onUpdate} />
+                    <h1>Games</h1>
+                    <PartnerHomeGameList games={games} onUpdate={openUpdateModal} updateCallback={onUpdate} />
                     <button onClick={openModal}>Create Game</button>
 
                     {isModalOpen && <Modal closeModal={closeModal}>

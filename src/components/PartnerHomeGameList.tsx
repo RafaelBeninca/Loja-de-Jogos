@@ -11,7 +11,7 @@ export interface PartnerHomeGameListProps {
 export default function PartnerHomeGameList({ games, onUpdate, updateCallback }: PartnerHomeGameListProps) {
     const navigate = useNavigate()
 
-    const onDelete = (id: number) => {
+    const onDelete = (gameId: number) => {
         if (confirm('Tem certeza que deseja deletar esse jogo?')) {
             // Continuar
         } else {
@@ -24,7 +24,7 @@ export default function PartnerHomeGameList({ games, onUpdate, updateCallback }:
                 'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
             }
         }
-        axiosInstance.delete(`/api/games/${id}`, config).then((response) => {
+        axiosInstance.delete(`/api/games?game_id=${gameId}`, config).then((response) => {
             console.log(response);
             updateCallback()
 
@@ -46,7 +46,6 @@ export default function PartnerHomeGameList({ games, onUpdate, updateCallback }:
 
     return (
         <div>
-            <h1>Game List</h1>
             <table>
                 <thead>
                     <tr>

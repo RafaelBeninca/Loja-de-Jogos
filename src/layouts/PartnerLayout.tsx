@@ -17,7 +17,7 @@ export default function PartnerLayout() {
             </li>
             {token && 
             <li>
-                <a href="/profile"><img src={user.profile_picture} alt="" width={'50px'} height={'50px'} /></a>
+                <a href={`/partner/${user.username}`}><img src={user.profile_picture} alt="" width={'50px'} height={'50px'} /></a>
             </li>
             }
         </ul>

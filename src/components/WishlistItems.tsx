@@ -1,62 +1,32 @@
-import { useContext, useState, useEffect } from "react"
-import UserContext from "../contexts/UserContext"
-import { WishlistItem } from "../types/types"
-import { useNavigate } from "react-router-dom"
+import { useState, useEffect } from "react"
+import { OriginalGame, WishlistItem } from "../types/types"
 import { getWishlistItems, onRemoveFromWishlist } from "../funcs/async/WishlistFunctions"
+import { Link } from "react-router-dom"
 
-export default function CartItems() {
+export default function WishlistItems() {
     const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
-    const { getUser, loginUser } = useContext(UserContext)
-    const [isLoggedIn, setIsLoggedIn] = useState(false)
-    const navigate = useNavigate()
+    const [games, setGames] = useState<OriginalGame[]>([])
 
-    useEffect(() => getWishlistItems(setWishlistItems), [])
-
-    const loginIfToken = () => {
-        getUser().then(({ user, token }) => {
-            if (token) {
-                setIsLoggedIn(true)
-                console.log(isLoggedIn)
-                loginUser(token, user)
-            }
-            else {
-                setIsLoggedIn(false)
-                navigate('/logout')
-            }
-        });
-    }
-
-    useEffect(() => { loginIfToken() }, [])
+    useEffect(() => getWishlistItems(setWishlistItems, setGames), [])
 
     return (
-        <>
-            {isLoggedIn &&
-                <div>
-                    <h1>Wishlist</h1>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Id</th>
-                                <th>User Id</th>
-                                <th>Game Id</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {wishlistItems.map((item) => (
-                                <tr key={item.id}>
-                                    <td>{item.id}</td>
-                                    <td>{item.user_id}</td>
-                                    <td>{item.game_id}</td>
-                                    <td>
-                                        <button onClick={() => onRemoveFromWishlist(setWishlistItems, wishlistItems, item.id)}>Remove from wishlist</button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+        <div>
+            {games.map((game) => (
+                <Link key={game.id} to={`../game/${game.title}`}>
+                    <tr key={game.id}>
+                        <img src={game.banner_image} alt="" style={{width: "6rem"}}/>
+                        <br />
+                        
+                        {game.title}
+                        <br />
+    
+                        <button onClick={(e) => {e.preventDefault(); onRemoveFromWishlist(setWishlistItems, wishlistItems, wishlistItems.filter((wishlistItem) => wishlistItem.game_id == game.id)[0], setGames, games)}}>Remove from wishlist</button>
+                    </tr>
+                </Link>
+            ))}
+            {wishlistItems.length === 0 &&
+            <p><b>Parece que você não tem nenhum item na sua wishlist...</b></p>
             }
-        </>
+        </div>
     )
 }

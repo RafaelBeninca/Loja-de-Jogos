@@ -1,29 +1,31 @@
-import { CartItem } from "../../types/types"
+import { CartItem, OriginalGame } from "../../types/types"
 import axiosInstance from "../../utils/axiosInstance"
 
-const getCartItems = (setCartItems: (items: CartItem[]) => void, cartId: string) => {
+const getCartItems = (setCartItems: (items: CartItem[]) => void, setGames?: (games: OriginalGame[]) => void) => {
     const config = {
         headers: {
             'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
         }
     }
-    axiosInstance.get(`/api/carts/${cartId}`, config).then((response) => {
+    axiosInstance.get(`/api/carts`, config).then((response) => {
+        console.log(response)
         setCartItems(response.data.items)
-        console.log(response.data)
+        setGames?.(response.data.games)
     }).catch((error) => {
         console.error(error.data)
     })
 }
 
-const onRemoveFromCart = (setCartItems: (items: CartItem[]) => void, cartItems: CartItem[], cartItemId: number) => {
+const onRemoveFromCart = (setCartItems: (items: CartItem[]) => void, cartItems: CartItem[], delCartItem: CartItem, setGames?: (games: OriginalGame[]) => void, games?: OriginalGame[]) => {
     const config = {
         headers: {
             'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
         }
     }
-    axiosInstance.delete(`/api/cart-item/${cartItemId}`, config).then((response) => {
+    axiosInstance.delete(`/api/cart-item?cart_item_id=${delCartItem.id}`, config).then((response) => {
         console.log(response.data);
-        setCartItems(cartItems.filter(cartItem => cartItem.id !== cartItemId))
+        setCartItems(cartItems.filter(cartItem => cartItem.id !== delCartItem.id))
+        games && setGames?.(games.filter(game => game.id !== delCartItem.game_id))
     }).catch((error) => {
         console.error(error.data);
 

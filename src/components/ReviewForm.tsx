@@ -81,7 +81,7 @@ export default function ReviewForm({ game, userReview=emptyUserReview, setIsUpda
             comment: newReview.comment
         }
 
-        axiosInstance.patch(`/api/review/${newReview.id}`, body, config).then(response => {
+        axiosInstance.patch(`/api/reviews?review_id=${newReview.id}`, body, config).then(response => {
             console.log(response)
             alert("Review alterada com sucesso!")
             setIsUpdatingReview!(false)

@@ -89,8 +89,8 @@ export default function GameForm({ existingGame, updateCallback }: GameFormProps
         const token = localStorage.getItem('token') || '';
 
         if (isUpdating) {
-            request = axiosInstance.patch
-            url += `/${game.id}`
+            request = axiosInstance.patch;
+            url += `?game_id=${game.id}`
         }
 
         const config = {

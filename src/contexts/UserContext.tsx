@@ -14,14 +14,11 @@ const UserContext = createContext<UserContextInterface>({
     logoutUser: () => { },
     loginUser: () => { },
     token: '',
-    cartId: '',
-    setCartId: () => { }
 })
 
 export function UserProvider({ children }: UserProviderProps) {
     const [user, setUser] = useState(emptyUser)
     const [token, setToken] = useState('')
-    const [cartId, setCartId] = useState('')
 
     const getUser = async () => {
         const localToken = localStorage.getItem('token') || ''
@@ -71,24 +68,10 @@ export function UserProvider({ children }: UserProviderProps) {
         setToken(newToken)
 
         setUser(newUser)
-        checkForNewCartId(newUser.id)
-    }
-
-    const checkForNewCartId = (userId: string) => {
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
-            }
-        }
-        axiosInstance.get(`/api/cart-id/${userId}`, config).then((response) => {
-            setCartId(response.data.cart_id)
-        }).catch((error) => {
-            console.error(error.response)
-        })
     }
 
     return (
-        <UserContext.Provider value={{ user, getUser, logoutUser, loginUser, token, cartId, setCartId }}>
+        <UserContext.Provider value={{ user, getUser, logoutUser, loginUser, token }}>
             {children}
         </UserContext.Provider>
     )
