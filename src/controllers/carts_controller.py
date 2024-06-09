@@ -2,32 +2,51 @@ from flask import jsonify, request
 from database.db import db
 from models.shop_order_model import Shop_Order
 from models.order_item_model import Order_Item
+from models.game_model import Game
+from models.bought_game_model import Bought_Game
+from controllers.games_controller import set_game_data_link_values
 
-def get_cart_controller(cart_id):
+
+def get_cart_controller(user_id):
     if request.method == 'GET':
         try:
-            data = Order_Item.query.filter(Order_Item.shop_order_id == cart_id).all()
+            cart: Shop_Order = Shop_Order.query.filter(Shop_Order.user_id == user_id, Shop_Order.status == "pending").one()
+            data: list[Order_Item] = Order_Item.query.filter(Order_Item.shop_order_id == cart.id).all()
 
             cart_items = [cart_item.to_dict() for cart_item in data]
+            games = []
 
-            return jsonify({"items": cart_items})
+            for cart_item in cart_items:
+                game: Game = Game.query.filter(Game.id == cart_item['game_id']).one()
+                games.append(game.to_dict())
+            
+            games = set_game_data_link_values(games)
+
+            return jsonify({"items": cart_items, "games": games})
         except Exception as e:
             return jsonify({"message": f"{str(e)}"}), 500
         
-def post_cart_item_controller():
+
+def post_cart_item_controller(user_id):
     try:
         data = request.get_json()
-        shop_order_id = data['shop_order_id']
         game_id = data['game_id']
-        isRepeatedItem = Order_Item.query.filter(Order_Item.shop_order_id == shop_order_id, Order_Item.game_id == game_id).all()
+        cart: Shop_Order = Shop_Order.query.filter(Shop_Order.user_id == user_id, Shop_Order.status == "pending").one()
+
+        isRepeatedItem = Order_Item.query.filter(Order_Item.shop_order_id == cart.id, Order_Item.game_id == game_id).all()
+        hasBeenBought = Bought_Game.query.filter(Bought_Game.game_id == game_id, Bought_Game.user_id == user_id).all()
 
         if isRepeatedItem:
-            return jsonify({'message': 'esse item já está no carrinho'}), 400
+            return jsonify({'message': 'este item já está no carrinho'}), 409
+
+        if hasBeenBought:
+            return jsonify({'message': 'este jogo já foi comprado pelo usuário'}), 409
+
     except Exception as e:
         return jsonify({'message': f'{str(e)}'}), 400
     
     try:
-        cart_item = Order_Item(shop_order_id, game_id)
+        cart_item = Order_Item(cart.id, game_id)
         db.session.add(cart_item)
         db.session.commit()
     except Exception as e:
@@ -35,8 +54,10 @@ def post_cart_item_controller():
 
     return jsonify({'message': 'item de carrinho adicionado com sucesso', 'cart_item': cart_item.to_dict()}), 200
 
-def delete_cart_item_controller(cart_item_id):
+
+def delete_cart_item_controller():
     try:
+        cart_item_id = request.args.get('cart_item_id')
         cart_item = Order_Item.query.get(cart_item_id)
         
         if not cart_item:
@@ -49,21 +70,28 @@ def delete_cart_item_controller(cart_item_id):
     
     return jsonify({'message': 'item de carrinho deletado com sucesso'}), 200
 
-def post_cart_controller(id):
+
+def post_cart_controller(user_id):
     try:
-        cart = Shop_Order(id, None, None, 'pending')
+        cart = Shop_Order(user_id, None, None, 'pending')
         db.session.add(cart)
         db.session.commit()
     except Exception as e:
-        print(e)
-        return None
+        return e
     
     return cart
 
-def get_cart_id_controller(user_id):
-    try:
-        cart = Shop_Order.query.filter(Shop_Order.user_id == user_id and Shop_Order.status == "pending").one()
 
-        return jsonify({'cart_id': cart.id}), 200
+def patch_cart_controller(cart_id, order_total, order_date):
+    try:
+        cart: Shop_Order = Shop_Order.query.get(cart_id)
+
+        cart.order_total = order_total
+        cart.order_date = order_date
+        cart.status = 'finished'
+
+        db.session.commit()
     except Exception as e:
-        return jsonify({'message': f'{str(e)}'}), 500
+        return e
+
+    return None

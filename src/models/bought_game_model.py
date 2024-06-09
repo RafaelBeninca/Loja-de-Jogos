@@ -1,6 +1,6 @@
 from database.db import db
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql.functions import func
 
 class Bought_Game(db.Model):
@@ -11,8 +11,8 @@ class Bought_Game(db.Model):
     game_id = db.Column(db.Integer, ForeignKey('game.id'))
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
-    user = relationship('User')
-    game = relationship('Game')
+    user = relationship('User', backref=backref("bought_game", cascade="all,delete"))
+    game = relationship('Game', backref=backref("bought_game", cascade="all,delete"))
 
     def __init__(self, user_id, game_id) -> None:
         self.user_id = user_id

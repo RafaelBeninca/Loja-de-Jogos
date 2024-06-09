@@ -11,7 +11,7 @@ class Wishlist_Item(db.Model):
     game_id = db.Column(db.Integer, ForeignKey('game.id'))
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
-    user = relationship('User')
+    user = relationship('User', backref=backref("wishlist", cascade="all,delete"))
     game = relationship('Game', backref=backref("wishlist", cascade="all,delete"))
 
     def __init__(self, user_id, game_id) -> None:

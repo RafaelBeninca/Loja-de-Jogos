@@ -1,10 +1,9 @@
-from controllers.users_controller import users_controller, delete_user_controller, get_user_controller, patch_user_controller, get_user_with_pic_link
+from controllers.users_controller import users_controller, delete_user_controller, patch_user_controller, get_user_with_pic_link
 from auth.auth import auth, token_required
 from flask import jsonify
 
 def user_routes(app):
     app.route('/api/users', methods=['GET', 'POST'])(users_controller)
-    app.route('/api/users/<user_id>', methods=['GET'])(get_user_controller)
 
     @app.route('/api/users', methods=['DELETE'])
     @token_required(app)

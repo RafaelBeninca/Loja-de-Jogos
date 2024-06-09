@@ -9,19 +9,6 @@ from gcloud.buckets.fgs_data_bucket.game_data_download import generate_download_
 from controllers.carts_controller import post_cart_controller
 from datetime import datetime, timedelta
 import jwt
-
-def get_user_controller(user_id):
-    if request.method == 'GET':
-        try:
-            data = User.query.get(user_id)
-            user: User = data.to_dict()
-
-            if user.profile_picture:
-                user.profile_picture = generate_download_signed_url_v4('fgs-data', user.profile_picture)
-
-            return jsonify({"user": user})
-        except Exception as e:
-            return jsonify({"message": f"{str(e)}"}), 500
     
 def patch_user_controller(app, user: User):
     try:
@@ -42,7 +29,10 @@ def patch_user_controller(app, user: User):
             print(profile_pic, filename)
 
             if user.profile_picture:
-                delete_blob('fgs-data', user.profile_picture)
+                try:
+                    delete_blob('fgs-data', user.profile_picture)
+                except Exception as e:
+                    print(e)
                 
                 blob_name = f"{user.blob_name_prefix}{filename}"
             else:
@@ -72,7 +62,8 @@ def patch_user_controller(app, user: User):
     
 def delete_user_controller(user: User):
     try:
-        delete_storage_folder('fgs-data', user.blob_name_prefix)
+        if user.blob_name_prefix:
+            delete_storage_folder('fgs-data', user.blob_name_prefix)
 
         db.session.delete(user)
         db.session.commit()
@@ -81,13 +72,39 @@ def delete_user_controller(user: User):
     
     return jsonify({'message': 'usuário deletado com sucesso'}), 200
 
+
+def get_users(user_id=None, username=None):
+    if user_id or username:
+        if user_id:
+            user: dict[str, any] = User.query.get(user_id).to_dict()
+        
+        if username:
+            user: dict[str, any] = User.query.filter(User.username == username).one().to_dict()
+
+        if user['profile_picture']:
+            user['profile_picture'] = generate_download_signed_url_v4('fgs-data', user['profile_picture'])
+
+        return user
+    
+    data: list[User] = User.query.all()
+    users = [user.to_dict() for user in data]
+    return users
+
+
 def users_controller():
     if request.method == 'GET':
         try:
-            data = User.query.all()
-            users = [user.to_dict() for user in data]
-            print(users)
-
+            user_id = request.args.get('user_id')
+            if user_id:
+                user = get_users(user_id)
+                return jsonify({"user": user})
+            
+            username = request.args.get('username')
+            if username:
+                user = get_users(username=username)
+                return jsonify({"user": user})
+            
+            users = get_users()
             return jsonify({"userList": users})
         except Exception as e:
             return jsonify({"message": f"{str(e)}"}), 500
@@ -105,13 +122,14 @@ def users_controller():
         
             db.session.add(user)
             db.session.commit()
+
+            cart = post_cart_controller(user.id)
+            if type(cart) == Exception:
+                delete_user_controller(user)
+                raise cart
         except Exception as e:
             return jsonify({'message': f'{str(e)}'}), 500
 
-        cart = post_cart_controller(user.id)
-        if not cart:
-            delete_user_controller(user)
-            return jsonify({'message': 'erro ao criar o carrinho'}), 500
 
         return jsonify({'message': 'usuário criado com sucesso', 'user': user.to_dict(), 'cart': cart.to_dict()}), 200
 

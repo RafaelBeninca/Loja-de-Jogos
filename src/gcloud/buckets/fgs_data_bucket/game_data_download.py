@@ -25,6 +25,4 @@ def generate_download_signed_url_v4(bucket_name, blob_name):
         method="GET",
     )
 
-    print("Generated GET signed URL:")
-    print(url)
     return url
