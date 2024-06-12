@@ -37,7 +37,7 @@ export default function UserImageInput({ name, id, setUser, user, defaultImage, 
         reader.readAsDataURL(image)
     }
 
-    useEffect(() => setBgImage(defaultImage as string), [])
+    useEffect(() => setBgImage(defaultImage), [])
 
     return (
         <label htmlFor={id} className="custom-file-upload">

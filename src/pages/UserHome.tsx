@@ -3,6 +3,7 @@ import { OriginalGame } from '../types/types.tsx'
 import UserHomeGameList from '../components/UserHomeGameList.tsx'
 import axiosInstance from '../utils/axiosInstance.tsx'
 import UserContext from '../contexts/UserContext.tsx'
+import { Box } from '@mui/material'
 
 export default function UserHome() {
     const [games, setGames] = useState<OriginalGame[]>([])
@@ -34,7 +35,7 @@ export default function UserHome() {
     useEffect(() => { loginIfToken() }, [])
 
     return (
-        <div>
+        <Box>
             {loading ? 
                 <p><b>Carregando...</b></p> :
                 <div>
@@ -42,6 +43,6 @@ export default function UserHome() {
                     <UserHomeGameList games={games} />
                 </div>
             }
-        </div>
+        </Box>
     )
 }

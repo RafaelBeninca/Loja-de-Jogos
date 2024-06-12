@@ -35,7 +35,7 @@ export default function VideoInput({ name, id, setGame, game }: VideoInputProps)
         reader.readAsDataURL(image)
     }
 
-    useEffect(() => changeVideo(game[id as keyof SimpleGame] as File | undefined), [])
+    useEffect(() => setVideo(game[id as keyof SimpleGame] as string), [])
 
     return (
         <label htmlFor={id} className="custom-file-upload">
