@@ -1,7 +1,7 @@
 import { OriginalGame, WishlistItem } from "../../types/types"
 import axiosInstance from "../../utils/axiosInstance"
 
-const getWishlistItems = (setWishlistItems: (items: WishlistItem[]) => void, setGames?: (games: OriginalGame[]) => void) => {
+const getWishlistItems = (setWishlistItems: (items: WishlistItem[]) => void, setGames?: (games: OriginalGame[]) => void, setIsLoading?: (isLoading: boolean) => void) => {
     const config = {
         headers: {
             'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
@@ -10,9 +10,11 @@ const getWishlistItems = (setWishlistItems: (items: WishlistItem[]) => void, set
     axiosInstance.get(`/api/wishlist`, config).then((response) => {
         setWishlistItems(response.data.items)
         setGames?.(response.data.games)
+        setIsLoading?.(false)
         console.log(response.data)
     }).catch((error) => {
         console.error(error.data)
+        setIsLoading?.(false)
     })
 }
 

@@ -1,0 +1,14 @@
+.carousel-root {
+    width: 100%;
+}
+
+.thumbs-wrapper {
+    margin: 0 !important;
+    width: 100% !important;
+    overflow-x: scroll !important;
+}
+
+.thumbs {
+    margin-block: 0.5rem;
+    padding: 0;
+}

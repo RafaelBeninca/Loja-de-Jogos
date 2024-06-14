@@ -55,7 +55,7 @@ export default function PartnerLogin() {
                     <form onSubmit={onSubmit}>
 
                         <label htmlFor="email">Email</label>
-                        <input type="text" name="email" id="email-input" required value={formUser.email_address} onChange={(e) => setFormUser({ ...formUser, email_address: e.target.value })} />
+                        <input type="email" name="email" id="email-input" required value={formUser.email_address} onChange={(e) => setFormUser({ ...formUser, email_address: e.target.value })} />
                         <br /><br />
 
                         <label htmlFor="password">Password</label>

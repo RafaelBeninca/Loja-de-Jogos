@@ -1,29 +1,13 @@
 import { useContext, useEffect, useState } from "react"
 import { BoughtGame, OriginalGame } from "../types/types"
 import axiosInstance from "../utils/axiosInstance"
-import { Link, useNavigate } from "react-router-dom"
+import { Link } from "react-router-dom"
 import UserContext from "../contexts/UserContext"
 
 export default function LibraryGameList() {
     const [games, setGames] = useState<OriginalGame[]>([])
     const [boughtGames, setBoughtGames] = useState<BoughtGame[]>([])
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const { getUser, loginUser, user } = useContext(UserContext);
-    const navigate = useNavigate();
-
-    const loginIfToken = () => {
-        getUser().then(({ user, token }) => {
-            if (token) {
-                setIsLoggedIn(true)
-                console.log(isLoggedIn)
-                loginUser(token, user)
-            }
-            else {
-                setIsLoggedIn(false)
-                navigate('/logout')
-            }
-        });
-    }
+    const { user } = useContext(UserContext);
 
     const getGames = () => {
         const config = {
@@ -42,12 +26,8 @@ export default function LibraryGameList() {
     }
 
     useEffect(getGames, [])
-    useEffect(loginIfToken, [])
     
     return (
-        <>
-        {!isLoggedIn ? 
-        <p><b>Carregando...</b></p> :
         <div>
             {games.map((game) => (
                 <Link key={game.id} to={`/game/${game.title}`}>
@@ -63,8 +43,9 @@ export default function LibraryGameList() {
                     <br />
                 </Link>
             ))}
+            {games.length === 0 &&
+            <p><b>Parece que você ainda não comprou nenhum jogo...</b></p>
+            }
         </div>
-        }
-        </>
     )
 }

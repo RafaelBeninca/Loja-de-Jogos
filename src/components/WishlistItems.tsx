@@ -1,32 +1,64 @@
-import { useState, useEffect } from "react"
-import { OriginalGame, WishlistItem } from "../types/types"
-import { getWishlistItems, onRemoveFromWishlist } from "../funcs/async/WishlistFunctions"
-import { Link } from "react-router-dom"
+import { useState, useEffect } from "react";
+import { OriginalGame, WishlistItem } from "../types/types";
+import {
+  getWishlistItems,
+  onRemoveFromWishlist,
+} from "../funcs/async/WishlistFunctions";
+import { Link } from "react-router-dom";
 
 export default function WishlistItems() {
-    const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
-    const [games, setGames] = useState<OriginalGame[]>([])
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [games, setGames] = useState<OriginalGame[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => getWishlistItems(setWishlistItems, setGames), [])
+  useEffect(
+    () => getWishlistItems(setWishlistItems, setGames, setIsLoading),
+    []
+  );
 
-    return (
+  return (
+    <>
+      {isLoading ? (
+        <p>
+          <b>Carregando...</b>
+        </p>
+      ) : (
         <div>
-            {games.map((game) => (
-                <Link key={game.id} to={`../game/${game.title}`}>
-                    <tr key={game.id}>
-                        <img src={game.banner_image} alt="" style={{width: "6rem"}}/>
-                        <br />
-                        
-                        {game.title}
-                        <br />
-    
-                        <button onClick={(e) => {e.preventDefault(); onRemoveFromWishlist(setWishlistItems, wishlistItems, wishlistItems.filter((wishlistItem) => wishlistItem.game_id == game.id)[0], setGames, games)}}>Remove from wishlist</button>
-                    </tr>
-                </Link>
-            ))}
-            {wishlistItems.length === 0 &&
-            <p><b>Parece que você não tem nenhum item na sua wishlist...</b></p>
-            }
+          {games.map((game) => (
+            <Link key={game.id} to={`../game/${game.title}`}>
+              <tr key={game.id}>
+                <img src={game.banner_image} alt="" style={{ width: "6rem" }} />
+                <br />
+
+                {game.title}
+                <br />
+
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onRemoveFromWishlist(
+                      setWishlistItems,
+                      wishlistItems,
+                      wishlistItems.filter(
+                        (wishlistItem) => wishlistItem.game_id == game.id
+                      )[0],
+                      setGames,
+                      games
+                    );
+                  }}
+                >
+                  Remove from wishlist
+                </button>
+              </tr>
+            </Link>
+          ))}
+          {wishlistItems.length === 0 && (
+            <p>
+              <b>Parece que você não tem nenhum item na sua wishlist...</b>
+            </p>
+          )}
         </div>
-    )
+      )}
+    </>
+  );
 }

@@ -4,10 +4,6 @@
     color: inherit;
 }
 
-.game-banner-img {
-    width: 14rem;
-}
-
 .game-carroussel {
     display: flex;
     flex-direction: row;

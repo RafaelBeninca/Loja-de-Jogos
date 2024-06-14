@@ -65,7 +65,7 @@ import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
 import InputBase from "@mui/material/InputBase";
-import Badge from "@mui/material/Badge";
+// import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
@@ -73,9 +73,10 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import MoreIcon from "@mui/icons-material/MoreVert";
+import FolderIcon from "@mui/icons-material/Folder";
 import LogoLong from "../assets/images/Logo_Long.png";
-import { Link, Outlet, useNavigate } from "react-router-dom";
 import UserContext from "../contexts/UserContext";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Avatar } from "@mui/material";
 
 const Search = styled("div")(({ theme }) => ({
@@ -162,18 +163,74 @@ export default function UserLayout() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-        {user.username ? 
-            <>
-                <MenuItem onClick={() => {handleMenuClose(); navigate(`/user/${user.username}`)}}>Profile</MenuItem>
-                <MenuItem onClick={() => {handleMenuClose(); navigate(`/settings/profile`)}}>Settings</MenuItem>
-                <MenuItem onClick={() => {handleMenuClose(); navigate(`/logout`)}}>Logout</MenuItem>
-            </> :
-            <>
-                <MenuItem onClick={() => {handleMenuClose(); navigate(`/login`)}}>Login de usuário</MenuItem>
-                <MenuItem onClick={() => {handleMenuClose(); navigate(`/partner/login`)}}>Login de parceiro</MenuItem>
-                <MenuItem onClick={() => {handleMenuClose(); navigate(`/signup`)}}>Signup</MenuItem>
-            </>
-        }
+      {user.username
+        ? [
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                navigate(`/user/${user.username}`);
+              }}
+              key={"btnProfile"}
+            >
+              Minha Conta
+            </MenuItem>,
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                navigate(`/partner`);
+              }}
+              key={"btnProfile"}
+            >
+              Trocar para Parceiro
+            </MenuItem>,
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                navigate(`/settings/profile`);
+              }}
+              key={"btnConfig"}
+            >
+              Configurações
+            </MenuItem>,
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                navigate(`/logout`);
+              }}
+              key={"btnLogout"}
+            >
+              Logout
+            </MenuItem>,
+          ]
+        : [
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                navigate(`/login`);
+              }}
+              key={"btnUserLogin"}
+            >
+              Login de usuário
+            </MenuItem>,
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                navigate(`/partner/login`);
+              }}
+              key={"btnPartnerLogin"}
+            >
+              Login de parceiro
+            </MenuItem>,
+            <MenuItem
+              onClick={() => {
+                handleMenuClose();
+                navigate(`/signup`);
+              }}
+              key={"btnSignup"}
+            >
+              Signup
+            </MenuItem>,
+          ]}
     </Menu>
   );
 
@@ -196,19 +253,30 @@ export default function UserLayout() {
     >
       <MenuItem>
         <IconButton size="large" aria-label="wishlist" color="inherit">
-          <Badge badgeContent={4} color="error">
-            <FavoriteIcon />
-          </Badge>
+          {/* Notificações */}
+          {/* <Badge badgeContent={4} color="error">
+          </Badge> */}
+          <FavoriteIcon />
         </IconButton>
         <p>Wishlist</p>
       </MenuItem>
       <MenuItem>
         <IconButton size="large" aria-label="carrinho" color="inherit">
-          <Badge badgeContent={17} color="error">
-            <ShoppingCartIcon />
-          </Badge>
+          {/* Notificações */}
+          {/* <Badge badgeContent={17} color="error">
+          </Badge> */}
+          <ShoppingCartIcon />
         </IconButton>
         <p>Carrinho</p>
+      </MenuItem>
+      <MenuItem>
+        <IconButton size="large" aria-label="biblioteca" color="inherit">
+          {/* Notificações */}
+          {/* <Badge badgeContent={17} color="error">
+          </Badge> */}
+          <FolderIcon />
+        </IconButton>
+        <p>Biblioteca</p>
       </MenuItem>
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
@@ -220,7 +288,7 @@ export default function UserLayout() {
         >
           <AccountCircle />
         </IconButton>
-        <p>Profile</p>
+        <p>Perfil</p>
       </MenuItem>
     </Menu>
   );
@@ -229,7 +297,7 @@ export default function UserLayout() {
     <>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="static">
-          <Toolbar>
+          <Toolbar sx={{ width: "70%", margin: "auto", padding: {'md': 0} }}>
             <Link to={"/"}>
               <Box
                 component="img"
@@ -252,17 +320,38 @@ export default function UserLayout() {
             </Search>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "none", md: "flex" } }}>
-              <IconButton size="large" aria-label="wishlist" color="inherit" onClick={() => navigate('/wishlist')}>
+              <IconButton
+                size="large"
+                aria-label="wishlist"
+                color="inherit"
+                href={"/wishlist"}
+              >
                 {/* Ícone de notificação */}
                 {/* <Badge badgeContent={4} color="error">
                 </Badge> */}
                 <FavoriteIcon />
               </IconButton>
-              <IconButton size="large" aria-label="carrinho" color="inherit" onClick={() => navigate('/cart')}>
+              <IconButton
+                size="large"
+                aria-label="carrinho"
+                color="inherit"
+                href={"/cart"}
+              >
                 {/* Ícone de notificação */}
                 {/* <Badge badgeContent={17} color="error">
                 </Badge> */}
                 <ShoppingCartIcon />
+              </IconButton>
+              <IconButton
+                size="large"
+                aria-label="library"
+                color="inherit"
+                href={"/library"}
+              >
+                {/* Ícone de notificação */}
+                {/* <Badge badgeContent={17} color="error">
+                </Badge> */}
+                <FolderIcon />
               </IconButton>
               <IconButton
                 size="large"
