@@ -1,3 +1,18 @@
+import { Box, Typography } from "@mui/material";
+
 export default function NoPage() {
-    return <h1>404</h1>
+  return (
+    <Box
+      sx={{
+        width: "70%",
+        marginInline: "auto",
+        marginTop: 4,
+      }}
+    >
+      <Typography variant="h1">404</Typography>
+      <Typography variant="body1">
+        A página que você está procurando não existe.
+      </Typography>
+    </Box>
+  );
 }

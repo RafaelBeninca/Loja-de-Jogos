@@ -5,6 +5,7 @@ import {
   onRemoveFromWishlist,
 } from "../funcs/async/WishlistFunctions";
 import { Link } from "react-router-dom";
+import { Typography } from "@mui/material";
 
 export default function WishlistItems() {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
@@ -19,9 +20,7 @@ export default function WishlistItems() {
   return (
     <>
       {isLoading ? (
-        <p>
-          <b>Carregando...</b>
-        </p>
+        <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
       ) : (
         <div>
           {games.map((game) => (

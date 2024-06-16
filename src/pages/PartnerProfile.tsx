@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 import { OriginalGame, User } from "../types/types"
 import UserContext from "../contexts/UserContext"
 import axiosInstance from "../utils/axiosInstance"
+import { Typography } from "@mui/material"
 
 export default function PartnerProfile() {
     const { getUser, loginUser, user, logoutUser } = useContext(UserContext)
@@ -54,7 +55,7 @@ export default function PartnerProfile() {
     return (
         <>
         {isLoading ? 
-        <p><b>Carregando...</b></p> :
+        <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography> :
         <>
         {!profileUser ? 
             <p><b>Não achamos este usuário...</b></p> :

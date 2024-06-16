@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react"
-import "../styles/mediaInput.css"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faImage } from '@fortawesome/free-regular-svg-icons'
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { FormUser } from "../types/types"
 
 interface UserImageInputProps {
@@ -44,9 +42,9 @@ export default function UserImageInput({ name, id, setUser, user, defaultImage, 
             {name}
             {bgImage ? 
                 <img src={bgImage as string} alt="" className="bg-image"/> :
-                <FontAwesomeIcon icon={faImage} />
+                <AddPhotoAlternateIcon />
             }
-            <input type="file" name={id} id={id} accept="image/*" required={required} onChange={handleOnChange}/>
+            <input type="file" name={id} id={id} accept="image/*" hidden required={required} onChange={handleOnChange}/>
         </label>
     )
 }

@@ -6,98 +6,70 @@ import "../styles/index.css";
 /* Verde: #29524A */
 /* Roxo: #20275A */
 
-const theme = createTheme({
+const lightTheme = createTheme({
   palette: {
     mode: "light",
     primary: {
       main: "#20275A",
     },
-    // background: {
-    //   default: "#000"
-    // },
     secondary: {
       main: "#29524A",
+    },
+    background: {
+      default: "#f3f3f3"
     },
   },
   typography: {
     fontFamily: "Hammersmith One",
-    fontSize: 12,
     fontWeightRegular: 400,
+    body1: {
+      fontSize: 13,
+    },
     h1: {
-      fontFamily: "Hammersmith One",
       fontSize: 36,
-      fontWeightRegular: 400,
-      color: "#000",
     },
     h2: {
-      fontFamily: "Hammersmith One",
       fontSize: 24,
-      fontWeightRegular: 400,
-      color: "#000",
     },
     h3: {
-      fontFamily: "Hammersmith One",
       fontSize: 18,
-      fontWeightRegular: 400,
-      color: "#000",
     },
     subtitle1: {
-      fontFamily: "Hammersmith One",
       fontSize: 20,
-      fontWeightRegular: 400,
-      color: "#000",
     },
+  }
+});
+
+const darkTheme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#354097",
+    },
+    secondary: {
+      main: "#29524A",
+    },
+    background: {
+      default: "#0e0e0e"
+    }
   },
-  components: {
-    //   MuiTextField: {
-    //     styleOverrides: {
-    //       root: {
-    //         '--TextField-brandBorderColor': '#E0E3E7',
-    //         '--TextField-brandBorderHoverColor': '#B2BAC2',
-    //         '--TextField-brandBorderFocusedColor': '#6F7E8C',
-    //         '& label.Mui-focused': {
-    //           color: 'var(--TextField-brandBorderFocusedColor)',
-    //         },
-    //       },
-    //     },
-    //   },
-    //   MuiOutlinedInput: {
-    //     styleOverrides: {
-    //       notchedOutline: {
-    //         borderColor: 'var(--TextField-brandBorderColor)',
-    //       },
-    //       root: {
-    //         [`&:hover .${outlinedInputClasses.notchedOutline}`]: {
-    //           borderColor: 'var(--TextField-brandBorderHoverColor)',
-    //         },
-    //         [`&.Mui-focused .${outlinedInputClasses.notchedOutline}`]: {
-    //           borderColor: 'var(--TextField-brandBorderFocusedColor)',
-    //         },
-    //       },
-    //     },
-    //   },
-    //   MuiFilledInput: {
-    //     styleOverrides: {
-    //       root: {
-    //         '&::before, &::after': {
-    //           borderBottom: '2px solid var(--TextField-brandBorderColor)',
-    //         },
-    //         '&:hover:not(.Mui-disabled, .Mui-error):before': {
-    //           borderBottom: '2px solid var(--TextField-brandBorderHoverColor)',
-    //         },
-    //         '&.Mui-focused:after': {
-    //           borderBottom: '2px solid var(--TextField-brandBorderFocusedColor)',
-    //         },
-    //       },
-    //     },
-    //   },
-    MuiInput: {
-      styleOverrides: {
-        root: {
-          borderBottom: '1px solid #fff',
-          color: "#fff",
-        },
-      }
+  typography: {
+    fontFamily: "Hammersmith One",
+    fontWeightRegular: 400,
+    body1: {
+      fontSize: 13,
+    },
+    h1: {
+      fontSize: 36,
+    },
+    h2: {
+      fontSize: 24,
+    },
+    h3: {
+      fontSize: 18,
+    },
+    subtitle1: {
+      fontSize: 20,
     },
   },
 });
@@ -116,4 +88,4 @@ declare module "@mui/material/styles" {
   }
 }
 
-export default theme;
+export { lightTheme, darkTheme };

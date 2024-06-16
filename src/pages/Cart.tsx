@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { CartItem, OriginalGame } from "../types/types";
 import { getCartItems } from "../funcs/async/CartFunctions";
+import { Typography } from "@mui/material";
 
 export default function Cart() {
   const { getUser, loginUser, logoutUser } = useContext(UserContext);
@@ -64,9 +65,7 @@ export default function Cart() {
         <>
           <h1>Carrinho</h1>
           {isLoading ? (
-            <p>
-              <b>Carregando...</b>
-            </p>
+            <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
           ) : (
             <div>
               <CartItems

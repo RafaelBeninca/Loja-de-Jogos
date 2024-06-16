@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react"
-import "../styles/mediaInput.css"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faImage } from '@fortawesome/free-regular-svg-icons'
+import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { SimpleGame } from "../types/types"
 
 interface VideoInputProps {
@@ -42,9 +40,9 @@ export default function VideoInput({ name, id, setGame, game }: VideoInputProps)
             {name}
             {video ? 
                 <video src={video as string} className="bg-image"/> :
-                <FontAwesomeIcon icon={faImage} />
+                <AddPhotoAlternateIcon />
             }
-            <input type="file" name={id} id={id} accept="video/*" onChange={handleOnChange}/>
+            <input type="file" name={id} id={id} hidden accept="video/*" onChange={handleOnChange}/>
         </label>
     )
 }

@@ -7,16 +7,20 @@ import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import MoreIcon from "@mui/icons-material/MoreVert";
-import LogoLong from "../assets/images/Logo_Long.png";
 import UserContext from "../contexts/UserContext";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Avatar } from "@mui/material";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import { ThemeContext } from "../contexts/ThemeContext";
+import HeaderLogo from "../components/HeaderLogo";
 
 export default function LoginLayout() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     useState<null | HTMLElement>(null);
   const { user } = useContext(UserContext);
+  const { darkMode, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
 
   const isMenuOpen = Boolean(anchorEl);
@@ -63,16 +67,7 @@ export default function LoginLayout() {
         }}
         key={"btnUserLogin"}
       >
-        Login de usuário
-      </MenuItem>
-      <MenuItem
-        onClick={() => {
-          handleMenuClose();
-          navigate(`/partner/login`);
-        }}
-        key={"btnPartnerLogin"}
-      >
-        Login de parceiro
+        Login
       </MenuItem>
       <MenuItem
         onClick={() => {
@@ -121,21 +116,21 @@ export default function LoginLayout() {
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
+        <AppBar position="sticky">
           <Toolbar sx={{ width: "70%", margin: "auto", padding: { md: 0 } }}>
             <Link to={"/"}>
-              <Box
-                component="img"
-                sx={{
-                  width: 350,
-                  maxWidth: { xs: 350, md: 250 },
-                }}
-                alt="The house from the offer."
-                src={LogoLong}
-              />
+              <HeaderLogo />
             </Link>
             <Box sx={{ flexGrow: 1 }} />
-            <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
+              <IconButton
+                size="large"
+                edge="end"
+                color="inherit"
+                onClick={toggleTheme}
+              >
+                {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
+              </IconButton>
               <IconButton
                 size="large"
                 edge="end"

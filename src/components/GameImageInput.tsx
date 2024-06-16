@@ -1,51 +1,110 @@
-import React, { useEffect, useState } from "react"
-import "../styles/mediaInput.css"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faImage } from '@fortawesome/free-regular-svg-icons'
-import { SimpleGame } from "../types/types"
+import React, { useEffect, useState } from "react";
+// import "../styles/mediaInput.css"
+import { SimpleGame } from "../types/types";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import { Box, InputLabel, alpha, styled } from "@mui/material";
 
 interface GameImageInputProps {
-    name: string,
-    id: string,
-    setGame: (arg0: SimpleGame) => void,
-    game: SimpleGame,
-    required: boolean
+  label: string;
+  name: string;
+  setGame: (arg0: SimpleGame) => void;
+  game: SimpleGame;
+  required: boolean;
+  showRequired?: boolean;
 }
 
-export default function GameImageInput({ name, id, setGame, game, required }: GameImageInputProps) {
-    const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null)
-    
-    const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
-        const target = e.target as HTMLInputElement & {
-            files: FileList
-        }
+const StyledImageInput = styled(InputLabel)(({ theme }) => ({
+  position: "relative",
+  overflow: "visible",
+  marginTop: 20,
+  border: "1px solid",
+  borderColor:
+    theme.palette.mode === "dark" ? alpha("#fff", 0.2) : alpha("#000", 0.2),
+  borderRadius: theme.shape.borderRadius,
+  display: "inline-block",
+  textAlign: "center",
+  aspectRatio: "16 / 9",
+  cursor: "pointer",
+  width: "100%",
+  ":hover": {
+    borderColor: theme.palette.mode === "dark" ? "#fff" : "#000",
+    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+  },
+}));
 
-        setGame({...game, [id]: target.files[0]});
-        changeBgImage(target.files[0])
-    }
+export default function GameImageInput({
+  label,
+  name,
+  setGame,
+  game,
+  required,
+  showRequired,
+}: GameImageInputProps) {
+  const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null);
 
-    const changeBgImage = (image: File | undefined) => {
-        if (!image) return
+  const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
+    const target = e.target as HTMLInputElement & {
+      files: FileList;
+    };
 
-        const reader = new FileReader();
-        
-        reader.onload = () => {
-            setBgImage(reader.result)
-        }
+    setGame({ ...game, [name]: target.files[0] });
+    changeBgImage(target.files[0]);
+  };
 
-        reader.readAsDataURL(image)
-    }
+  const changeBgImage = (image: File | undefined) => {
+    if (!image) return;
 
-    useEffect(() => setBgImage(game[id as keyof SimpleGame] as string), [])
+    const reader = new FileReader();
 
-    return (
-        <label htmlFor={id} className="custom-file-upload">
-            {name}
-            {bgImage ? 
-                <img src={bgImage as string} alt="" className="bg-image"/> :
-                <FontAwesomeIcon icon={faImage} />
-            }
-            <input type="file" name={id} id={id} accept="image/*" required={required} onChange={handleOnChange}/>
-        </label>
-    )
+    reader.onload = () => {
+      setBgImage(reader.result);
+    };
+
+    reader.readAsDataURL(image);
+  };
+
+  useEffect(() => setBgImage(game[name as keyof SimpleGame] as string), []);
+
+  return (
+    <Box>
+      <StyledImageInput>
+        <InputLabel
+          sx={{
+            position: "absolute",
+            top: -20,
+            color: "inherit",
+          }}
+        >
+          {label}
+          {showRequired && "*"}
+        </InputLabel>
+        {bgImage ? (
+          <Box
+            component={"img"}
+            src={bgImage as string}
+            alt=""
+            sx={{
+              aspectRatio: 16 / 9,
+              width: "100%",
+            }}
+          />
+        ) : (
+          <AddPhotoAlternateIcon
+            fontSize="large"
+            sx={{
+              marginBlock: "20%",
+            }}
+          />
+        )}
+        <input
+          type="file"
+          name={name}
+          hidden
+          accept="image/*"
+          required={required}
+          onChange={handleOnChange}
+        />
+      </StyledImageInput>
+    </Box>
+  );
 }

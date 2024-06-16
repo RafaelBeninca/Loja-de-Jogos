@@ -5,7 +5,6 @@ import axiosInstance from "../utils/axiosInstance.tsx";
 import { UserContextInterface } from "../types/types.tsx";
 import {
   Box,
-  ThemeProvider,
   FormControl,
   TextField,
   // Divider,
@@ -13,8 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import Button from "@mui/material/Button";
-import theme from "../components/Theming.tsx";
-import Logo from "../../Assets/images/Logo_Title.png";
+// import Logo from "../../Assets/images/Logo_Title.png";
 import Display from "../../Assets/images/Teste.png";
 
 import "../styles/userLogin.css";
@@ -34,9 +32,9 @@ export default function UserLogin() {
   const navigate = useNavigate();
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     if (!formUser.email_address || !formUser.password) {
-      setGeneralErrorMSG("Todos os campos são obrigatórios!")
+      setGeneralErrorMSG("Todos os campos são obrigatórios!");
     }
 
     axiosInstance
@@ -49,9 +47,10 @@ export default function UserLogin() {
         setError(true);
         if (error.response.status === 401) {
           if (error.response.data.cause === "email_address") {
-            setEmailErrorMSG("Não foi possível encontrar sua conta! Tente novamente");
-          }
-          else if (error.response.data.cause === "password") {
+            setEmailErrorMSG(
+              "Não foi possível encontrar sua conta! Tente novamente"
+            );
+          } else if (error.response.data.cause === "password") {
             setPasswordErrorMSG("Senha incorreta! Tente novamente");
           }
         } else {
@@ -82,18 +81,18 @@ export default function UserLogin() {
   return (
     <>
       {!isLoggedIn && (
-        <ThemeProvider theme={theme}>
+        <Box>
           <Box
             sx={{
               alignItems: "center",
               display: "flex",
               flexDirection: "column",
-              background: "linear-gradient(to right bottom, #0e1129, #162b27)",
+              // background: "linear-gradient(to right bottom, #0e1129, #162b27)",
             }}
           >
             {/* Logo e "Div" do Login */}
 
-            <Box
+            {/* <Box
               component={"img"}
               sx={{
                 maxWidth: "100%",
@@ -103,28 +102,28 @@ export default function UserLogin() {
               }}
               src={Logo}
               alt="logo"
-            />
+            /> */}
             <Paper
-              elevation={24}
+              elevation={2}
               sx={{
                 borderRadius: "0.5rem",
-                bgcolor: "primary.dark",
+                // bgcolor: "primary.dark",
                 display: "flex",
                 flexDirection: "row",
                 alignItems: "left",
-                marginBottom: "10rem",
+                marginBlock: "6rem",
                 width: "70rem",
                 height: "30rem",
               }}
             >
               <Paper
-                elevation={12}
+                elevation={5}
                 sx={{
                   width: "25rem",
                   height: "28rem",
                   marginTop: "1rem",
                   marginLeft: "1rem",
-                  bgcolor: "primary.main",
+                  // bgcolor: "primary.main",
                 }}
               >
                 {/* Formulário */}
@@ -150,15 +149,10 @@ export default function UserLogin() {
                         })
                       }
                       id="email-input"
-                      label="E-Mail:"
+                      label="E-Mail"
                       variant="standard"
                       size="small"
                       type="email"
-                      InputLabelProps={{
-                        style: {
-                          color: "#fff",
-                        },
-                      }}
                       sx={{ width: 350, marginTop: "2rem" }}
                     />
                     <TextField
@@ -169,24 +163,23 @@ export default function UserLogin() {
                         setFormUser({ ...formUser, password: e.target.value })
                       }
                       id="password-input"
-                      label="Password:"
+                      label="Password"
                       variant="standard"
                       size="small"
                       type="password"
-                      InputLabelProps={{
-                        style: {
-                          color: "#fff",
-                        },
-                      }}
                       sx={{ width: 350, marginTop: "3rem" }}
                     />
                     <Button
                       variant="contained"
                       type="submit"
-                      onClick={() => {setEmailErrorMSG(""); setPasswordErrorMSG(""); setGeneralErrorMSG("")}}
+                      onClick={() => {
+                        setEmailErrorMSG("");
+                        setPasswordErrorMSG("");
+                        setGeneralErrorMSG("");
+                      }}
                       sx={{
                         width: "5rem",
-                        bgcolor: "secondary.dark",
+                        // bgcolor: "secondary.dark",
                         marginTop: "2rem",
                       }}
                     >
@@ -196,7 +189,7 @@ export default function UserLogin() {
                 </Box>
               </Paper>
               <Paper
-                elevation={12}
+                elevation={5}
                 sx={{
                   width: "42rem",
                   height: "28rem",
@@ -224,14 +217,15 @@ export default function UserLogin() {
 
           <Box
             sx={{
-              bgcolor: "#000",
               width: "100%",
               height: "5rem",
+              bgcolor: "#000",
+              color: "#fff"
             }}
           >
             <Typography variant="h1">FOOTER PLACEHOLDER</Typography>
           </Box>
-        </ThemeProvider>
+        </Box>
       )}
     </>
   );

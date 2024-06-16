@@ -1,48 +1,105 @@
-import React, { useEffect, useState } from "react"
-import "../styles/mediaInput.css"
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faImage } from '@fortawesome/free-regular-svg-icons'
-import { SimpleGame } from "../types/types"
+import React, { useEffect, useState } from "react";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import { SimpleGame } from "../types/types";
+import { Box, InputLabel, Typography, alpha, styled } from "@mui/material";
 
 interface ExeInputProps {
-    name: string,
-    id: string,
-    setGame: (arg0: SimpleGame) => void,
-    game: SimpleGame,
-    required: boolean
+  label: string;
+  name: string;
+  setGame: (arg0: SimpleGame) => void;
+  game: SimpleGame;
+  required: boolean;
+  showRequired?: boolean;
 }
 
-export default function ExeInput({ name, id, setGame, game, required }: ExeInputProps) {
-    const [filename, setFilename] = useState<string | undefined>()
-    
-    const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
-        const target = e.target as HTMLInputElement & {
-            files: FileList
-        }
+const StyledExeInput = styled(InputLabel)(({ theme }) => ({
+  position: "relative",
+  overflow: "visible",
+  marginTop: 20,
+  border: "1px solid",
+  borderColor:
+    theme.palette.mode === "dark" ? alpha("#fff", 0.2) : alpha("#000", 0.2),
+  borderRadius: theme.shape.borderRadius,
+  display: "inline-block",
+  textAlign: "center",
+  cursor: "pointer",
+  width: "100%",
+  ":hover": {
+    borderColor: theme.palette.mode === "dark" ? "#fff" : "#000",
+    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+  },
+}));
 
-        setGame({...game, [id]: target.files[0]});
-        setFilename(target.files[0].name)
-    }
+export default function ExeInput({
+  label,
+  name,
+  setGame,
+  game,
+  required,
+  showRequired,
+}: ExeInputProps) {
+  const [filename, setFilename] = useState<string | undefined>();
 
-    const changeFilename = (fileLink: string | undefined) => {
-        if (!fileLink) return
+  const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
+    const target = e.target as HTMLInputElement & {
+      files: FileList;
+    };
 
-        const temp = fileLink.split("?X-Goog-Algorithm")[0]
-        const fn = temp.split("/").pop()
+    setGame({ ...game, [name]: target.files[0] });
+    setFilename(target.files[0].name);
+  };
 
-        setFilename(fn)
-    }
+  const changeFilename = (fileLink: string | undefined) => {
+    if (!fileLink) return;
 
-    useEffect(() => changeFilename(game[id as keyof SimpleGame] as string | undefined), [])
+    const temp = fileLink.split("?X-Goog-Algorithm")[0];
+    const fn = temp.split("/").pop();
 
-    return (
-        <label htmlFor={id} className="custom-file-upload">
-            {name}
-            {filename ? 
-                <p><b>{filename}</b></p> :
-                <FontAwesomeIcon icon={faImage} />
-            }
-            <input type="file" name={id} id={id} accept=".exe" required={required} onChange={handleOnChange}/>
-        </label>
-    )
+    setFilename(fn);
+  };
+
+  useEffect(
+    () => changeFilename(game[name as keyof SimpleGame] as string | undefined),
+    []
+  );
+
+  return (
+    <Box>
+      <StyledExeInput>
+        <InputLabel
+          sx={{
+            position: "absolute",
+            top: -20,
+            color: "inherit",
+          }}
+        >
+          {label}
+          {showRequired && "*"}
+        </InputLabel>
+        {filename ? (
+          <Typography
+            sx={{
+              marginBlock: "1rem",
+            }}
+          >
+            {filename}
+          </Typography>
+        ) : (
+          <FileUploadIcon
+            sx={{
+              marginBlock: "1rem",
+            }}
+          />
+        )}
+        <input
+          type="file"
+          name={name}
+          hidden
+          accept=".exe"
+          required={required}
+          onChange={handleOnChange}
+        />
+      </StyledExeInput>
+    </Box>
+  );
 }

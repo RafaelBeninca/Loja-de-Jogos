@@ -5,16 +5,17 @@ import { OriginalGame, Review, User } from "../types/types";
 import UserContext from "../contexts/UserContext";
 import ReviewForm from "../components/ReviewForm";
 import { emptyOriginalGame } from "../utils/defaultValues";
-import { Avatar, Box, Button, ThemeProvider, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, Paper, Typography } from "@mui/material";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "../styles/imageCarousel.css";
 import Rating from "@mui/material/Rating";
-import theme from "../components/Theming";
+import AddShoppingCart from "@mui/icons-material/AddShoppingCart";
 
 export default function Game() {
   const [game, setGame] = useState<OriginalGame>(emptyOriginalGame);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewAverage, setReviewAverage] = useState<number>(0);
   const [users, setUsers] = useState<User[]>([]);
   const [userReview, setUserReview] = useState<Review | null>(null);
   const [isUpdatingReview, setIsUpdatingReview] = useState(false);
@@ -43,6 +44,7 @@ export default function Game() {
         console.log(response);
         setReviews(response.data.reviews);
         setUsers(response.data.users);
+        setReviewAverage(response.data.avg);
         setUserReview(null);
       })
       .catch((error) => {
@@ -175,7 +177,11 @@ export default function Game() {
     const list: string[] = [];
     for (const key in game) {
       const value = game[key as keyof OriginalGame];
-      if (key.includes("preview") && typeof value === "string" && value !== "") {
+      if (
+        key.includes("preview") &&
+        typeof value === "string" &&
+        value !== ""
+      ) {
         list.push(value);
       }
     }
@@ -183,9 +189,22 @@ export default function Game() {
     setCarouselImages(list);
   };
 
+  // const handleReviewAverage = () => {
+  //   console.log("handling reviews")
+  //   if (reviews.length === 0) return
+
+  //   let sum = 0
+  //   reviews.forEach(review => {
+  //     sum += review.rating      
+  //   });
+
+  //   setReviewAverage(sum / reviews.length)
+  // }
+
   useEffect(loginIfToken, []);
-  useEffect(getGameWithTitle, []);
+  useEffect(getGameWithTitle, [params.title]);
   useEffect(getReviews, [game.id]);
+  // useEffect(handleReviewAverage, [reviews]);
   useEffect(getDeveloperUser, [game.developer]);
   useEffect(getPublisherUser, [game.publisher]);
   useEffect(handleCarouselImages, [game.preview_image_1]);
@@ -193,21 +212,20 @@ export default function Game() {
 
   return (
     <>
-      <ThemeProvider theme={theme}>
+      <Box
+        sx={{
+          width: "70%",
+          marginInline: "auto",
+          display: "flex",
+          flexDirection: "column",
+          paddingBlock: 5,
+          marginTop: 10,
+        }}
+      >
         {game.id === 0 ? (
-          <p>
-            <b>Carregando...</b>
-          </p>
+          <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
         ) : (
-          <Box
-            sx={{
-              width: "70%",
-              marginInline: "auto",
-              display: "flex",
-              flexDirection: "column",
-              paddingBlock: 5,
-            }}
-          >
+          <>
             <Typography variant="h1">{params.title}</Typography>
             <Box
               sx={{
@@ -246,7 +264,7 @@ export default function Game() {
                   display: "flex",
                   flexDirection: "column",
                   gap: 1,
-                  width: "30%"
+                  width: "30%",
                 }}
               >
                 <Box
@@ -257,27 +275,27 @@ export default function Game() {
                     aspectRatio: 16 / 9,
                   }}
                 />
-                <Typography sx={{ fontSize: 13 }}>{game.summary}</Typography>
+                <Typography>{game.summary}</Typography>
 
                 {/* TODO */}
-                <Typography sx={{ fontSize: 13 }}>
-                  Análises: 4.5{" "}
+                <Typography>
+                  Análises: {reviewAverage.toPrecision(2) + " "}
                   <Rating
-                    value={4.8}
+                    value={reviewAverage}
                     precision={0.1}
                     readOnly
                     sx={{ fontSize: 12 }}
                   />{" "}
-                  (100)
+                  ({reviews.length})
                 </Typography>
-                <Typography sx={{ fontSize: 13 }}>
+                <Typography>
                   Data de lançamento:{" "}
                   {game.release_date
                     ? getFormattedDatetime(game.release_date)
                     : "Não definida"}
                 </Typography>
                 <Box>
-                  <Typography sx={{ fontSize: 13 }}>
+                  <Typography>
                     Desenvolvedor:{" "}
                     {developerUser ? (
                       <Link to={`/partner/${developerUser.username}`}>
@@ -287,7 +305,7 @@ export default function Game() {
                       game.developer
                     )}
                   </Typography>
-                  <Typography sx={{ fontSize: 13 }}>
+                  <Typography>
                     Distribuidora:{" "}
                     {publisherUser ? (
                       <Link to={`/partner/${publisherUser.username}`}>
@@ -300,29 +318,44 @@ export default function Game() {
                 </Box>
                 <Typography>
                   {isBoughtGame ? (
-                    <a href={game?.game_file}>Download</a>
+                    <Button variant="contained" href={game?.game_file}>
+                      Download
+                    </Button>
                   ) : (
-                    <Button onClick={handleOnClickBuy} variant="contained">
-                      Comprar
+                    <Button
+                      onClick={handleOnClickBuy}
+                      variant="contained"
+                      sx={{
+                        gap: 1,
+                      }}
+                    >
+                      <AddShoppingCart />
+                      R${game.price}
                     </Button>
                   )}
                 </Typography>
               </Box>
             </Box>
+
+            {/* Sobre */}
             <Box>
               <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 3 }}>
                 Sobre
               </Typography>
-              <Typography sx={{ fontSize: 13 }}>{game.about}</Typography>
+              <Typography>{game.about}</Typography>
             </Box>
+
+            {/* Reviews */}
             <Box>
               <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 3 }}>
                 Análises
               </Typography>
+
               {/* Review nova */}
               {isBoughtGame && !userReview && (
                 <ReviewForm game={game} getReviews={getReviews} />
               )}
+
               {/* Update de review */}
               {isBoughtGame && userReview && isUpdatingReview && (
                 <ReviewForm
@@ -333,85 +366,115 @@ export default function Game() {
                 />
               )}
               <Box>
-                {reviews.map((review) => (
-                  <Box>
-                    <Link
-                      key={review.id}
-                      to={`/user/${getReviewUser(review).username}`}
-                      style={{
-                        display: "flex",
-                        gap: 5,
-                        width: "fit-content",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        textDecoration: "none",
-                        color: "inherit",
-                      }}
-                    >
-                      <Avatar
-                        src={getReviewUser(review).profile_picture}
-                        alt=""
-                      />
-                      <Typography sx={{ fontSize: 13, fontWeight: "bold" }}>
-                        {getReviewUser(review).username}
-                      </Typography>
-                    </Link>
-                    <Rating value={review.rating} readOnly precision={0.5} />
-                    <Typography sx={{ fontSize: 13 }}>
-                      Publicada: {getFormattedDatetime(review.created_at)}
-                    </Typography>
-                    <Typography sx={{ fontSize: 14, marginBlock: 2 }}>
-                      {review.comment}
-                    </Typography>
-                    {review.updated_at && (
-                      <Typography
+                {reviews.length === 0 ? (
+                  <Typography>
+                    Parece que este jogo ainda não tem nenhuma análise
+                  </Typography>
+                ) : (
+                  <>
+                    {reviews.map((review) => (
+                      <Card
                         sx={{
-                          fontSize: 12,
-                          fontWeight: "bold",
-                          marginBottom: 2,
+                          padding: 2,
+                          borderRadius: 1,
+                          marginBottom: 3,
                         }}
                       >
-                        *Editada: {getFormattedDatetime(review.updated_at)}
-                      </Typography>
-                    )}
-                    {review.user_id === parseInt(user.id) &&
-                      !isUpdatingReview && (
-                        <>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              gap: 1,
-                              marginTop: 1,
-                              marginBottom: 3,
-                            }}
+                        <Link
+                          key={review.id}
+                          to={`/user/${getReviewUser(review).username}`}
+                          style={{
+                            display: "flex",
+                            gap: 5,
+                            width: "fit-content",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            textDecoration: "none",
+                            color: "inherit",
+                          }}
+                        >
+                          <Avatar
+                            src={getReviewUser(review).profile_picture}
+                            alt=""
+                          />
+                          <Typography sx={{ fontWeight: "bold" }}>
+                            {getReviewUser(review).username}
+                          </Typography>
+                        </Link>
+                        <Rating
+                          value={review.rating}
+                          readOnly
+                          size="small"
+                          sx={{
+                            marginTop: 1,
+                          }}
+                          precision={0.5}
+                        />
+                        {/* <Paper elevation={4} sx={{
+                          paddingInline: 1,
+                          paddingBlock: 1,
+                          marginBlock: 2
+                        }}> */}
+                        <Typography sx={{ fontSize: 14, marginBlock: 2 }}>
+                          {review.comment}
+                        </Typography>
+                        {/* </Paper> */}
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: "block",
+                          }}
+                        >
+                          Publicada: {getFormattedDatetime(review.created_at)}
+                        </Typography>
+                        {review.updated_at && (
+                          <Typography
+                          variant="caption"
                           >
-                            <Button
-                              color="error"
-                              variant="outlined"
-                              size="small"
-                              onClick={() => handleOnDeleteReview(review.id)}
-                            >
-                              Deletar
-                            </Button>
-                            <Button
-                              color="info"
-                              variant="contained"
-                              size="small"
-                              onClick={() => setIsUpdatingReview(true)}
-                            >
-                              Atualizar
-                            </Button>
-                          </Box>
-                          {!userReview && setUserReview(review)}
-                        </>
-                      )}
-                  </Box>
-                ))}
+                            Editada: {getFormattedDatetime(review.updated_at)}
+                          </Typography>
+                        )}
+                        {review.user_id === parseInt(user.id) &&
+                          !isUpdatingReview && (
+                            <>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  gap: 1,
+                                  marginTop: 1,
+                                }}
+                              >
+                                <Button
+                                  color="error"
+                                  variant="outlined"
+                                  size="small"
+                                  onClick={() =>
+                                    handleOnDeleteReview(review.id)
+                                  }
+                                >
+                                  Excluir
+                                </Button>
+                                <Button
+                                  color="info"
+                                  variant="contained"
+                                  size="small"
+                                  onClick={() => setIsUpdatingReview(true)}
+                                >
+                                  Alterar
+                                </Button>
+                              </Box>
+                              {!userReview && setUserReview(review)}
+                            </>
+                          )}
+                      </Card>
+                    ))}
+                  </>
+                )}
               </Box>
             </Box>
-          </Box>
+          </>
         )}
-      </ThemeProvider>
+      </Box>
     </>
   );
 }

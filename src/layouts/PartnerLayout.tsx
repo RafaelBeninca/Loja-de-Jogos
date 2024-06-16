@@ -1,83 +1,25 @@
-// import { useContext } from "react";
-// import { Outlet, Link } from "react-router-dom";
-// import UserContext from "../contexts/UserContext";
-
-// export default function UserLayout() {
-//     const { user, token } = useContext(UserContext)
-
-//     return (
-//     <>
-//         <nav>
-//         <ul>
-//             <li>
-//                 <Link to="/">Home</Link>
-//             </li>
-//             {token ?
-//                 <li>
-//                     <Link to='/logout'>Logout</Link>
-//                 </li> :
-//                 <>
-//                     <li>
-//                         <Link to="/login">Login as user</Link>
-//                     </li>
-//                     <li>
-//                         <Link to="/partner/login">Login as partner</Link>
-//                     </li>
-//                 </>
-//             }
-//             {!token &&
-//             <li>
-//                 <Link to='/signup'>Signup</Link>
-//             </li>
-//             }
-//             {token &&
-//             <li>
-//                 <Link to='/cart'>Cart</Link>
-//             </li>
-//             }
-//             {token &&
-//             <li>
-//                 <Link to='/wishlist'>Wishlist</Link>
-//             </li>
-//             }
-//             {token &&
-//             <li>
-//                 <Link to='/library'>Library</Link>
-//             </li>
-//             }
-//             {token &&
-//             <li>
-//                 <a href={`/user/${user.username}`}><img src={user.profile_picture} alt="" width={'50px'} height={'50px'}/></a>
-//             </li>
-//             }
-//         </ul>
-//         </nav>
-
-//         <Outlet />
-//     </>
-//     )
-// }
-
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { styled, alpha } from "@mui/material/styles";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import InputBase from "@mui/material/InputBase";
 // import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 import MoreIcon from "@mui/icons-material/MoreVert";
-import FolderIcon from "@mui/icons-material/Folder";
-import LogoLong from "../assets/images/Logo_Long.png";
 import UserContext from "../contexts/UserContext";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { Avatar } from "@mui/material";
+import { Autocomplete, Avatar, TextField } from "@mui/material";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import HeaderLogo from "../components/HeaderLogo";
+import { ThemeContext } from "../contexts/ThemeContext";
+import AddIcon from "@mui/icons-material/Add";
+import axiosInstance from "../utils/axiosInstance";
+import { OriginalGame } from "../types/types";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -105,29 +47,57 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   justifyContent: "center",
 }));
 
-const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: "inherit",
-  "& .MuiInputBase-input": {
-    padding: theme.spacing(1, 1, 1, 0),
+const StyledTextField = styled(TextField)(({ theme }) => ({
+  "& fieldset": {
+    borderColor: "rgba(255, 255, 255, 0.6)",
+  },
+  "&:hover .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(255, 255, 255, 1)",
+  },
+}));
+
+const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
+  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+    borderColor: "rgba(255, 255, 255, 1)",
+  },
+  "& .MuiAutocomplete-inputRoot .MuiAutocomplete-input": {
+    width: "inherit",
+  },
+  "& .MuiOutlinedInput-root .MuiAutocomplete-input": {
+    padding: theme.spacing(0.6, 1, 0.6, 0),
     // vertical padding + font size from searchIcon
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
     transition: theme.transitions.create("width"),
     width: "100%",
+    color: "#fff",
     [theme.breakpoints.up("md")]: {
-      width: "20ch",
+      width: "35ch",
     },
   },
 }));
 
 export default function UserLayout() {
+  const [games, setGames] = useState<OriginalGame[]>([]);
+  const [inputValue, setInputValue] = useState("");
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     useState<null | HTMLElement>(null);
   const { user } = useContext(UserContext);
+  const { darkMode, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+
+  const handleChange = (
+    event: React.SyntheticEvent<Element, Event>,
+    newValue: unknown
+  ) => {
+    setInputValue(""); // Reset the input value
+    if (newValue) {
+      navigate(`/partner/game/${newValue}`);
+    }
+  };
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -145,6 +115,28 @@ export default function UserLayout() {
   const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMobileMoreAnchorEl(event.currentTarget);
   };
+
+  function fetchPartnerGames() {
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
+
+    axiosInstance
+      .get(`/api/games?creator_id=${user.id}`, config)
+      .then((response) => {
+        setGames(response.data.gameList);
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+        if (error.response.status === 401) {
+          navigate("/partner/login", { relative: "route" });
+        }
+      });
+  }
 
   const menuId = "primary-search-account-menu";
   const renderMenu = (
@@ -234,33 +226,58 @@ export default function UserLayout() {
     </Menu>
   );
 
+  useEffect(fetchPartnerGames, [])
+
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static">
+        <AppBar position="sticky">
           <Toolbar sx={{ width: "70%", margin: "auto", padding: { md: 0 } }}>
-            <Link to={"/partner"}>
-              <Box
-                component="img"
-                sx={{
-                  width: 350,
-                  maxWidth: { xs: 350, md: 250 },
-                }}
-                alt="The house from the offer."
-                src={LogoLong}
-              />
+            <Link to={"/"}>
+              <HeaderLogo />
             </Link>
             <Search>
               <SearchIconWrapper>
                 <SearchIcon />
               </SearchIconWrapper>
-              <StyledInputBase
-                placeholder="Search…"
-                inputProps={{ "aria-label": "search" }}
+              <StyledAutocomplete
+                freeSolo
+                id="free-solo-2-demo"
+                options={games.map((game) => game.title)}
+                inputValue={inputValue}
+                onInputChange={(e, value) => setInputValue(value)}
+                onChange={handleChange}
+                renderInput={(params) => (
+                  <StyledTextField
+                    {...params}
+                    placeholder="Search..."
+                    InputProps={{
+                      ...params.InputProps,
+                      type: "search",
+                      endAdornment: null,
+                    }}
+                  />
+                )}
               />
             </Search>
             <Box sx={{ flexGrow: 1 }} />
-            <Box sx={{ display: { xs: "none", md: "flex" } }}>
+            <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
+              <IconButton
+                size="large"
+                edge="end"
+                color="inherit"
+                href="/partner/new-game"
+              >
+                <AddIcon />
+              </IconButton>
+              <IconButton
+                size="large"
+                edge="end"
+                color="inherit"
+                onClick={toggleTheme}
+              >
+                {darkMode ? <DarkModeIcon /> : <LightModeIcon />}
+              </IconButton>
               <IconButton
                 size="large"
                 edge="end"

@@ -8,16 +8,15 @@ import {
   onRemoveFromWishlist,
 } from "../funcs/async/WishlistFunctions";
 import { getCartItems, onRemoveFromCart } from "../funcs/async/CartFunctions";
-import "../styles/userHome.css";
-import { Box, Card, IconButton, Typography } from "@mui/material";
+import { Box, Card, IconButton, Paper, Typography } from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 export interface GameCarouselProps {
-  games: OriginalGame[],
-  title: string
+  games: OriginalGame[];
+  title: string;
 }
 
 export default function GameCarousel({ games, title }: GameCarouselProps) {
@@ -96,91 +95,105 @@ export default function GameCarousel({ games, title }: GameCarouselProps) {
   };
 
   return (
-    <Box className="game-carroussel" sx={{
-      position: "relative",
-      overflow: "visible"
-    }}>
-      <Typography variant="h2" sx={{
-        position: "absolute",
-        top: -12,
-      }}>{title}</Typography>
-      {games.map((game) => (
-        <Link
-          to={`/game/${game.title}`}
-          style={{
-            backgroundColor: "#e3e3e3",
-            textDecoration: "none",
-            color: "inherit",
-          }}
-        >
-          <Card key={game.id}>
-            <Box
-              component={"img"}
-              src={game.banner_image}
-              alt=""
-              sx={{
-                width: 200,
-                aspectRatio: 16 / 9
-              }}
-            />
-            <Box
-              sx={{
-                padding: 1,
-              }}
-            >
-              <Typography variant="h3">{game.title}</Typography>
-              <Typography>R${game.price}</Typography>
+    <Paper
+      sx={{
+        position: "relative",
+        overflowY: "visible",
+      }}
+    >
+      <Typography
+        variant="h2"
+        sx={{
+          position: "absolute",
+          top: -12,
+          left: 5,
+        }}
+      >
+        {title}
+      </Typography>
+      <Box sx={{
+        display: "flex",
+        gap: 1,
+        overflowX: "scroll",
+        padding: 2,
 
-              {getCartItem(game) ? (
-                <IconButton
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onRemoveFromCart(
-                      setCartItems,
-                      cartItems,
-                      getCartItem(game)
-                    );
-                  }}
-                >
-                  <RemoveShoppingCartIcon />
-                </IconButton>
-              ) : (
-                <IconButton
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onAddToCart(game);
-                  }}
-                >
-                  <AddShoppingCartIcon />
-                </IconButton>
-              )}
-              {getWishlistItem(game) ? (
-                <IconButton
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onRemoveFromWishlist(
-                      setWishlistItems,
-                      wishlistItems,
-                      getWishlistItem(game)
-                    );
-                  }}
-                >
-                  <FavoriteIcon />
-                </IconButton>
-              ) : (
-                <IconButton
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onAddToWishlist(game);
-                  }}
-                >
-                  <FavoriteBorderIcon />
-                </IconButton>
-              )}
-            </Box>
-          </Card>
-        </Link>
+      }}>
+      {games.map((game) => (
+          <Link
+            to={`/game/${game.title}`}
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+            }}
+          >
+            <Card key={game.id} elevation={3}>
+              <Box
+                component={"img"}
+                src={game.banner_image}
+                alt=""
+                sx={{
+                  width: 200,
+                  aspectRatio: 16 / 9,
+                }}
+              />
+              <Box
+                sx={{
+                  padding: 1,
+                }}
+              >
+                <Typography variant="h3">{game.title}</Typography>
+                <Typography>R${game.price}</Typography>
+                {getCartItem(game) ? (
+                  <IconButton
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onRemoveFromCart(
+                        setCartItems,
+                        cartItems,
+                        getCartItem(game)
+                      );
+                    }}
+                  >
+                    <RemoveShoppingCartIcon />
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onAddToCart(game);
+                    }}
+                  >
+                    <AddShoppingCartIcon />
+                  </IconButton>
+                )}
+                {getWishlistItem(game) ? (
+                  <IconButton
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onRemoveFromWishlist(
+                        setWishlistItems,
+                        wishlistItems,
+                        getWishlistItem(game)
+                      );
+                    }}
+                  >
+                    <FavoriteIcon />
+                  </IconButton>
+                ) : (
+                  <IconButton
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onAddToWishlist(game);
+                    }}
+                  >
+                    <FavoriteBorderIcon />
+                  </IconButton>
+                )}
+              </Box>
+            </Card>
+          </Link>
       ))}
     </Box>
+    </Paper>
   );
 }

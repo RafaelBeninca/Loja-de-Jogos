@@ -1,101 +1,88 @@
-import { useContext, useEffect, useState } from 'react'
-import { OriginalGame } from '../types/types.tsx'
-import PartnerHomeGameList from '../components/PartnerHomeGameList.tsx'
-import GameForm from '../components/GameForm.tsx'
-import Modal from '../components/Modal.tsx'
-import axiosInstance from '../utils/axiosInstance.tsx'
-import { useNavigate } from 'react-router-dom'
-import { emptyOriginalGame } from '../utils/defaultValues.tsx'
-import UserContext from '../contexts/UserContext.tsx'
+import { useContext, useEffect, useState } from "react";
+import { OriginalGame } from "../types/types.tsx";
+import PartnerHomeGameList from "../components/PartnerHomeGameList.tsx";
+import axiosInstance from "../utils/axiosInstance.tsx";
+import { useNavigate } from "react-router-dom";
+import UserContext from "../contexts/UserContext.tsx";
+import { Box, Typography } from "@mui/material";
 
 export default function PartnerHome() {
-    const [games, setGames] = useState<OriginalGame[]>([])
-    const [isModalOpen, setIsModalOpen] = useState(false)
-    const [currentGame, setCurrentGame] = useState<OriginalGame>(emptyOriginalGame)
-    const { getUser, loginUser, user } = useContext(UserContext)
-    const [isLoggedIn, setIsLoggedIn] = useState(false)
-    const [loading, setLoading] = useState(true)
+  const [games, setGames] = useState<OriginalGame[]>([]);
+  const { getUser, loginUser, user } = useContext(UserContext);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-    const navigate = useNavigate()
+  const navigate = useNavigate();
 
-    useEffect(() => { loginIfToken() }, [])
+  function fetchPartnerGames() {
+    if (!isLoggedIn) return;
 
-    function fetchPartnerGames() {
-        if (!isLoggedIn) return
+    const token = localStorage.getItem("token");
+    const config = {
+      headers: {
+        Authorization: "Bearer " + token,
+      },
+    };
 
-        const token = localStorage.getItem('token')
-        const config = {
-            headers: {
-                'Authorization': 'Bearer ' + token
-            }
+    axiosInstance
+      .get(`/api/games?creator_id=${user.id}`, config)
+      .then((response) => {
+        setGames(response.data.gameList);
+        setLoading(false);
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+        if (error.response.status === 401) {
+          navigate("/partner/login", { relative: "route" });
         }
+      });
+  }
 
-        axiosInstance.get(`/api/games?creator_id=${user.id}`, config).then((response) => {
-            setGames(response.data.gameList)
-            setLoading(false)
-            console.log(response)
-        }).catch((error) => {
-            console.error(error)
-            if (error.response.status === 401) {
-                navigate('/partner/login', {relative: 'route'})
-            }
-        })
-    }
+  const loginIfToken = () => {
+    getUser().then(({ user, token }) => {
+      if (token) {
+        setIsLoggedIn(true);
+        loginUser(token, user);
+      } else {
+        setIsLoggedIn(false);
+        navigate("/logout");
+      }
+    });
+  };
 
-    useEffect(fetchPartnerGames, [isLoggedIn])
+  useEffect(() => {
+    loginIfToken();
+  }, []);
+  useEffect(fetchPartnerGames, [isLoggedIn]);
 
-    const closeModal = () => {
-        setIsModalOpen(false)
-        setCurrentGame(emptyOriginalGame)
-    }
-
-    const openModal = () => {
-        if (!isModalOpen) setIsModalOpen(true)
-    }
-
-    const openUpdateModal = (game: OriginalGame) => {
-        if (isModalOpen) return
-        console.log(game)
-        setCurrentGame(game)
-        setIsModalOpen(true)
-    }
-
-    const onUpdate = () => {
-        closeModal()
-        fetchPartnerGames()
-    }
-
-    const loginIfToken = () => {
-        getUser().then(({ user, token }) => {
-            if (token) {
-                setIsLoggedIn(true)
-                console.log(isLoggedIn)
-                loginUser(token, user)
-            }
-            else {
-                setIsLoggedIn(false)
-                navigate('/logout')
-            }
-        });
-    }
-
-    useEffect(() => { loginIfToken() }, [])
-
-    return (
-        <>
-        {isLoggedIn &&
-            games.length === 0 && loading ? 
-                <p><b>Carregando...</b></p> : 
-                <div>
-                    <h1>Games</h1>
-                    <PartnerHomeGameList games={games} onUpdate={openUpdateModal} updateCallback={onUpdate} />
-                    <button onClick={openModal}>Create Game</button>
-
-                    {isModalOpen && <Modal closeModal={closeModal}>
-                        <GameForm existingGame={currentGame} updateCallback={onUpdate} />
-                    </Modal>}
-                </div>
-        }
-        </>
-    )
+  return (
+    <>
+      {isLoggedIn && (
+        <Box
+          sx={{
+            width: "70%",
+            marginInline: "auto",
+            display: "flex",
+            flexDirection: "column",
+            paddingBlock: 5,
+          }}
+        >
+          {games.length === 0 && loading ? (
+            <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
+          ) : (
+            <>
+              <Typography variant="h1" sx={{
+                marginBottom: 2
+              }}>Meus Jogos</Typography>
+              <PartnerHomeGameList
+                games={games}
+                updateCallback={fetchPartnerGames}
+              />
+            </>
+          )}
+        </Box>
+      )}
+    </>
+  );
 }

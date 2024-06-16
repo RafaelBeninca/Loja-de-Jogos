@@ -122,7 +122,7 @@ export default function ReviewForm({
           }}
         >
           <Avatar src={user.profile_picture} alt="" />
-          <Typography sx={{ fontSize: 13, fontWeight: "bold" }}>
+          <Typography sx={{ fontWeight: "bold" }}>
             {user.username}
           </Typography>
         </Link>
@@ -139,6 +139,10 @@ export default function ReviewForm({
       <form onSubmit={isUpdatingReview ? updateReview : createReview}>
         <Rating
           value={newReview.rating}
+          size="small"
+          sx={{
+            marginBlock: 1
+          }}
           onChange={(e, newValue) =>
             setNewReview({ ...newReview, rating: newValue! })
           }
@@ -147,8 +151,6 @@ export default function ReviewForm({
           multiline
           fullWidth
           name="comment"
-          id="comment"
-          placeholder="Digite sua análise aqui..."
           label="Análise"
           value={newReview.comment}
           maxRows={15}
@@ -164,10 +166,11 @@ export default function ReviewForm({
           type="submit"
           variant="contained"
           sx={{
-            marginBlock: 2,
+            marginTop: 1,
+            marginBottom: 5
           }}
         >
-          {isUpdatingReview ? "Atualizar" : "Criar"}
+          {isUpdatingReview ? "Alterar" : "Postar"}
         </Button>
       </form>
     </Box>
