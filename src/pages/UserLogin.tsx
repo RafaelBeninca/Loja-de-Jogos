@@ -212,19 +212,6 @@ export default function UserLogin() {
               </Paper>
             </Paper>
           </Box>
-
-          {/* Footer da página */}
-
-          <Box
-            sx={{
-              width: "100%",
-              height: "5rem",
-              bgcolor: "#000",
-              color: "#fff"
-            }}
-          >
-            <Typography variant="h1">FOOTER PLACEHOLDER</Typography>
-          </Box>
         </Box>
       )}
     </>

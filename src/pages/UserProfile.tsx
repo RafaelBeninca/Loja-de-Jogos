@@ -3,7 +3,14 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import UserContext from "../contexts/UserContext";
 import axiosInstance from "../utils/axiosInstance";
 import { OriginalGame, User } from "../types/types";
-import { Typography } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  TextField,
+  // Divider,
+  Paper,
+  Typography,
+} from "@mui/material";
 
 export default function UserProfile() {
   const { getUser, loginUser, user, logoutUser } = useContext(UserContext);
@@ -68,24 +75,48 @@ export default function UserProfile() {
               <b>Não achamos este usuário...</b>
             </p>
           ) : (
-            <div>
-              <img
-                src={profileUser.profile_picture}
-                alt=""
-                style={{ width: "6rem" }}
-              />
+            <Box 
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+              }}>
+            <Paper
+              elevation={2}
+              sx={{
+                borderRadius: "0.5rem",
+                alignItems: "left",
+                marginBlock: "6rem",
+                width: "85%",
+                height: "30rem",
+              }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                }}>
+                <Box
+                    component={"img"}
+                    sx={{
+                      width: "10rem",
+                      height: "10rem",
+                      borderRadius: "50rem",
+                      marginLeft: "3rem",
+                      marginTop: "2rem"
+                    }}
+                    src={profileUser.profile_picture}
+                    alt=""
+                  />
+              <Box sx={{display: "flex", flexDirection: "column"}}>
+                <Typography sx={{marginTop: "3rem", marginLeft: "2rem"}} variant="h1">{profileUser.username}</Typography>
+                <Typography sx={{marginTop: "2rem", marginLeft: "2rem"}} variant="subtitle1">{profileUser.summary}</Typography>
+                </Box>
+              </Box>
               <br />
-              <p>
-                <b>Username: {profileUser.username}</b>
-              </p>
               {isActiveUserProfile && (
                 <p>
                   <b>Email: {profileUser.email_address}</b>
                 </p>
               )}
-              <p>
-                <b>Sobre: {profileUser.summary}</b>
-              </p>
               {isActiveUserProfile && (
                 <button
                   onClick={() =>
@@ -117,7 +148,8 @@ export default function UserProfile() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </Paper>
+            </Box>
           )}
         </>
       )}
