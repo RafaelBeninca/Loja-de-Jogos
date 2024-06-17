@@ -37,6 +37,9 @@ const lightTheme = createTheme({
     subtitle1: {
       fontSize: 20,
     },
+    subtitle2: {
+      fontSize: 12,
+    },
   }
 });
 

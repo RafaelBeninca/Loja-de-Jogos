@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { FormUser } from "../types/types";
 import UserImageInput from "../components/UserImageInput";
+import { MarginTwoTone } from "@mui/icons-material";
 
 export default function ProfileConfig() {
   const { user, getUser, loginUser } = useContext(UserContext);
@@ -126,7 +127,7 @@ export default function ProfileConfig() {
   return (
     <>
       {isLoggedIn && (
-        <div>
+        <div style={{marginTop: "10rem"}}>
           <form onSubmit={onSubmit} encType="multipart/form-data">
             <UserImageInput
               name="Profile Picture"

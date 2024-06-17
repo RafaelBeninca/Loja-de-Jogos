@@ -3,13 +3,15 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import UserContext from "../contexts/UserContext";
 import axiosInstance from "../utils/axiosInstance";
 import { OriginalGame, User } from "../types/types";
+import IconButton from "@mui/material/IconButton";
+import SettingsIcon from '@mui/icons-material/Settings';
+import DefaultPFP from "../../Assets/images/DefaultPFP.jpg"
 import {
   Box,
-  FormControl,
-  TextField,
   // Divider,
   Paper,
   Typography,
+  Card,
 } from "@mui/material";
 
 export default function UserProfile() {
@@ -89,8 +91,12 @@ export default function UserProfile() {
                 width: "85%",
                 height: "30rem",
               }}>
-              <Box
+              <Paper
                 sx={{
+                  width: "69.7rem",
+                  height: "15rem",
+                  marginTop: "1rem",
+                  marginLeft: "1rem",
                   display: "flex",
                   flexDirection: "row",
                 }}>
@@ -103,37 +109,36 @@ export default function UserProfile() {
                       marginLeft: "3rem",
                       marginTop: "2rem"
                     }}
-                    src={profileUser.profile_picture}
+                    src={profileUser.profile_picture ? profileUser.profile_picture : DefaultPFP}
                     alt=""
                   />
               <Box sx={{display: "flex", flexDirection: "column"}}>
-                <Typography sx={{marginTop: "3rem", marginLeft: "2rem"}} variant="h1">{profileUser.username}</Typography>
-                <Typography sx={{marginTop: "2rem", marginLeft: "2rem"}} variant="subtitle1">{profileUser.summary}</Typography>
-                </Box>
+                <> 
+                  <Box sx={{display: "flex"}}>
+                    <Typography sx={{marginTop: "3rem", marginLeft: "2rem"}} variant="h1">{profileUser.username}</Typography>
+                    {isActiveUserProfile && (
+                      <IconButton size="large" aria-label="settings" color="secondary" href="/settings/profile" sx={{height: "2rem", width: "2rem", marginTop: "2rem"}}>
+                        <SettingsIcon />
+                      </IconButton>
+                    )}
+                  </Box>
+                  <Typography sx={{marginTop: "0.1rem", marginLeft: "2rem"}} variant="subtitle1">{profileUser.email_address}</Typography>
+                  <Typography sx={{marginTop: "1.5rem", marginLeft: "2rem", maxWidth: "30rem", textOverflow: "ellipsis", display: "inline-block", overflow: "hidden"}} variant="subtitle2">{profileUser.summary}</Typography>
+                </>
               </Box>
-              <br />
-              {isActiveUserProfile && (
-                <p>
-                  <b>Email: {profileUser.email_address}</b>
-                </p>
-              )}
-              {isActiveUserProfile && (
-                <button
-                  onClick={() =>
-                    navigate("/settings/profile", { relative: "route" })
-                  }
-                >
-                  Settings
-                </button>
-              )}
-              <br />
-              <br />
-              <br />
-              Jogos comprados:
-              <div>
+            </Paper>
+              <Typography sx={{marginTop: "1rem", marginLeft: "1rem"}} variant="subtitle1">Jogos comprados:</Typography>
+              <Paper sx={{ height: "10rem", alignItems: "center", display: "flex"}}>
+                <Box sx={{ 
+                  display: "flex",
+                  flexDirection: "row",
+                  gap: "1rem",
+                  width: "97%",
+                  marginLeft: "1rem",
+                }}>
                 {games?.map((game) => (
                   <Link key={game.id} to={`/game/${game.title}`}>
-                    <div key={game.id}>
+                    <Card key={game.id} sx={{textDecoration: "none", height: "7rem", backgroundColor: "primary.main"}}>
                       <img
                         src={game.banner_image}
                         alt=""
@@ -143,11 +148,12 @@ export default function UserProfile() {
 
                       {game.title}
                       <br />
-                    </div>
+                    </Card>
                     <br />
                   </Link>
                 ))}
-              </div>
+                </Box>
+              </Paper>
             </Paper>
             </Box>
           )}
