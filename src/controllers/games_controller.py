@@ -2,11 +2,15 @@ from flask import jsonify, request
 from database.db import db
 from models.game_model import Game
 from models.user_model import User
+from models.genre_model import Genre
+from models.game_genre_model import Game_Genre
 from werkzeug.utils import secure_filename
-from gcloud.buckets.fgs_data_bucket.game_data_upload import upload_directory_with_transfer_manager, upload_blob_from_memory
+from gcloud.buckets.fgs_data_bucket.game_data_upload import upload_blob_from_memory
 from gcloud.buckets.fgs_data_bucket.game_data_download import generate_download_signed_url_v4
 from gcloud.buckets.fgs_data_bucket.game_data_delete import delete_storage_folder, delete_blob
+from controllers.genres_controller import post_genres_controller, alter_genres_controller
 from datetime import datetime
+import json
 import os
 
 def game_controller(user_id):
@@ -23,7 +27,6 @@ def game_controller(user_id):
         release_date = request.form.get('release_date')
         if not release_date:
             release_date = None
-
         
         try:
             files = request.files
@@ -60,6 +63,12 @@ def game_controller(user_id):
             
             db.session.add(game)
             db.session.commit()
+
+            tags_str = request.form.get("genres")
+            tags = json.loads(tags_str)
+            tag_result = post_genres_controller(tags, Game.query.filter(Game.title == request.form.get('title')).one().id)
+            if isinstance(tag_result, Exception):
+                raise Exception(tag_result)
         except Exception as e:
             return jsonify({"message": f"{str(e)}"}), 500
 
@@ -77,7 +86,7 @@ def game_controller(user_id):
                 raise Exception("este jogo não existe")
             
             if game.creator_id != user_id:
-                return jsonify({"message": "usuário não tem permissão para deletar este jogo"}), 403
+                return jsonify({"message": "usuário não tem permissão para excluir este jogo"}), 403
 
             if games_with_same_title and game.id != games_with_same_title[0].id: 
                 raise Exception("um jogo com este nome já existe")
@@ -125,7 +134,6 @@ def game_controller(user_id):
             game.price = request.form.get('price', game.price)
 
             release_date = request.form.get('release_date') 
-            print(release_date)
             if not release_date:
                 release_date = game.release_date
 
@@ -134,6 +142,14 @@ def game_controller(user_id):
             game.about = request.form.get('about', game.about)
 
             db.session.commit()
+
+            tags_str = request.form.get("genres")
+            tags = json.loads(tags_str)
+
+            tag_result = alter_genres_controller(tags, Game.query.filter(Game.title == request.form.get('title')).one().id)
+            if isinstance(tag_result, Exception):
+                raise Exception(tag_result)
+            
         except Exception as e:
             return jsonify({"message": f"{str(e)}"}), 500
         
@@ -150,7 +166,7 @@ def game_controller(user_id):
                 return jsonify({"message": "jogo não existe"}), 400
             
             if game.creator_id != user_id:
-                return jsonify({"message": "usuário não tem permissão para deletar esse jogo"}), 403
+                return jsonify({"message": "usuário não tem permissão para excluir esse jogo"}), 403
 
             delete_storage_folder('fgs-data', game.blob_name_prefix)
 
@@ -165,37 +181,64 @@ def game_controller(user_id):
 def get_games_controller():
     try:
         game_title = request.args.get('game_title')
+        field_name = request.args.get('field_name')
+        if game_title and field_name:
+            test: Game = Game.query.filter(Game.title == game_title).one()
+            
+            if not getattr(test, field_name):
+                return jsonify({"message": "imagem não existe"}), 200
+            
+            url = generate_download_signed_url_v4("fgs-data", getattr(test, field_name))
+            test.media_links[field_name + "_link"] = url
+
+            return jsonify({"url": url}), 200
+
         if game_title:
             game: dict[str, any] = Game.query.filter(Game.title == game_title).one().to_dict()
+            replace_media_links(game)
+
             creator_id = game['creator_id']
             creator = User.query.get(creator_id).to_dict()
-            game = set_game_data_link_values([game])[0]
 
-            return jsonify({"game": game, "creator": creator}), 200
+            genre_data: list[Game_Genre] = Game_Genre.query.filter(Game_Genre.game_id == game['id']).all()
+            genres = [Genre.query.get(game_genre.genre_id).to_dict() for game_genre in genre_data]
+            return jsonify({"game": game, "creator": creator, "genres": genres}), 200
         
         creator_id = request.args.get('creator_id')
         if creator_id:
             data: list[Game] = Game.query.filter(Game.creator_id == creator_id).all()
             games = [game.to_dict() for game in data]
+
+            for game in games:
+                print(game['media_links'])
+                replace_media_links(game)
+            
             creator = User.query.get(creator_id).to_dict()
 
-            games = set_game_data_link_values(games)
             return jsonify({"gameList": games, "creator": creator}), 200
 
         data: list[Game] = Game.query.all()
         games = [game.to_dict() for game in data]
 
-        games = set_game_data_link_values(games)
-
+        for game in games:
+            replace_media_links(game)
+        
         return jsonify({"gameList": games}), 200
     except Exception as e:
         return jsonify({"message": f"{str(e)}"}), 500
 
     
-def set_game_data_link_values(games: list[dict[str, any]]):
-    for game in games:
-            for field_name in game.keys():
-                if ("trailer" in field_name or "image" in field_name or "file" in field_name) and game[field_name]:
-                    game[field_name] = generate_download_signed_url_v4("fgs-data", game[field_name])
-
-    return games
+def replace_media_links(game: dict[str, any]):
+    game["game_file"] = game['media_links']['game_file_link']
+    game["banner_image"] = game['media_links']['banner_image_link']
+    game["trailer_1"] = game['media_links']['trailer_1_link']
+    game["trailer_2"] = game['media_links']['trailer_2_link']
+    game["trailer_3"] = game['media_links']['trailer_3_link']
+    
+    game["preview_image_1"] = game['media_links']['preview_image_1_link']
+    game["preview_image_2"] = game['media_links']['preview_image_2_link']
+    game["preview_image_3"] = game['media_links']['preview_image_3_link']
+    game["preview_image_4"] = game['media_links']['preview_image_4_link']
+    game["preview_image_5"] = game['media_links']['preview_image_5_link']
+    game["preview_image_6"] = game['media_links']['preview_image_6_link']
+    del game["media_links"]

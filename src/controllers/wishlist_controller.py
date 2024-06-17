@@ -2,7 +2,7 @@ from flask import jsonify, request
 from database.db import db
 from models.wishlist_item_model import Wishlist_Item
 from models.game_model import Game
-from controllers.games_controller import set_game_data_link_values
+from controllers.games_controller import replace_media_links
 
 def wishlist_controller(user_id):
     try:
@@ -15,7 +15,8 @@ def wishlist_controller(user_id):
             game: Game = Game.query.filter(Game.id == wishlist_item['game_id']).one()
             games.append(game.to_dict())
         
-        games = set_game_data_link_values(games)
+        for game in games:
+            replace_media_links(game)
 
         return jsonify({"items": wishlist_items, "games": games}), 200
     except Exception as e:

@@ -4,7 +4,7 @@ from models.shop_order_model import Shop_Order
 from models.order_item_model import Order_Item
 from models.game_model import Game
 from models.bought_game_model import Bought_Game
-from controllers.games_controller import set_game_data_link_values
+from controllers.games_controller import replace_media_links
 
 
 def get_cart_controller(user_id):
@@ -20,7 +20,8 @@ def get_cart_controller(user_id):
                 game: Game = Game.query.filter(Game.id == cart_item['game_id']).one()
                 games.append(game.to_dict())
             
-            games = set_game_data_link_values(games)
+            for game in games:
+                replace_media_links(game)
 
             return jsonify({"items": cart_items, "games": games})
         except Exception as e:

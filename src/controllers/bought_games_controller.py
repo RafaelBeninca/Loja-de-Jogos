@@ -2,7 +2,7 @@ from flask import jsonify, request
 from database.db import db
 from models.bought_game_model import Bought_Game
 from models.game_model import Game
-from controllers.games_controller import set_game_data_link_values
+from controllers.games_controller import replace_media_links
 from controllers.carts_controller import patch_cart_controller, post_cart_controller
 from datetime import datetime
 
@@ -14,12 +14,12 @@ def get_bought_games_controller():
         
         game_id = request.args.get('game_id')
         if game_id:
-            bought_game: Bought_Game = Bought_Game.query.filter(Bought_Game.user_id == user_id, Bought_Game.game_id == game_id).one()
+            bought_game: Bought_Game = Bought_Game.query.filter(Bought_Game.user_id == user_id, Bought_Game.game_id == game_id).all()
 
             if not bought_game:
                 return jsonify({'message': 'o usuário ainda não comprou este jogo'}), 400
 
-            return jsonify({'bought_game': bought_game.to_dict()}), 200
+            return jsonify({'bought_game': bought_game[0].to_dict()}), 200
         
         data: list[Bought_Game] = Bought_Game.query.filter(Bought_Game.user_id == user_id).all()
         bought_games = [bought_game.to_dict() for bought_game in data]
@@ -29,7 +29,8 @@ def get_bought_games_controller():
             game: Game = Game.query.filter(Game.id == bought_game['game_id']).one()
             games.append(game.to_dict())
 
-        games = set_game_data_link_values(games)
+        for game in games:
+            replace_media_links(game)
 
         return jsonify({'bought_games': bought_games, 'games': games}), 200
     except Exception as e:

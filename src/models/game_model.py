@@ -1,5 +1,5 @@
 from database.db import db
-from sqlalchemy import ForeignKey
+from sqlalchemy import ForeignKey, orm
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql.functions import func
 
@@ -32,7 +32,7 @@ class Game(db.Model):
 
     creator = relationship('User', backref=backref("game", cascade="all,delete"))
 
-    def __init__(self, creator_id, publisher, developer, title, price, release_date, summary, about, game_file, banner_image, trailer_1, trailer_2, trailer_3, preview_image_1, preview_image_2, preview_image_3, preview_image_4, preview_image_5, preview_image_6, blob_name_prefix) -> None:
+    def __init__(self, creator_id, publisher, developer, title, price, release_date, summary, about, game_file, banner_image, trailer_1, trailer_2, trailer_3, preview_image_1, preview_image_2, preview_image_3, preview_image_4, preview_image_5, preview_image_6, blob_name_prefix, media_links=None) -> None:
         self.creator_id = creator_id
         self.publisher = publisher
         self.developer = developer
@@ -53,18 +53,41 @@ class Game(db.Model):
         self.preview_image_5 = preview_image_5
         self.preview_image_6 = preview_image_6
         self.blob_name_prefix = blob_name_prefix
-        
-        # self.media_links = {
-        #     "trailer_1_link": "",
-        #     "trailer_2_link": "",
-        #     "trailer_3_link": "",
-        #     "preview_image_1_link": "",
-        #     "preview_image_2_link": "",
-        #     "preview_image_3_link": "",
-        #     "preview_image_4_link": "",
-        #     "preview_image_5_link": "",
-        #     "preview_image_6_link": ""
-        # }
+
+        if media_links is None:
+            self.media_links = {
+                "game_file_link": "",
+                "banner_image_link": "",
+                "trailer_1_link": "",
+                "trailer_2_link": "",
+                "trailer_3_link": "",
+                "preview_image_1_link": "",
+                "preview_image_2_link": "",
+                "preview_image_3_link": "",
+                "preview_image_4_link": "",
+                "preview_image_5_link": "",
+                "preview_image_6_link": ""
+            }
+        else:
+            self.media_links = media_links
+
+    @orm.reconstructor
+    def init_on_load(self):
+        if not hasattr(self, 'media_links') or not self.media_links:
+            self.media_links = {
+                "game_file_link": "",
+                "banner_image_link": "",
+                "trailer_1_link": "",
+                "trailer_2_link": "",
+                "trailer_3_link": "",
+                "preview_image_1_link": "",
+                "preview_image_2_link": "",
+                "preview_image_3_link": "",
+                "preview_image_4_link": "",
+                "preview_image_5_link": "",
+                "preview_image_6_link": ""
+            }
+
 
     def to_dict(self):
         return {
@@ -90,6 +113,7 @@ class Game(db.Model):
             'preview_image_6': self.preview_image_6,
             'blob_name_prefix': self.blob_name_prefix,
             'created_at': self.created_at,
-            'updated_at': self.updated_at
+            'updated_at': self.updated_at,
+            'media_links': self.media_links
         }
     

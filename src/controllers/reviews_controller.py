@@ -1,17 +1,42 @@
 from flask import jsonify, request
 from database.db import db
 from models.review_model import Review
+from models.game_model import Game
 from controllers.users_controller import get_users
 
 def get_reviews_controller():
     try:
         game_id = request.args.get('game_id')
-        data: list[Review] = Review.query.filter(Review.game_id == game_id).all()
+        if game_id:
+            data: list[Review] = Review.query.filter(Review.game_id == game_id).all()
 
-        reviews = [review.to_dict() for review in data]
-        users = [get_users(review['user_id']) for review in reviews]
+            reviews = [review.to_dict() for review in data]
+            users = [get_users(review['user_id']) for review in reviews]
 
-        return jsonify({"reviews": reviews, 'users': users}), 200
+            sum = 0
+            for review in reviews:
+                sum += review['rating']
+
+            avg = 0
+            if reviews:
+                avg = sum / len(reviews)
+
+            return jsonify({"reviews": reviews, 'users': users, "avg": avg}), 200
+
+        creator_id = request.args.get('creator_id')
+        if creator_id:
+            avgs = []
+            games: list[Game] = Game.query.filter(Game.creator_id == creator_id).all()
+            for game in games:
+                reviews: list[Review] = Review.query.filter(Review.game_id == game.id).all()
+
+                sum = 0
+                for review in reviews:
+                    sum += review.rating
+
+                avgs.append({"title": game.title, "avg": (sum / len(reviews)) if reviews else 0, 'num_of_reviews': len(reviews)})
+
+            return jsonify({"avgs": avgs}), 200
     except Exception as e:
         return jsonify({"message": f"{str(e)}"}), 500
     

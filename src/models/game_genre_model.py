@@ -1,6 +1,6 @@
 from database.db import db
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 from sqlalchemy.sql.functions import func
 
 class Game_Genre(db.Model):
@@ -11,8 +11,8 @@ class Game_Genre(db.Model):
     genre_id = db.Column(db.Integer, ForeignKey('genre.id'))
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
 
-    game = relationship('Game')
-    genre = relationship('Genre')
+    game = relationship('Game', backref=backref("game_genre", cascade="all,delete"))
+    genre = relationship('Genre', backref=backref("game_genre", cascade="all,delete"))
 
     def __init__(self, game_id, genre_id) -> None:
         self.game_id = game_id

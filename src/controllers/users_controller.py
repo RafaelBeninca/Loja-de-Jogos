@@ -79,7 +79,12 @@ def get_users(user_id=None, username=None):
             user: dict[str, any] = User.query.get(user_id).to_dict()
         
         if username:
-            user: dict[str, any] = User.query.filter(User.username == username).one().to_dict()
+            user: list[User] = User.query.filter(User.username == username).all()
+
+            if not user:
+                return None
+            
+            user = user[0].to_dict()
 
         if user['profile_picture']:
             user['profile_picture'] = generate_download_signed_url_v4('fgs-data', user['profile_picture'])
@@ -102,6 +107,9 @@ def users_controller():
             username = request.args.get('username')
             if username:
                 user = get_users(username=username)
+                if not user:
+                    return jsonify({'message': 'usuário não existe'}), 400
+                
                 return jsonify({"user": user})
             
             users = get_users()
