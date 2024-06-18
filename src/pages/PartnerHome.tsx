@@ -85,16 +85,6 @@ export default function PartnerHome() {
                   <Typography sx={{ fontWeight: "bold" }}>
                     Parece que você ainda não criou nenhum jogo...
                   </Typography>
-                  <Button
-                    href="/partner/new-game"
-                    variant="contained"
-                    sx={{
-                      paddingInline: 2,
-                      marginBlock: 2,
-                    }}
-                  >
-                    Criar
-                  </Button>
                 </>
               )}{" "}
             </>
@@ -105,6 +95,17 @@ export default function PartnerHome() {
               updateCallback={fetchPartnerGames}
             />
           )}
+          <Button
+            href="/partner/new-game"
+            variant="contained"
+            size="large"
+            sx={{
+              paddingInline: 2,
+              marginBlock: 5,
+            }}
+          >
+            Criar
+          </Button>
         </Box>
       )}
     </>

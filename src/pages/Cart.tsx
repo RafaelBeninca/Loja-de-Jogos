@@ -3,9 +3,9 @@ import CartItems from "../components/CartItems";
 import UserContext from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
-import { CartItem, OriginalGame } from "../types/types";
+import { CartItem, GameAverage, GameGenre, OriginalGame } from "../types/types";
 import { getCartItems } from "../funcs/async/CartFunctions";
-import { Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 
 export default function Cart() {
   const { getUser, loginUser, logoutUser } = useContext(UserContext);
@@ -13,6 +13,8 @@ export default function Cart() {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [games, setGames] = useState<OriginalGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [gamesAverage, setGamesAverage] = useState<GameAverage[]>([]);
+  const [gameGenres, setGameGenres] = useState<GameGenre[]>([]);
   const navigate = useNavigate();
 
   const loginIfToken = () => {
@@ -57,36 +59,67 @@ export default function Cart() {
   useEffect(() => {
     loginIfToken();
   }, []);
-  useEffect(() => getCartItems(setCartItems, setGames, setIsLoading), []);
+  useEffect(
+    () =>
+      getCartItems(
+        setCartItems,
+        setGames,
+        setIsLoading,
+        setGamesAverage,
+        setGameGenres
+      ),
+    []
+  );
 
   return (
     <>
       {isLoggedIn && (
-        <>
-          <h1>Carrinho</h1>
+        <Box
+          sx={{
+            marginBlock: 5,
+            marginTop: 15,
+            width: "70%",
+            marginInline: "auto",
+          }}
+        >
+          <Typography
+            variant="h1"
+            sx={{
+              marginBottom: 1,
+            }}
+          >
+            Carrinho
+          </Typography>
           {isLoading ? (
             <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
           ) : (
-            <div>
+            <Box>
               <CartItems
                 setCartItems={setCartItems}
                 cartItems={cartItems}
                 setGames={setGames}
                 games={games}
+                gameGenres={gameGenres}
+                gamesAverage={gamesAverage}
               />
-              <br />
-              <br />
-
               {cartItems.length > 0 ? (
-                <button onClick={handlePurchase}>Comprar</button>
+                <Button variant="contained" size="large" onClick={handlePurchase} sx={{
+                  marginBlock: 5
+                }}>
+                  Comprar
+                </Button>
               ) : (
-                <p>
-                  <b>Parece que você não tem nenhum item no carrinho...</b>
-                </p>
+                <Typography
+                  sx={{
+                    fontWeight: "bold",
+                  }}
+                >
+                  Parece que você não tem nenhum item no carrinho...
+                </Typography>
               )}
-            </div>
+            </Box>
           )}
-        </>
+        </Box>
       )}
     </>
   );

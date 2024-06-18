@@ -31,7 +31,7 @@ export default function PartnerHomeGameList({
   );
   const [partnerGenres, setPartnerGenres] = useState<GameGenre[]>([]);
   const [selectedGame, setSelectedGame] = useState<OriginalGame | null>(null);
-  const [gamesAverage, setGamesAverage] = useState<GameAverage[]>();
+  const [gamesAverage, setGamesAverage] = useState<GameAverage[]>([]);
   const { user } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -117,16 +117,15 @@ export default function PartnerHomeGameList({
   };
 
   const handleGameMenuClose = (e: object) => {
-    e.preventDefault();
-    e.stopPropagation();
+    const event = e as React.MouseEvent<MouseEvent>;
+
+    event.preventDefault();
+    event.stopPropagation();
     setGameMoreAnchorEl(null);
     setSelectedGame(null);
   };
 
-  const handleImgError = (
-    game: OriginalGame,
-    fieldName: string
-  ) => {
+  const handleImgError = (game: OriginalGame, fieldName: string) => {
     axiosInstance
       .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
       .then((response) => {
@@ -144,7 +143,6 @@ export default function PartnerHomeGameList({
       });
   };
 
-  const gameMenuId = "primary-search-game-menu";
   const renderGameMenu = (
     <Menu
       anchorEl={gameMoreAnchorEl}
@@ -152,7 +150,6 @@ export default function PartnerHomeGameList({
         vertical: "top",
         horizontal: "right",
       }}
-      id={gameMenuId}
       keepMounted
       transformOrigin={{
         vertical: "top",
@@ -233,9 +230,8 @@ export default function PartnerHomeGameList({
                       ?.avg.toPrecision(2) + " "}
                     <Rating
                       value={
-                        gamesAverage.find(
-                          ({ title }) => title === game.title
-                        )?.avg
+                        gamesAverage.find(({ title }) => title === game.title)
+                          ?.avg
                       }
                       readOnly
                       precision={0.1}
@@ -247,9 +243,8 @@ export default function PartnerHomeGameList({
                     />
                     (
                     {
-                      gamesAverage.find(
-                        ({ title }) => title === game.title
-                      )?.num_of_reviews
+                      gamesAverage.find(({ title }) => title === game.title)
+                        ?.num_of_reviews
                     }
                     )
                   </Typography>

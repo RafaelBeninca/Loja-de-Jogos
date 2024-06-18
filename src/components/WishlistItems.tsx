@@ -29,9 +29,6 @@ export default function WishlistItems() {
   const [gamesAverage, setGamesAverage] = useState<GameAverage[]>([]);
   const [gameGenres, setGameGenres] = useState<GameGenre[]>([]);
 
-  const test = 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Facilis unde in atque eveniet veniam rem quasi consequatur tempora, rerum, soluta, non voluptatum eligendi temporibus. Facilis dolorem, quis nam, at accusantium, eius necessitatibus ducimus in culpa natus officia quod possimus. Doloribus vel perspiciatis fugiat soluta, similique exercitationem commodi minus officia ea?'
-  const test2 = ''
-
   const handleImgError = (game: OriginalGame, fieldName: string) => {
     axiosInstance
       .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
@@ -135,7 +132,7 @@ export default function WishlistItems() {
                     )}
                     <Typography sx={{
                       marginBlock: 1
-                    }}>{test.length >= 190 ? test.substring(0, 186) + "..." : test}</Typography>
+                    }}>{game.summary.length >= 190 ? game.summary.substring(0, 186) + "..." : game.summary}</Typography>
                   </Box>
                   <Box
                     sx={{

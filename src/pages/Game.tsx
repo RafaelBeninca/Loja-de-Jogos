@@ -1,7 +1,14 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { useContext, useEffect, useState } from "react";
-import { Genre, OriginalGame, Review, User } from "../types/types";
+import {
+  CartItem,
+  Genre,
+  OriginalGame,
+  Review,
+  User,
+  WishlistItem,
+} from "../types/types";
 import UserContext from "../contexts/UserContext";
 import ReviewForm from "../components/ReviewForm";
 import { emptyOriginalGame } from "../utils/defaultValues";
@@ -11,6 +18,9 @@ import {
   Button,
   Card,
   Chip,
+  IconButton,
+  Menu,
+  MenuItem,
   Paper,
   Typography,
 } from "@mui/material";
@@ -19,8 +29,13 @@ import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "../styles/imageCarousel.css";
 import Rating from "@mui/material/Rating";
 import AddShoppingCart from "@mui/icons-material/AddShoppingCart";
-// import InsertPhotoIcon from "../assets/images/InsertPhotoIcon.png";
+import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
+import { onRemoveFromCart } from "../funcs/async/CartFunctions";
+import { onRemoveFromWishlist } from "../funcs/async/WishlistFunctions";
+import MoreIcon from "@mui/icons-material/MoreVert";
 
 export default function Game() {
   const [game, setGame] = useState<OriginalGame>(emptyOriginalGame);
@@ -36,9 +51,16 @@ export default function Game() {
   const [carouselImages, setCarouselImages] = useState<
     { key: string; value: string }[]
   >([]);
+  const [gameMoreAnchorEl, setGameMoreAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
+  const [wishlistItem, setWishlistItem] = useState<WishlistItem | null>(null);
+  const [cartItem, setCartItem] = useState<CartItem | null>(null);
   const { getUser, loginUser, logoutUser, user } = useContext(UserContext);
   const params = useParams();
   const navigate = useNavigate();
+
+  const isGameMenuOpen = Boolean(gameMoreAnchorEl);
 
   const loginIfToken = () => {
     getUser().then(({ user, token }) => {
@@ -48,6 +70,18 @@ export default function Game() {
         logoutUser();
       }
     });
+  };
+
+  const getWishlistItem = () => {
+    axiosInstance
+      .get(`/api/wishlist?game_id=${game.id}`)
+      .then((response) => {
+        console.log(response);
+        setWishlistItem(response.data.item);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   const getReviews = () => {
@@ -237,9 +271,162 @@ export default function Game() {
     }
   };
 
+  const handleGameMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+  ) => {
+    event.stopPropagation();
+    event.preventDefault();
+    setGameMoreAnchorEl(event.currentTarget);
+  };
+
+  const handleGameMenuClose = (e: object) => {
+    const event = e as React.MouseEvent<MouseEvent>;
+
+    event.preventDefault();
+    event.stopPropagation();
+    setGameMoreAnchorEl(null);
+  };
+
+  const onAddToCart = () => {
+    const data = {
+      game_id: game.id,
+    };
+    const config = {
+      headers: {
+        Authorization: "Bearer " + (localStorage.getItem("token") || ""),
+      },
+    };
+    axiosInstance
+      .post("/api/cart-item", data, config)
+      .then((response) => {
+        console.log(response.data);
+        setCartItem(response.data.cart_item);
+      })
+      .catch((error) => {
+        console.error(error.data);
+        if (error.response.status === 401) {
+          logoutUser();
+          navigate("/login");
+        } else if (error.response.status === 409) {
+          alert("Você já comprou este jogo");
+        } else {
+          alert(`Erro. \n\nTente novamente.`);
+        }
+      });
+  };
+
+  const onAddToWishlist = () => {
+    const data = {
+      game_id: game.id,
+    };
+    const config = {
+      headers: {
+        Authorization: "Bearer " + (localStorage.getItem("token") || ""),
+      },
+    };
+    axiosInstance
+      .post("/api/wishlist-item", data, config)
+      .then((response) => {
+        console.log(response.data);
+        setWishlistItem(response.data.wishlist_item);
+      })
+      .catch((error) => {
+        console.error(error.data);
+        if (error.response.status === 401) {
+          logoutUser();
+          navigate("/login");
+        } else {
+          alert(`${error.response.data}. \n\nTente novamente.`);
+        }
+      });
+  };
+
+  const renderGameMenu = (
+    <Menu
+      anchorEl={gameMoreAnchorEl}
+      anchorOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+      keepMounted
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "right",
+      }}
+      open={isGameMenuOpen}
+      onClose={(e) => handleGameMenuClose(e)}
+    >
+      {cartItem ? (
+        <MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            onRemoveFromCart({
+              delCartItem: cartItem,
+              setCartItem: setCartItem,
+            });
+          }}
+          sx={{
+            display: "flex",
+            gap: 1
+          }}
+        >
+          <RemoveShoppingCartIcon />
+          <Typography>Remover</Typography>
+        </MenuItem>
+      ) : (
+        <MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            onAddToCart();
+          }}
+          sx={{
+            display: "flex",
+            gap: 1
+          }}
+        >
+          <AddShoppingCart />
+          <Typography>Adicionar</Typography>
+        </MenuItem>
+      )}
+      {wishlistItem ? (
+        <MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            onRemoveFromWishlist({
+              delWishlistItem: wishlistItem,
+              setWishlistItem: setWishlistItem,
+            });
+          }}
+          sx={{
+            display: "flex",
+            gap: 1
+          }}
+        >
+          <FavoriteIcon />
+          <Typography>Remover</Typography>
+        </MenuItem>
+      ) : (
+        <MenuItem
+          onClick={(e) => {
+            e.preventDefault();
+            onAddToWishlist();
+          }}
+          sx={{
+            display: "flex",
+            gap: 1
+          }}
+        >
+          <FavoriteBorderIcon />
+          <Typography>Adicionar</Typography>
+        </MenuItem>
+      )}
+    </Menu>
+  );
+
   useEffect(loginIfToken, []);
   useEffect(getGameWithTitle, [params.title]);
   useEffect(getReviews, [game.id]);
+  useEffect(getWishlistItem, [game.id]);
   useEffect(getDeveloperUser, [game.developer]);
   useEffect(getPublisherUser, [game.publisher]);
   useEffect(getBoughtGame, [user.id, game.id]);
@@ -265,7 +452,11 @@ export default function Game() {
           <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
         ) : (
           <>
-            <Box>
+            <Box
+              sx={{
+                position: "relative",
+              }}
+            >
               <Typography variant="h1">{params.title}</Typography>
               <Box
                 sx={{
@@ -421,6 +612,21 @@ export default function Game() {
                   </Typography>
                 </Box>
               </Box>
+              <IconButton
+                size="large"
+                aria-label="show more"
+                aria-haspopup="true"
+                color="inherit"
+                onClick={(e) => handleGameMenuOpen(e)}
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  right: -10,
+                }}
+              >
+                <MoreIcon />
+              </IconButton>
+              {renderGameMenu}
             </Box>
             {/* Sobre */}
             <Box>
