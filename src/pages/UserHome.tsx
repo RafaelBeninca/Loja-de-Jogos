@@ -14,7 +14,6 @@ import "../styles/imageCarousel.css";
 import { Link } from "react-router-dom";
 import { getCartItems } from "../funcs/async/CartFunctions.tsx";
 import { getWishlistItems } from "../funcs/async/WishlistFunctions.tsx";
-import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 
 export default function UserHome() {
   const [games, setGames] = useState<OriginalGame[]>([]);
@@ -25,6 +24,8 @@ export default function UserHome() {
   const { getUser, logoutUser, loginUser, user } = useContext(UserContext);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [reviewAverage, setReviewAverage] = useState<number>(0);
+  const [numReviews, setNumReviews] = useState<number>(0);
 
   const loginIfToken = () => {
     getUser().then(({ user, token }) => {
@@ -34,6 +35,21 @@ export default function UserHome() {
         logoutUser();
       }
     });
+  };
+
+  const getReviews = () => {
+    if (!mainGame || mainGame.id === 0) return;
+
+    axiosInstance
+      .get(`/api/reviews?game_id=${mainGame.id}`)
+      .then((response) => {
+        console.log(response);
+        setNumReviews(response.data.reviews.length);
+        setReviewAverage(response.data.avg);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   const getGenres = () => {
@@ -116,6 +132,7 @@ export default function UserHome() {
 
     handleMainImgError(mainGame, "banner_image");
   }, [mainGame?.banner_image]);
+  useEffect(getReviews, [mainGame?.id]);
 
   return (
     <Box
@@ -124,8 +141,8 @@ export default function UserHome() {
         marginInline: "auto",
         display: "flex",
         flexDirection: "column",
-        paddingBlock: 5,
-        marginTop: 10,
+        marginBlock: 5,
+        marginTop: 15,
       }}
     >
       {loading ? (
@@ -180,7 +197,20 @@ export default function UserHome() {
               >
                 <Box>
                   <Typography variant="h2">{mainGame?.title}</Typography>
-                  <Rating value={4.5} readOnly precision={0.1} size="small" />
+                  <Typography>
+                    {reviewAverage.toPrecision(2) + " "}
+                    <Rating
+                      value={reviewAverage}
+                      precision={0.1}
+                      readOnly
+                      size="small"
+                      sx={{
+                        position: "relative",
+                        top: 4,
+                      }}
+                    />{" "}
+                    ({numReviews})
+                  </Typography>
                   <Typography>{mainGame?.summary}</Typography>
                 </Box>
                 <Box
@@ -200,10 +230,10 @@ export default function UserHome() {
                     }}
                   >
                     {gameGenres
-                      .filter(
+                      .find(
                         ({ title, genres }) =>
                           mainGame?.title === title && genres.length > 0
-                      )[0]
+                      )
                       ?.genres.map((genre, index) => (
                         <Chip
                           key={index}
@@ -229,13 +259,12 @@ export default function UserHome() {
               <GameCarousel
                 games={games.filter(
                   (game) =>
-                    gameGenres.filter(
+                    gameGenres.find(
                       ({ title, genres }) =>
                         game.title === title &&
                         genres.length > 0 &&
-                        genres.filter(({ name }) => name === genre.name)
-                          .length > 0
-                    ).length > 0
+                        genres.find(({ name }) => name === genre.name)
+                    )
                 )}
                 setGames={setGames}
                 title={genre.name.toUpperCase()}

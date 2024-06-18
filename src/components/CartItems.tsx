@@ -23,7 +23,7 @@ export default function CartItems({setCartItems, cartItems, setGames, games}: Ca
                         R${game.price}
                         <br />
 
-                        <button onClick={(e) => {e.preventDefault(); onRemoveFromCart(setCartItems, cartItems, cartItems.filter((cartItem) => cartItem.game_id == game.id)[0], setGames, games)}}>Remove from cart</button>
+                        <button onClick={(e) => {e.preventDefault(); onRemoveFromCart(setCartItems, cartItems, cartItems.find((cartItem) => cartItem.game_id == game.id)!, setGames, games)}}>Remove from cart</button>
                     </div>
                 </Link>
             ))}

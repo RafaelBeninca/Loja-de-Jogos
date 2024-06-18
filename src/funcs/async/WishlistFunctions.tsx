@@ -1,7 +1,7 @@
-import { OriginalGame, WishlistItem } from "../../types/types"
+import { GameAverage, GameGenre, OriginalGame, WishlistItem } from "../../types/types"
 import axiosInstance from "../../utils/axiosInstance"
 
-const getWishlistItems = (setWishlistItems: (items: WishlistItem[]) => void, setGames?: (games: OriginalGame[]) => void, setIsLoading?: (isLoading: boolean) => void) => {
+const getWishlistItems = (setWishlistItems: (items: WishlistItem[]) => void, setGames?: (games: OriginalGame[]) => void, setIsLoading?: (isLoading: boolean) => void, setGamesAverage?: (avg: GameAverage[]) => void, setGameGenres?: (gameGenres: GameGenre[]) => void) => {
     const config = {
         headers: {
             'Authorization': 'Bearer ' + (localStorage.getItem('token') || '')
@@ -11,6 +11,8 @@ const getWishlistItems = (setWishlistItems: (items: WishlistItem[]) => void, set
         setWishlistItems(response.data.items)
         setGames?.(response.data.games)
         setIsLoading?.(false)
+        setGamesAverage?.(response.data.avgs)
+        setGameGenres?.(response.data.game_genres)
         console.log(response.data)
     }).catch((error) => {
         console.error(error.data)

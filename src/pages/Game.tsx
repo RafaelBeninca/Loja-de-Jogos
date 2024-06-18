@@ -155,7 +155,7 @@ export default function Game() {
   };
 
   const getReviewUser = (review: Review) => {
-    return users.filter((user) => parseInt(user.id) === review.user_id)[0];
+    return users.find((user) => parseInt(user.id) === review.user_id)!;
   };
 
   const getDeveloperUser = () => {
@@ -222,6 +222,21 @@ export default function Game() {
     }
   };
 
+  const getGameFileLink = async () => {
+    if (game.id === 0) return;
+
+    try {
+      const response = await axiosInstance.head(game.game_file);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
+      const response = await axiosInstance.get(
+        `/api/games?game_title=${game.title}&&field_name=game_file`
+      );
+      setGame({ ...game, game_file: response.data.url });
+    }
+  };
+
   useEffect(loginIfToken, []);
   useEffect(getGameWithTitle, [params.title]);
   useEffect(getReviews, [game.id]);
@@ -229,6 +244,9 @@ export default function Game() {
   useEffect(getPublisherUser, [game.publisher]);
   useEffect(getBoughtGame, [user.id, game.id]);
   useEffect(handleCarouselImages, [game.id]);
+  useEffect(() => {
+    getGameFileLink();
+  }, [game.game_file]);
 
   return (
     <>
@@ -240,170 +258,173 @@ export default function Game() {
           flexDirection: "column",
           paddingBlock: 5,
           marginTop: 10,
+          gap: 4,
         }}
       >
         {game.id === 0 ? (
           <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
         ) : (
           <>
-            <Typography variant="h1">{params.title}</Typography>
-            <Box
-              sx={{
-                display: "flex",
-                gap: 3,
-              }}
-            >
-              <Box
-                sx={{
-                  width: "70%",
-                }}
-              >
-                <Carousel
-                  swipeable={true}
-                  useKeyboardArrows={true}
-                  showStatus={false}
-                  thumbWidth={100}
-                  infiniteLoop={true}
-                >
-                  {carouselImages.length > 0
-                    ? carouselImages.map(({ key, value }) => {
-                        return (
-                          <div>
-                            <img
-                              src={value}
-                              onError={() => handleImgError(key)}
-                              alt=""
-                              draggable="false"
-                              style={{ aspectRatio: 16 / 9 }}
-                            />
-                          </div>
-                        );
-                      })
-                    : [
-                        <div
-                          style={{
-                            width: "100%",
-                            aspectRatio: 16 / 9,
-                          }}
-                        >
-                          <Paper 
-                            elevation={2}
-                          sx={{
-                            width: "100%",
-                            aspectRatio: 16 / 9,
-                          }}>
-                            <InsertPhotoIcon
-                              color="secondary"
-                              sx={{
-                                marginBlock: "20%",
-                                fontSize: 100
-                              }}
-                            />
-                          </Paper>
-                        </div>,
-                      ]}
-                </Carousel>
-              </Box>
+            <Box>
+              <Typography variant="h1">{params.title}</Typography>
               <Box
                 sx={{
                   display: "flex",
-                  flexDirection: "column",
-                  gap: 1,
-                  width: "30%",
+                  gap: 3,
                 }}
               >
                 <Box
-                  component={"img"}
-                  src={game.banner_image}
-                  onError={() => handleImgError("banner_image")}
-                  alt=""
                   sx={{
-                    aspectRatio: 16 / 9,
+                    width: "70%",
                   }}
-                />
-                <Typography>{game.summary}</Typography>
-
-                <Typography>
-                  Análises: {reviewAverage.toPrecision(2) + " "}
-                  <Rating
-                    value={reviewAverage}
-                    precision={0.1}
-                    readOnly
-                    sx={{ fontSize: 12 }}
-                  />{" "}
-                  ({reviews.length})
-                </Typography>
-                <Typography>
-                  Data de lançamento:{" "}
-                  {game.release_date
-                    ? getFormattedDatetime(game.release_date)
-                    : "Não definida"}
-                </Typography>
-                <Box>
-                  <Typography>
-                    Desenvolvedor:{" "}
-                    {developerUser ? (
-                      <Link to={`/partner/${developerUser.username}`}>
-                        {developerUser.username}
-                      </Link>
-                    ) : (
-                      game.developer
-                    )}
-                  </Typography>
-                  <Typography>
-                    Distribuidora:{" "}
-                    {publisherUser ? (
-                      <Link to={`/partner/${publisherUser.username}`}>
-                        {publisherUser.username}
-                      </Link>
-                    ) : (
-                      game.publisher
-                    )}
-                  </Typography>
+                >
+                  <Carousel
+                    swipeable={true}
+                    useKeyboardArrows={true}
+                    showStatus={false}
+                    thumbWidth={100}
+                    infiniteLoop={true}
+                  >
+                    {carouselImages.length > 0
+                      ? carouselImages.map(({ key, value }) => {
+                          return (
+                            <div>
+                              <img
+                                src={value}
+                                onError={() => handleImgError(key)}
+                                alt=""
+                                draggable="false"
+                                style={{ aspectRatio: 16 / 9 }}
+                              />
+                            </div>
+                          );
+                        })
+                      : [
+                          <div
+                            style={{
+                              width: "100%",
+                              aspectRatio: 16 / 9,
+                            }}
+                          >
+                            <Paper
+                              elevation={2}
+                              sx={{
+                                width: "100%",
+                                aspectRatio: 16 / 9,
+                              }}
+                            >
+                              <InsertPhotoIcon
+                                color="secondary"
+                                sx={{
+                                  marginBlock: "20%",
+                                  fontSize: 100,
+                                }}
+                              />
+                            </Paper>
+                          </div>,
+                        ]}
+                  </Carousel>
                 </Box>
                 <Box
                   sx={{
                     display: "flex",
-                    gap: 0.6,
+                    flexDirection: "column",
+                    gap: 1,
+                    width: "30%",
                   }}
                 >
-                  {genres.map((genre) => (
-                    <Chip
-                      label={genre.name}
-                      size="small"
-                      variant="outlined"
-                      color="secondary"
-                    />
-                  ))}
+                  <Box
+                    component={"img"}
+                    src={game.banner_image}
+                    onError={() => handleImgError("banner_image")}
+                    alt=""
+                    sx={{
+                      aspectRatio: 16 / 9,
+                    }}
+                  />
+                  <Typography>{game.summary}</Typography>
+
+                  <Typography>
+                    Análises: {reviewAverage.toPrecision(2) + " "}
+                    <Rating
+                      value={reviewAverage}
+                      precision={0.1}
+                      readOnly
+                      sx={{ fontSize: 12 }}
+                    />{" "}
+                    ({reviews.length})
+                  </Typography>
+                  <Typography>
+                    Data de lançamento:{" "}
+                    {game.release_date
+                      ? getFormattedDatetime(game.release_date)
+                      : "Não definida"}
+                  </Typography>
+                  <Box>
+                    <Typography>
+                      Desenvolvedor:{" "}
+                      {developerUser ? (
+                        <Link to={`/partner/${developerUser.username}`}>
+                          {developerUser.username}
+                        </Link>
+                      ) : (
+                        game.developer
+                      )}
+                    </Typography>
+                    <Typography>
+                      Distribuidora:{" "}
+                      {publisherUser ? (
+                        <Link to={`/partner/${publisherUser.username}`}>
+                          {publisherUser.username}
+                        </Link>
+                      ) : (
+                        game.publisher
+                      )}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 0.6,
+                    }}
+                  >
+                    {genres.map((genre) => (
+                      <Chip
+                        label={genre.name}
+                        size="small"
+                        variant="outlined"
+                        color="secondary"
+                      />
+                    ))}
+                  </Box>
+                  <Typography
+                    sx={{
+                      marginBlock: 1,
+                    }}
+                  >
+                    {isBoughtGame ? (
+                      <Button variant="contained" href={game.game_file}>
+                        Download
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={handleOnClickBuy}
+                        variant="contained"
+                        sx={{
+                          gap: 1,
+                        }}
+                      >
+                        <AddShoppingCart />
+                        R${game.price}
+                      </Button>
+                    )}
+                  </Typography>
                 </Box>
-                <Typography
-                  sx={{
-                    marginBlock: 1,
-                  }}
-                >
-                  {isBoughtGame ? (
-                    <Button variant="contained" href={game?.game_file}>
-                      Download
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleOnClickBuy}
-                      variant="contained"
-                      sx={{
-                        gap: 1,
-                      }}
-                    >
-                      <AddShoppingCart />
-                      R${game.price}
-                    </Button>
-                  )}
-                </Typography>
               </Box>
             </Box>
-
             {/* Sobre */}
             <Box>
-              <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 3 }}>
+              <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 2 }}>
                 Sobre
               </Typography>
               <Typography>{game.about}</Typography>
@@ -411,7 +432,7 @@ export default function Game() {
 
             {/* Reviews */}
             <Box>
-              <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 3 }}>
+              <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 2 }}>
                 Análises
               </Typography>
 
@@ -475,10 +496,10 @@ export default function Game() {
                           precision={0.5}
                         />
                         {/* <Paper elevation={4} sx={{
-                          paddingInline: 1,
-                          paddingBlock: 1,
-                          marginBlock: 2
-                        }}> */}
+                        paddingInline: 1,
+                        paddingBlock: 1,
+                        marginBlock: 2
+                      }}> */}
                         <Typography sx={{ fontSize: 14, marginBlock: 2 }}>
                           {review.comment}
                         </Typography>

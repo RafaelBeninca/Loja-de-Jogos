@@ -42,9 +42,9 @@ export default function LibraryGameList() {
             <br />
             Bought At:{" "}
             {
-              boughtGames.filter(
+              boughtGames.find(
                 (boughtGame) => boughtGame.game_id === game.id
-              )[0].created_at
+              )?.created_at
             }
           </div>
           <br />

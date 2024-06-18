@@ -229,13 +229,13 @@ export default function PartnerHomeGameList({
                     }}
                   >
                     {gamesAverage
-                      .filter(({ title }) => title === game.title)[0]
-                      .avg.toPrecision(2) + " "}
+                      .find(({ title }) => title === game.title)
+                      ?.avg.toPrecision(2) + " "}
                     <Rating
                       value={
-                        gamesAverage.filter(
+                        gamesAverage.find(
                           ({ title }) => title === game.title
-                        )[0].avg
+                        )?.avg
                       }
                       readOnly
                       precision={0.1}
@@ -247,9 +247,9 @@ export default function PartnerHomeGameList({
                     />
                     (
                     {
-                      gamesAverage.filter(
+                      gamesAverage.find(
                         ({ title }) => title === game.title
-                      )[0].num_of_reviews
+                      )?.num_of_reviews
                     }
                     )
                   </Typography>
@@ -273,10 +273,10 @@ export default function PartnerHomeGameList({
                   }}
                 >
                   {partnerGenres
-                    .filter(
+                    .find(
                       ({ title, genres }) =>
                         game.title === title && genres.length > 0
-                    )[0]
+                    )
                     ?.genres.map((genre, index) => (
                       <Chip
                         key={index}
