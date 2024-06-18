@@ -73,10 +73,23 @@ def alter_genres_controller(updated_tags, game_id):
         game_genre_tags = Game_Genre.query.filter(Game_Genre.game_id == game_id).all()
         game_tags_id = [Genre.query.get(game_genre_tag.genre_id).id for game_genre_tag in game_genre_tags]
 
-        updated_tags_id = [Genre.query.filter(Genre.name == updated_tag).one().id for updated_tag in updated_tags]
+        updated_tags_id = []
+        for updated_tag in updated_tags:
+            tagExists = Genre.query.filter(Genre.name == updated_tag).all()
+
+            if not tagExists:
+                tag = Genre(updated_tag)
+            
+                db.session.add(tag)
+                db.session.commit()
+            
+            updated_tags_id.append(Genre.query.filter(Genre.name == updated_tag).one().id)
 
         new_tags_id = list(set(updated_tags_id).difference(set(game_tags_id)))
         deleted_tags_id = list(set(game_tags_id).difference(set(updated_tags_id)))
+
+        print(new_tags_id)
+        print(deleted_tags_id)
 
         for new_tag_id in new_tags_id:
             new_tag = Game_Genre(game_id, new_tag_id)

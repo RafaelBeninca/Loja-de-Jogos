@@ -146,7 +146,7 @@ def game_controller(user_id):
             tags_str = request.form.get("genres")
             tags = json.loads(tags_str)
 
-            tag_result = alter_genres_controller(tags, Game.query.filter(Game.title == request.form.get('title')).one().id)
+            tag_result = alter_genres_controller(tags, game_id)
             if isinstance(tag_result, Exception):
                 raise Exception(tag_result)
             
@@ -185,11 +185,13 @@ def get_games_controller():
         if game_title and field_name:
             test: Game = Game.query.filter(Game.title == game_title).one()
             
-            if not getattr(test, field_name):
+            if not hasattr(test, field_name):
                 return jsonify({"message": "imagem não existe"}), 200
             
             url = generate_download_signed_url_v4("fgs-data", getattr(test, field_name))
-            test.media_links[field_name + "_link"] = url
+            setattr(test, field_name + "_link", url)
+
+            db.session.commit()
 
             return jsonify({"url": url}), 200
 
@@ -210,7 +212,6 @@ def get_games_controller():
             games = [game.to_dict() for game in data]
 
             for game in games:
-                print(game['media_links'])
                 replace_media_links(game)
             
             creator = User.query.get(creator_id).to_dict()
@@ -229,16 +230,29 @@ def get_games_controller():
 
     
 def replace_media_links(game: dict[str, any]):
-    game["game_file"] = game['media_links']['game_file_link']
-    game["banner_image"] = game['media_links']['banner_image_link']
-    game["trailer_1"] = game['media_links']['trailer_1_link']
-    game["trailer_2"] = game['media_links']['trailer_2_link']
-    game["trailer_3"] = game['media_links']['trailer_3_link']
+    game["game_file"] = game['game_file_link']
+    game["banner_image"] = game['banner_image_link']
+    game["trailer_1"] = game['trailer_1_link']
+    game["trailer_2"] = game['trailer_2_link']
+    game["trailer_3"] = game['trailer_3_link']
     
-    game["preview_image_1"] = game['media_links']['preview_image_1_link']
-    game["preview_image_2"] = game['media_links']['preview_image_2_link']
-    game["preview_image_3"] = game['media_links']['preview_image_3_link']
-    game["preview_image_4"] = game['media_links']['preview_image_4_link']
-    game["preview_image_5"] = game['media_links']['preview_image_5_link']
-    game["preview_image_6"] = game['media_links']['preview_image_6_link']
-    del game["media_links"]
+    game["preview_image_1"] = game['preview_image_1_link']
+    game["preview_image_2"] = game['preview_image_2_link']
+    game["preview_image_3"] = game['preview_image_3_link']
+    game["preview_image_4"] = game['preview_image_4_link']
+    game["preview_image_5"] = game['preview_image_5_link']
+    game["preview_image_6"] = game['preview_image_6_link']
+
+
+    del game['game_file_link']
+    del game['banner_image_link']
+    del game['trailer_1_link']
+    del game['trailer_2_link']
+    del game['trailer_3_link']
+    
+    del game['preview_image_1_link']
+    del game['preview_image_2_link']
+    del game['preview_image_3_link']
+    del game['preview_image_4_link']
+    del game['preview_image_5_link']
+    del game['preview_image_6_link']
