@@ -4,7 +4,10 @@ from models.bought_game_model import Bought_Game
 from models.game_model import Game
 from controllers.games_controller import replace_media_links
 from controllers.carts_controller import patch_cart_controller, post_cart_controller
+from controllers.reviews_controller import get_game_avgs
+from controllers.genres_controller import get_game_genres
 from datetime import datetime
+
 
 def get_bought_games_controller():
     try:
@@ -29,10 +32,14 @@ def get_bought_games_controller():
             game: Game = Game.query.filter(Game.id == bought_game['game_id']).one()
             games.append(game.to_dict())
 
+        avgs = []
+        game_genres = []
         for game in games:
             replace_media_links(game)
+            avgs.append(get_game_avgs(game))
+            game_genres.append(get_game_genres(game))
 
-        return jsonify({'bought_games': bought_games, 'games': games}), 200
+        return jsonify({'bought_games': bought_games, 'games': games, "avgs": avgs, "game_genres": game_genres}), 200
     except Exception as e:
         return jsonify({'message': f'{str(e)}'}), 500
 

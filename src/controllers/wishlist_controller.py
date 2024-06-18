@@ -8,6 +8,17 @@ from controllers.genres_controller import get_game_genres
 
 def wishlist_controller(user_id):
     try:
+        game_id = request.args.get('game_id')
+        if game_id:
+            hasItem = Wishlist_Item.query.filter(Wishlist_Item.user_id == user_id, Wishlist_Item.game_id == game_id).all()
+
+            if not hasItem:
+                return jsonify({'message': 'usuário não tem este jogo na wishlist'}), 400
+            
+            item = hasItem[0].to_dict()
+
+            return jsonify({"item": item})
+
         data: list[Wishlist_Item] = Wishlist_Item.query.filter(Wishlist_Item.user_id == user_id).all()
 
         wishlist_items = [wishlist_item.to_dict() for wishlist_item in data]

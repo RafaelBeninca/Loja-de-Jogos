@@ -25,7 +25,8 @@ def get_genres_controller():
         creator_id = request.args.get("creator_id")
         if creator_id:
             creator_game_genres = []
-            games: list[Game] = Game.query.filter(Game.creator_id == creator_id)
+            data: list[Game] = Game.query.filter(Game.creator_id == creator_id)
+            games = [game.to_dict() for game in data]
             for game in games:
                 creator_game_genres.append(get_game_genres(game))
             
