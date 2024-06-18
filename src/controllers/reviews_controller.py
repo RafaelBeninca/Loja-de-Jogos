@@ -4,6 +4,17 @@ from models.review_model import Review
 from models.game_model import Game
 from controllers.users_controller import get_users
 
+
+def get_game_avgs(game: dict[str, any]) -> dict[str, any]:
+    reviews: list[Review] = Review.query.filter(Review.game_id == game['id']).all()
+
+    sum = 0
+    for review in reviews:
+        sum += review.rating
+
+    return {"title": game['title'], "avg": (sum / len(reviews)) if reviews else 0, 'num_of_reviews': len(reviews)}
+
+
 def get_reviews_controller():
     try:
         game_id = request.args.get('game_id')
@@ -26,15 +37,11 @@ def get_reviews_controller():
         creator_id = request.args.get('creator_id')
         if creator_id:
             avgs = []
-            games: list[Game] = Game.query.filter(Game.creator_id == creator_id).all()
+            data: list[Game] = Game.query.filter(Game.creator_id == creator_id).all()
+
+            games: dict[str, any] = [game.to_dict() for game in data]
             for game in games:
-                reviews: list[Review] = Review.query.filter(Review.game_id == game.id).all()
-
-                sum = 0
-                for review in reviews:
-                    sum += review.rating
-
-                avgs.append({"title": game.title, "avg": (sum / len(reviews)) if reviews else 0, 'num_of_reviews': len(reviews)})
+                avgs.append(get_game_avgs(game))
 
             return jsonify({"avgs": avgs}), 200
     except Exception as e:

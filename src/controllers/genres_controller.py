@@ -4,6 +4,14 @@ from models.genre_model import Genre
 from models.game_genre_model import Game_Genre
 from models.game_model import Game
 
+
+def get_game_genres(game: dict[str, any]) -> dict[str, any]:
+    game_genres: list[Game_Genre] = Game_Genre.query.filter(Game_Genre.game_id == game['id']).all()
+                
+    genres = [Genre.query.get(game_genre.genre_id).to_dict() for game_genre in game_genres]
+    return {"title": game['title'], "genres": genres}
+
+
 def get_genres_controller():
     try:
         game_id = request.args.get('game_id')
@@ -19,10 +27,7 @@ def get_genres_controller():
             creator_game_genres = []
             games: list[Game] = Game.query.filter(Game.creator_id == creator_id)
             for game in games:
-                game_genres: list[Game_Genre] = Game_Genre.query.filter(Game_Genre.game_id == game.id).all()
-                
-                genres = [Genre.query.get(game_genre.genre_id).to_dict() for game_genre in game_genres]
-                creator_game_genres.append({"title": game.title, "genres": genres})
+                creator_game_genres.append(get_game_genres(game))
             
             return jsonify({"game_genres": creator_game_genres}), 200
         

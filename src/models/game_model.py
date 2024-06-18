@@ -44,7 +44,7 @@ class Game(db.Model):
 
     creator = relationship('User', backref=backref("game", cascade="all,delete"))
 
-    def __init__(self, creator_id, publisher, developer, title, price, release_date, summary, about, game_file, banner_image, trailer_1, trailer_2, trailer_3, preview_image_1, preview_image_2, preview_image_3, preview_image_4, preview_image_5, preview_image_6, blob_name_prefix, game_file_link=None, banner_image_link=None, trailer_1_link=None, trailer_2_link=None, trailer_3_link=None, preview_image_1_link=None, preview_image_2_link=None, preview_image_3_link=None, preview_image_4_link=None, preview_image_5_link=None, preview_image_6_link=None) -> None:
+    def __init__(self, creator_id, publisher, developer, title, price, release_date, summary, about, game_file, banner_image, trailer_1, trailer_2, trailer_3, preview_image_1, preview_image_2, preview_image_3, preview_image_4, preview_image_5, preview_image_6, blob_name_prefix, game_file_link="", banner_image_link="", trailer_1_link="", trailer_2_link="", trailer_3_link="", preview_image_1_link="", preview_image_2_link="", preview_image_3_link="", preview_image_4_link="", preview_image_5_link="", preview_image_6_link="") -> None:
         self.creator_id = creator_id
         self.publisher = publisher
         self.developer = developer

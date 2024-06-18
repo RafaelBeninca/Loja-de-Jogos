@@ -3,6 +3,8 @@ from database.db import db
 from models.wishlist_item_model import Wishlist_Item
 from models.game_model import Game
 from controllers.games_controller import replace_media_links
+from controllers.reviews_controller import get_game_avgs
+from controllers.genres_controller import get_game_genres
 
 def wishlist_controller(user_id):
     try:
@@ -15,10 +17,15 @@ def wishlist_controller(user_id):
             game: Game = Game.query.filter(Game.id == wishlist_item['game_id']).one()
             games.append(game.to_dict())
         
+        avgs = []
+        game_genres = []
         for game in games:
             replace_media_links(game)
+            avgs.append(get_game_avgs(game))
+            game_genres.append(get_game_genres(game))
+            
 
-        return jsonify({"items": wishlist_items, "games": games}), 200
+        return jsonify({"items": wishlist_items, "games": games, "avgs": avgs, "game_genres": game_genres}), 200
     except Exception as e:
         return jsonify({"message": f"{str(e)}"}), 500
 
