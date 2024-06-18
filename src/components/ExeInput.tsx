@@ -7,7 +7,7 @@ import axiosInstance from "../utils/axiosInstance";
 interface ExeInputProps {
   label: string;
   name: string;
-  setGame: (arg0: SimpleGame) => void;
+  setGame: React.Dispatch<React.SetStateAction<SimpleGame>>;
   game: SimpleGame;
   required: boolean;
   showRequired?: boolean;
@@ -52,7 +52,10 @@ export default function ExeInput({
       return;
     }
 
-    setGame({ ...game, [name]: target.files[0] });
+    setGame((prevGame) => ({
+      ...prevGame,
+      [name]: target.files[0] as File,
+    }));
     setFilename(target.files[0].name);
   };
 
@@ -66,23 +69,25 @@ export default function ExeInput({
   };
 
   const handleFilenameError = () => {
+    if (filename) return;
+
     axiosInstance
       .get(`/api/games?game_title=${game.title}&&field_name=game_file`)
       .then((response) => {
         setGame({ ...game, game_file: response.data.url });
-        changeFilename(response.data.url)
+        changeFilename(response.data.url);
         console.log(response);
       })
       .catch((error) => {
         console.error(error);
       });
-  }
+  };
 
   useEffect(
     () => changeFilename(game[name as keyof SimpleGame] as string | undefined),
     []
   );
-  useEffect(() => handleFilenameError(), []);
+  useEffect(handleFilenameError, [filename]);
 
   return (
     <Box>

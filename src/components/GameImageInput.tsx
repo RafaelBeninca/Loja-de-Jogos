@@ -8,7 +8,7 @@ import axiosInstance from "../utils/axiosInstance";
 interface GameImageInputProps {
   label: string;
   name: string;
-  setGame: (arg0: SimpleGame) => void;
+  setGame: React.Dispatch<React.SetStateAction<SimpleGame>>;
   game: SimpleGame;
   required: boolean;
   showRequired?: boolean;
@@ -43,14 +43,17 @@ export default function GameImageInput({
 }: GameImageInputProps) {
   const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null);
 
-  const image = game[name as keyof SimpleGame]
+  const image = game[name as keyof SimpleGame];
 
   const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement & {
       files: FileList;
     };
 
-    setGame({ ...game, [name]: target.files[0] });
+    setGame((prevGame) => ({
+      ...prevGame,
+      [name]: target.files[0] as File,
+    }));
     changeBgImage(target.files[0]);
   };
 
@@ -66,14 +69,12 @@ export default function GameImageInput({
     reader.readAsDataURL(image);
   };
 
-  const handleImgError = (
-    fieldName: string
-  ) => {
+  const handleImgError = (fieldName: string) => {
     axiosInstance
       .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
       .then((response) => {
         setGame({ ...game, [fieldName]: response.data.url });
-        setBgImage(response.data.url)
+        setBgImage(response.data.url);
         console.log(response);
       })
       .catch((error) => {

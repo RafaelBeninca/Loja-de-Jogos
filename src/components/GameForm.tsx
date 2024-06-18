@@ -57,6 +57,8 @@ export default function GameForm({ existingGame }: GameFormProps) {
   >([]);
   const navigate = useNavigate();
 
+  console.log(game)
+
   const isUpdating = existingGame.id !== 0;
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
