@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { SimpleGame } from "../types/types";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { Box, InputLabel, alpha, styled } from "@mui/material";
+import axiosInstance from "../utils/axiosInstance";
 
 interface GameImageInputProps {
   label: string;
@@ -42,6 +43,8 @@ export default function GameImageInput({
 }: GameImageInputProps) {
   const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null);
 
+  const image = game[name as keyof SimpleGame]
+
   const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement & {
       files: FileList;
@@ -63,7 +66,22 @@ export default function GameImageInput({
     reader.readAsDataURL(image);
   };
 
-  useEffect(() => setBgImage(game[name as keyof SimpleGame] as string), []);
+  const handleImgError = (
+    fieldName: string
+  ) => {
+    axiosInstance
+      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+      .then((response) => {
+        setGame({ ...game, [fieldName]: response.data.url });
+        setBgImage(response.data.url)
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  useEffect(() => setBgImage(image as string), [image]);
 
   return (
     <Box>
@@ -82,6 +100,7 @@ export default function GameImageInput({
           <Box
             component={"img"}
             src={bgImage as string}
+            onError={() => handleImgError(name)}
             alt=""
             sx={{
               aspectRatio: 16 / 9,

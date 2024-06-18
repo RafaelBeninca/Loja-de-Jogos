@@ -41,12 +41,12 @@ export default function UpdateGame() {
       });
   };
 
-  useEffect(getGameWithTitle, []);
   useEffect(loginIfToken, []);
+  useEffect(getGameWithTitle, [params.title]);
   
   return (
     <>
-      {isLoggedIn && game.banner_image && (
+      {isLoggedIn && (
         <Box
           sx={{
             width: "70%",
@@ -56,7 +56,7 @@ export default function UpdateGame() {
             paddingBlock: 5,
           }}
         >
-          <GameForm existingGame={game}/>
+          <GameForm existingGame={game} key={game.id}/>
         </Box>
       )}
     </>

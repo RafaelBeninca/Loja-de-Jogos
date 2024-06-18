@@ -1,13 +1,10 @@
 import { Link, useNavigate } from "react-router-dom";
 import { CartItem, OriginalGame, WishlistItem } from "../types/types";
 import axiosInstance from "../utils/axiosInstance";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import UserContext from "../contexts/UserContext";
-import {
-  getWishlistItems,
-  onRemoveFromWishlist,
-} from "../funcs/async/WishlistFunctions";
-import { getCartItems, onRemoveFromCart } from "../funcs/async/CartFunctions";
+import { onRemoveFromWishlist } from "../funcs/async/WishlistFunctions";
+import { onRemoveFromCart } from "../funcs/async/CartFunctions";
 import { Box, Card, IconButton, Paper, Typography } from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
@@ -17,11 +14,20 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 export interface GameCarouselProps {
   games: OriginalGame[];
   title: string;
+  cartItems: CartItem[];
+  setCartItems: (cartItems: CartItem[]) => void;
+  wishlistItems: WishlistItem[];
+  setWishlistItems: (wishlistItems: WishlistItem[]) => void;
 }
 
-export default function GameCarousel({ games, title }: GameCarouselProps) {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+export default function GameCarousel({
+  games,
+  title,
+  cartItems,
+  setCartItems,
+  wishlistItems,
+  setWishlistItems,
+}: GameCarouselProps) {
   const { logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -79,9 +85,6 @@ export default function GameCarousel({ games, title }: GameCarouselProps) {
       });
   };
 
-  useEffect(() => getCartItems(setCartItems), []);
-  useEffect(() => getWishlistItems(setWishlistItems), []);
-
   const getCartItem = (game: OriginalGame) => {
     const cartItem = cartItems.find((item) => item.game_id === game.id);
 
@@ -111,14 +114,15 @@ export default function GameCarousel({ games, title }: GameCarouselProps) {
       >
         {title}
       </Typography>
-      <Box sx={{
-        display: "flex",
-        gap: 1,
-        overflowX: "scroll",
-        padding: 2,
-
-      }}>
-      {games.map((game) => (
+      <Box
+        sx={{
+          display: "flex",
+          gap: 1,
+          overflowX: "scroll",
+          padding: 2,
+        }}
+      >
+        {games.map((game) => (
           <Link
             to={`/game/${game.title}`}
             style={{
@@ -192,8 +196,8 @@ export default function GameCarousel({ games, title }: GameCarouselProps) {
               </Box>
             </Card>
           </Link>
-      ))}
-    </Box>
+        ))}
+      </Box>
     </Paper>
   );
 }

@@ -166,7 +166,7 @@ export default function UserLayout() {
                 handleMenuClose();
                 navigate(`/partner`);
               }}
-              key={"btnProfile"}
+              key={"btnPartner"}
             >
               Trocar para Parceiro
             </MenuItem>,

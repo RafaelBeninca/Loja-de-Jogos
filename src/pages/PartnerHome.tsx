@@ -4,7 +4,7 @@ import PartnerHomeGameList from "../components/PartnerHomeGameList.tsx";
 import axiosInstance from "../utils/axiosInstance.tsx";
 import { useNavigate } from "react-router-dom";
 import UserContext from "../contexts/UserContext.tsx";
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 
 export default function PartnerHome() {
   const [games, setGames] = useState<OriginalGame[]>([]);
@@ -15,7 +15,7 @@ export default function PartnerHome() {
   const navigate = useNavigate();
 
   function fetchPartnerGames() {
-    if (!isLoggedIn) return;
+    if (!isLoggedIn || !user.id) return;
 
     const token = localStorage.getItem("token");
     const config = {
@@ -63,23 +63,47 @@ export default function PartnerHome() {
           sx={{
             width: "70%",
             marginInline: "auto",
-            display: "flex",
-            flexDirection: "column",
             paddingBlock: 5,
           }}
         >
-          {games.length === 0 && loading ? (
-            <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
-          ) : (
+          <Typography
+            variant="h1"
+            sx={{
+              marginBottom: 2,
+            }}
+          >
+            Meus Jogos
+          </Typography>
+          {games.length === 0 ? (
             <>
-              <Typography variant="h1" sx={{
-                marginBottom: 2
-              }}>Meus Jogos</Typography>
-              <PartnerHomeGameList
-                games={games}
-                updateCallback={fetchPartnerGames}
-              />
+              {loading ? (
+                <Typography sx={{ fontWeight: "bold" }}>
+                  Carregando...
+                </Typography>
+              ) : (
+                <>
+                  <Typography sx={{ fontWeight: "bold" }}>
+                    Parece que você ainda não criou nenhum jogo...
+                  </Typography>
+                  <Button
+                    href="/partner/new-game"
+                    variant="contained"
+                    sx={{
+                      paddingInline: 2,
+                      marginBlock: 2,
+                    }}
+                  >
+                    Criar
+                  </Button>
+                </>
+              )}{" "}
             </>
+          ) : (
+            <PartnerHomeGameList
+              games={games}
+              setGames={setGames}
+              updateCallback={fetchPartnerGames}
+            />
           )}
         </Box>
       )}

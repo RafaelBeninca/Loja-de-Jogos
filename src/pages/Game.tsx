@@ -1,11 +1,11 @@
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { useContext, useEffect, useState } from "react";
-import { OriginalGame, Review, User } from "../types/types";
+import { Genre, OriginalGame, Review, User } from "../types/types";
 import UserContext from "../contexts/UserContext";
 import ReviewForm from "../components/ReviewForm";
 import { emptyOriginalGame } from "../utils/defaultValues";
-import { Avatar, Box, Button, Card, Paper, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, Chip, Typography } from "@mui/material";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "../styles/imageCarousel.css";
@@ -15,6 +15,7 @@ import AddShoppingCart from "@mui/icons-material/AddShoppingCart";
 export default function Game() {
   const [game, setGame] = useState<OriginalGame>(emptyOriginalGame);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [reviewAverage, setReviewAverage] = useState<number>(0);
   const [users, setUsers] = useState<User[]>([]);
   const [userReview, setUserReview] = useState<Review | null>(null);
@@ -22,7 +23,9 @@ export default function Game() {
   const [isBoughtGame, setIsBoughtGame] = useState(false);
   const [developerUser, setDeveloperUser] = useState<User>();
   const [publisherUser, setPublisherUser] = useState<User>();
-  const [carouselImages, setCarouselImages] = useState<string[]>([]);
+  const [carouselImages, setCarouselImages] = useState<
+    { key: string; value: string }[]
+  >([]);
   const { getUser, loginUser, logoutUser, user } = useContext(UserContext);
   const params = useParams();
   const navigate = useNavigate();
@@ -38,6 +41,8 @@ export default function Game() {
   };
 
   const getReviews = () => {
+    if (game.id === 0) return;
+
     axiosInstance
       .get(`/api/reviews?game_id=${game.id}`)
       .then((response) => {
@@ -58,6 +63,7 @@ export default function Game() {
       .then((response) => {
         console.log(response);
         setGame(response.data.game);
+        setGenres(response.data.genres);
       })
       .catch((error) => {
         console.error(error);
@@ -66,6 +72,8 @@ export default function Game() {
   };
 
   const getBoughtGame = () => {
+    if (user.id === "0" || game.id === 0) return;
+
     const config = {
       headers: {
         Authorization: "Bearer " + (localStorage.getItem("token") || ""),
@@ -141,6 +149,8 @@ export default function Game() {
   };
 
   const getDeveloperUser = () => {
+    if (!game.developer) return;
+
     axiosInstance
       .get(`/api/users?username=${game.developer}`)
       .then((response) => {
@@ -174,7 +184,7 @@ export default function Game() {
   };
 
   const handleCarouselImages = () => {
-    const list: string[] = [];
+    const list: { key: string; value: string }[] = [];
     for (const key in game) {
       const value = game[key as keyof OriginalGame];
       if (
@@ -182,33 +192,33 @@ export default function Game() {
         typeof value === "string" &&
         value !== ""
       ) {
-        list.push(value);
+        list.push({ key: key, value: value });
       }
     }
 
     setCarouselImages(list);
+    console.log(list)
   };
 
-  // const handleReviewAverage = () => {
-  //   console.log("handling reviews")
-  //   if (reviews.length === 0) return
-
-  //   let sum = 0
-  //   reviews.forEach(review => {
-  //     sum += review.rating      
-  //   });
-
-  //   setReviewAverage(sum / reviews.length)
-  // }
+  const handleImgError = async (fieldName: string) => {
+    try {
+      const response = await axiosInstance.get(
+        `/api/games?game_title=${game.title}&&field_name=${fieldName}`
+      );
+      setGame({ ...game, [fieldName]: response.data.url });
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(loginIfToken, []);
   useEffect(getGameWithTitle, [params.title]);
   useEffect(getReviews, [game.id]);
-  // useEffect(handleReviewAverage, [reviews]);
   useEffect(getDeveloperUser, [game.developer]);
   useEffect(getPublisherUser, [game.publisher]);
-  useEffect(handleCarouselImages, [game.preview_image_1]);
   useEffect(getBoughtGame, [user.id, game.id]);
+  useEffect(handleCarouselImages, [game.id])
 
   return (
     <>
@@ -238,26 +248,27 @@ export default function Game() {
                   width: "70%",
                 }}
               >
-                <Carousel
-                  swipeable={true}
-                  useKeyboardArrows={true}
-                  showStatus={false}
-                  thumbWidth={100}
-                  infiniteLoop={true}
-                >
-                  {carouselImages.map((imgSrc) => {
-                    return (
-                      <div>
-                        <img
-                          src={imgSrc}
-                          alt=""
-                          draggable="false"
-                          style={{ aspectRatio: 16 / 9 }}
-                        />
-                      </div>
-                    );
-                  })}
-                </Carousel>
+                  <Carousel
+                    swipeable={true}
+                    useKeyboardArrows={true}
+                    showStatus={false}
+                    thumbWidth={100}
+                    infiniteLoop={true}
+                  >
+                    {carouselImages.map(({ key, value }) => {
+                      return (
+                        <div>
+                          <img
+                            src={value}
+                            onError={() => handleImgError(key)}
+                            alt=""
+                            draggable="false"
+                            style={{ aspectRatio: 16 / 9 }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </Carousel>
               </Box>
               <Box
                 sx={{
@@ -270,6 +281,7 @@ export default function Game() {
                 <Box
                   component={"img"}
                   src={game.banner_image}
+                  onError={() => handleImgError("banner_image")}
                   alt=""
                   sx={{
                     aspectRatio: 16 / 9,
@@ -277,7 +289,6 @@ export default function Game() {
                 />
                 <Typography>{game.summary}</Typography>
 
-                {/* TODO */}
                 <Typography>
                   Análises: {reviewAverage.toPrecision(2) + " "}
                   <Rating
@@ -316,7 +327,26 @@ export default function Game() {
                     )}
                   </Typography>
                 </Box>
-                <Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 0.6,
+                  }}
+                >
+                  {genres.map((genre) => (
+                    <Chip
+                      label={genre.name}
+                      size="small"
+                      variant="outlined"
+                      color="secondary"
+                    />
+                  ))}
+                </Box>
+                <Typography
+                  sx={{
+                    marginBlock: 1,
+                  }}
+                >
                   {isBoughtGame ? (
                     <Button variant="contained" href={game?.game_file}>
                       Download
@@ -428,9 +458,7 @@ export default function Game() {
                           Publicada: {getFormattedDatetime(review.created_at)}
                         </Typography>
                         {review.updated_at && (
-                          <Typography
-                          variant="caption"
-                          >
+                          <Typography variant="caption">
                             Editada: {getFormattedDatetime(review.updated_at)}
                           </Typography>
                         )}

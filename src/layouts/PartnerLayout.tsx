@@ -57,7 +57,7 @@ const StyledTextField = styled(TextField)(({ theme }) => ({
 }));
 
 const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
-  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+  "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline": {
     borderColor: "rgba(255, 255, 255, 1)",
   },
   "& .MuiAutocomplete-inputRoot .MuiAutocomplete-input": {
@@ -117,6 +117,8 @@ export default function UserLayout() {
   };
 
   function fetchPartnerGames() {
+    if (!user.id) return;
+
     const token = localStorage.getItem("token");
     const config = {
       headers: {
@@ -226,7 +228,7 @@ export default function UserLayout() {
     </Menu>
   );
 
-  useEffect(fetchPartnerGames, [])
+  useEffect(fetchPartnerGames, []);
 
   return (
     <>

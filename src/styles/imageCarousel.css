@@ -21,3 +21,7 @@
 .thumb:hover, .thumb.selected {
     border: 2px solid #29524A !important;
 }
+
+.carousel img {
+    display: "inherit";
+}

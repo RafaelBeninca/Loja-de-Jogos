@@ -1,10 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
-import { GameAverage, OriginalGame, Review } from "../types/types";
+import { GameAverage, GameGenre, OriginalGame } from "../types/types";
 import axiosInstance from "../utils/axiosInstance";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import {
   Box,
   Card,
+  Chip,
   IconButton,
   Menu,
   MenuItem,
@@ -16,16 +17,19 @@ import UserContext from "../contexts/UserContext";
 
 export interface PartnerHomeGameListProps {
   games: OriginalGame[];
+  setGames: (games: OriginalGame[]) => void;
   updateCallback: () => void;
 }
 
 export default function PartnerHomeGameList({
   games,
+  setGames,
   updateCallback,
 }: PartnerHomeGameListProps) {
   const [gameMoreAnchorEl, setGameMoreAnchorEl] = useState<null | HTMLElement>(
     null
   );
+  const [partnerGenres, setPartnerGenres] = useState<GameGenre[]>([]);
   const [selectedGame, setSelectedGame] = useState<OriginalGame | null>(null);
   const [gamesAverage, setGamesAverage] = useState<GameAverage[]>();
   const { user } = useContext(UserContext);
@@ -34,6 +38,8 @@ export default function PartnerHomeGameList({
   const isGameMenuOpen = Boolean(gameMoreAnchorEl);
 
   const getGamesAverage = () => {
+    if (!user.id) return;
+
     axiosInstance
       .get(`/api/reviews?creator_id=${user.id}`)
       .then((response) => {
@@ -86,6 +92,20 @@ export default function PartnerHomeGameList({
       });
   };
 
+  const getPartnerGenres = () => {
+    if (!user.id) return;
+
+    axiosInstance
+      .get(`/api/genres?creator_id=${user.id}`)
+      .then((response) => {
+        console.log(response);
+        setPartnerGenres(response.data.game_genres);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   const handleGameMenuOpen = (
     event: React.MouseEvent<HTMLElement>,
     game: OriginalGame
@@ -101,6 +121,27 @@ export default function PartnerHomeGameList({
     e.stopPropagation();
     setGameMoreAnchorEl(null);
     setSelectedGame(null);
+  };
+
+  const handleImgError = (
+    game: OriginalGame,
+    fieldName: string
+  ) => {
+    axiosInstance
+      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+      .then((response) => {
+        setGames(
+          games.map((oldGame) =>
+            oldGame.id === game.id
+              ? { ...game, [fieldName]: response.data.url }
+              : oldGame
+          )
+        );
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   const gameMenuId = "primary-search-game-menu";
@@ -129,6 +170,7 @@ export default function PartnerHomeGameList({
   );
 
   useEffect(getGamesAverage, []);
+  useEffect(getPartnerGenres, []);
 
   return (
     <Box
@@ -138,7 +180,7 @@ export default function PartnerHomeGameList({
         gap: 3,
       }}
     >
-      {games.map((game) => (
+      {games.reverse().map((game) => (
         <Link
           to={`/partner/game/${game.title}`}
           style={{
@@ -158,10 +200,12 @@ export default function PartnerHomeGameList({
             <Box
               component={"img"}
               src={game.banner_image}
+              onError={() => handleImgError(game, "banner_image")}
               alt=""
               sx={{
                 width: "60%",
                 aspectRatio: 16 / 9,
+                borderRadius: 1,
               }}
             />
             <Box
@@ -171,6 +215,7 @@ export default function PartnerHomeGameList({
                 flexDirection: "column",
                 flexGrow: 1,
                 justifyContent: "space-between",
+                width: "40%",
               }}
             >
               <Box>
@@ -179,7 +224,7 @@ export default function PartnerHomeGameList({
                   <Typography
                     sx={{
                       fontSize: 14,
-                      marginBottom: 1
+                      marginBottom: 1,
                     }}
                   >
                     {gamesAverage
@@ -210,31 +255,38 @@ export default function PartnerHomeGameList({
                 )}
                 <Typography>{game.summary}</Typography>
               </Box>
-              <Typography variant="h2" component="p">
-                R${game.price}
-              </Typography>
-
-              {/* <Box
-              sx={{
-                display: "flex",
-                gap: 1,
-              }}
-            >
-              <Button
-                color="info"
-                variant="contained"
-                onClick={() => onUpdate(game)}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 0.6,
+                }}
               >
-                Update
-              </Button>
-              <Button
-                color="error"
-                variant="outlined"
-                onClick={() => onDelete(game.id)}
-              >
-                Delete
-              </Button>
-            </Box> */}
+                <Typography variant="h2" component="p">
+                  R${game.price}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 1,
+                  }}
+                >
+                  {partnerGenres
+                    .filter(
+                      ({ title, genres }) =>
+                        game.title === title && genres.length > 0
+                    )[0]
+                    ?.genres.map((genre, index) => (
+                      <Chip
+                        key={index}
+                        label={genre.name}
+                        size="small"
+                        variant="outlined"
+                        color="secondary"
+                      />
+                    ))}
+                </Box>
+              </Box>
               <IconButton
                 size="large"
                 aria-label="show more"

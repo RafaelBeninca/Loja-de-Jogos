@@ -111,3 +111,14 @@ export interface GameAverage {
   avg: number,
   num_of_reviews: number
 }
+
+export interface Genre {
+  id: number,
+  name: string,
+  created_at: string
+}
+
+export interface GameGenre {
+  title: string,
+  genres: Genre[]
+}

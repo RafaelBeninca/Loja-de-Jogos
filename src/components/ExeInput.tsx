@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { SimpleGame } from "../types/types";
 import { Box, InputLabel, Typography, alpha, styled } from "@mui/material";
+import axiosInstance from "../utils/axiosInstance";
 
 interface ExeInputProps {
   label: string;
@@ -24,6 +25,7 @@ const StyledExeInput = styled(InputLabel)(({ theme }) => ({
   textAlign: "center",
   cursor: "pointer",
   width: "100%",
+  textWrap: "wrap",
   ":hover": {
     borderColor: theme.palette.mode === "dark" ? "#fff" : "#000",
     color: theme.palette.mode === "dark" ? "#fff" : "#000",
@@ -45,6 +47,11 @@ export default function ExeInput({
       files: FileList;
     };
 
+    if (target.files[0].name.length >= 200) {
+      alert("O nome do arquivo é muito grande! \n\nTente novamente.");
+      return;
+    }
+
     setGame({ ...game, [name]: target.files[0] });
     setFilename(target.files[0].name);
   };
@@ -58,10 +65,24 @@ export default function ExeInput({
     setFilename(fn);
   };
 
+  const handleFilenameError = () => {
+    axiosInstance
+      .get(`/api/games?game_title=${game.title}&&field_name=game_file`)
+      .then((response) => {
+        setGame({ ...game, game_file: response.data.url });
+        changeFilename(response.data.url)
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
   useEffect(
     () => changeFilename(game[name as keyof SimpleGame] as string | undefined),
     []
   );
+  useEffect(() => handleFilenameError(), []);
 
   return (
     <Box>

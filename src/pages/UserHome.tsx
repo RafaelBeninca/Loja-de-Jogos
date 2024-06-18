@@ -1,19 +1,29 @@
 import { useContext, useEffect, useState } from "react";
-import { OriginalGame } from "../types/types.tsx";
+import {
+  CartItem,
+  GameGenre,
+  Genre,
+  OriginalGame,
+  WishlistItem,
+} from "../types/types.tsx";
 import GameCarousel from "../components/GameCarousel.tsx";
 import axiosInstance from "../utils/axiosInstance.tsx";
 import UserContext from "../contexts/UserContext.tsx";
-import { Box, Card, Rating, Typography } from "@mui/material";
-// import { Carousel } from "react-responsive-carousel";
+import { Box, Card, Chip, Paper, Rating, Typography } from "@mui/material";
 import "../styles/imageCarousel.css";
 import { Link } from "react-router-dom";
+import { getCartItems } from "../funcs/async/CartFunctions.tsx";
+import { getWishlistItems } from "../funcs/async/WishlistFunctions.tsx";
 
 export default function UserHome() {
   const [games, setGames] = useState<OriginalGame[]>([]);
   const [mainGame, setMainGame] = useState<OriginalGame | null>(null);
+  const [gameGenres, setGameGenres] = useState<GameGenre[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [loading, setLoading] = useState(true);
-  // const [carouselImages, setCarouselImages] = useState<string[]>([]);
-  const { getUser, logoutUser, loginUser } = useContext(UserContext);
+  const { getUser, logoutUser, loginUser, user } = useContext(UserContext);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
 
   const loginIfToken = () => {
     getUser().then(({ user, token }) => {
@@ -25,7 +35,31 @@ export default function UserHome() {
     });
   };
 
-  function fetchGames() {
+  const getGenres = () => {
+    axiosInstance
+      .get(`/api/genres`)
+      .then((response) => {
+        console.log(response);
+        setGenres(response.data.genres);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const getGameGenres = () => {
+    axiosInstance
+      .get(`/api/genres?with_games=true`)
+      .then((response) => {
+        console.log(response);
+        setGameGenres(response.data.game_genres);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const fetchGames = () => {
     axiosInstance
       .get("/api/games")
       .then((response) => {
@@ -36,33 +70,55 @@ export default function UserHome() {
       .catch((error) => {
         console.error(error);
       });
-  }
+  };
 
-  const handleCarouselImages = () => {
-    const list: string[] = [];
-    for (const key in mainGame) {
-      const value = mainGame[key as keyof OriginalGame];
-      if (
-        key.includes("preview") &&
-        typeof value === "string" &&
-        value !== ""
-      ) {
-        list.push(value);
-      }
-    }
+  const handleMainImgError = (
+    game: OriginalGame,
+    fieldName: string
+  ) => {
+    console.log("img error")
+    if (!mainGame) return;
 
-    // setCarouselImages(list);
+    axiosInstance
+      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+      .then((response) => {
+        setMainGame({
+          ...mainGame,
+          [fieldName]: response.data.url,
+        });
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   };
 
   useEffect(fetchGames, []);
   useEffect(() => {
     loginIfToken();
   }, []);
-  useEffect(
-    () => setMainGame(games[Math.floor(Math.random() * games.length)]),
-    [games]
-  );
-  useEffect(handleCarouselImages, [mainGame]);
+  useEffect(() => {
+    if (loading) return;
+
+    setMainGame(games[Math.floor(Math.random() * games.length)]);
+  }, [loading]);
+  useEffect(getGameGenres, []);
+  useEffect(getGenres, []);
+
+  useEffect(() => {
+    if (!user.id) return;
+    getCartItems(setCartItems);
+  }, []);
+  useEffect(() => {
+    if (!user.id) return;
+    getWishlistItems(setWishlistItems);
+  }, []);
+  useEffect(() => {
+    if (!mainGame || mainGame.banner_image) return;
+
+    handleMainImgError(mainGame, "banner_image")
+
+  }, [mainGame?.banner_image])
 
   return (
     <Box
@@ -93,58 +149,36 @@ export default function UserHome() {
               textDecoration: "none",
               color: "inherit",
             }}
-            // onClick={handleLinkClick}
           >
             <Card
               sx={{
                 display: "flex",
                 gap: 3,
                 padding: 3,
-                marginBottom: 5,
+                marginBottom: 8,
               }}
-              elevation={4}
+              elevation={2}
             >
-              <Box
-                sx={{
-                  width: "70%",
-                }}
-              >
-                {/* <Carousel
-                    swipeable={true}
-                    useKeyboardArrows={true}
-                    showStatus={false}
-                    thumbWidth={80}
-                    infiniteLoop={true}
-                    showThumbs={false}
-                  >
-                    {carouselImages.map((imgSrc) => {
-                      return (
-                        <div>
-                          <img
-                            src={imgSrc}
-                            alt=""
-                            draggable="false"
-                            style={{ aspectRatio: 16 / 9 }}
-                          />
-                        </div>
-                      );
-                    })}
-                  </Carousel> */}
-                <Box
+              {mainGame && (
+                <Paper
                   component={"img"}
-                  src={mainGame?.banner_image}
+                  src={mainGame.banner_image}
+                  onError={() => handleMainImgError(mainGame, "banner_image")}
                   sx={{
-                    width: "100%",
+                    width: "70%",
                     aspectRatio: 16 / 9,
+                    borderRadius: 1,
                   }}
+                  elevation={4}
                 />
-              </Box>
+              )}
               <Box
                 sx={{
                   display: "flex",
                   flexDirection: "column",
                   flexGrow: 1,
                   justifyContent: "space-between",
+                  width: "30%",
                 }}
               >
                 <Box>
@@ -152,9 +186,38 @@ export default function UserHome() {
                   <Rating value={4.5} readOnly precision={0.1} size="small" />
                   <Typography>{mainGame?.summary}</Typography>
                 </Box>
-                <Typography variant="h2" component={"p"}>
-                  R${mainGame?.price}
-                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 0.6,
+                  }}
+                >
+                  <Typography variant="h2" component={"p"} color={"primary"}>
+                    R${mainGame?.price}
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                    }}
+                  >
+                    {gameGenres
+                      .filter(
+                        ({ title, genres }) =>
+                          mainGame?.title === title && genres.length > 0
+                      )[0]
+                      ?.genres.map((genre, index) => (
+                        <Chip
+                          key={index}
+                          label={genre.name}
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                        />
+                      ))}
+                  </Box>
+                </Box>
               </Box>
             </Card>
           </Link>
@@ -162,12 +225,28 @@ export default function UserHome() {
             sx={{
               display: "flex",
               flexDirection: "column",
-              gap: 8,
+              gap: 6,
             }}
           >
-            <GameCarousel games={games} title="RPG" />
-            <GameCarousel games={games} title="FPS" />
-            <GameCarousel games={games} title="Corrida" />
+            {genres.map((genre, index) => (
+              <GameCarousel
+                games={games.filter(
+                  (game) =>
+                    gameGenres
+                      .filter(
+                        ({ title, genres }) =>
+                          game.title === title && genres.length > 0
+                      )[0]
+                      .genres.filter(({ name }) => name === genre.name)[0]
+                )}
+                title={genre.name.toUpperCase()}
+                cartItems={cartItems}
+                setCartItems={setCartItems}
+                wishlistItems={wishlistItems}
+                setWishlistItems={setWishlistItems}
+                key={index}
+              />
+            ))}
           </Box>
         </Box>
       )}
