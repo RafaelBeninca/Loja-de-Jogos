@@ -180,13 +180,14 @@ export default function PartnerHomeGameList({
         gap: 3,
       }}
     >
-      {games.reverse().map((game) => (
+      {games.map((game, index) => (
         <Link
           to={`/partner/game/${game.title}`}
           style={{
             textDecoration: "none",
             color: "inherit",
           }}
+          key={index}
         >
           <Card
             key={game.id}
@@ -199,7 +200,7 @@ export default function PartnerHomeGameList({
           >
             <Box
               component={"img"}
-              src={game.banner_image}
+              src={game.banner_image ? game.banner_image : ""}
               onError={() => handleImgError(game, "banner_image")}
               alt=""
               sx={{

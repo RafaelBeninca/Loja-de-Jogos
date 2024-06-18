@@ -54,7 +54,7 @@ export default function ExeInput({
 
     setGame((prevGame) => ({
       ...prevGame,
-      [name]: target.files[0] as File,
+      [name]: target.files[0],
     }));
     setFilename(target.files[0].name);
   };

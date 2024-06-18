@@ -5,12 +5,22 @@ import { Genre, OriginalGame, Review, User } from "../types/types";
 import UserContext from "../contexts/UserContext";
 import ReviewForm from "../components/ReviewForm";
 import { emptyOriginalGame } from "../utils/defaultValues";
-import { Avatar, Box, Button, Card, Chip, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Card,
+  Chip,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { Carousel } from "react-responsive-carousel";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "../styles/imageCarousel.css";
 import Rating from "@mui/material/Rating";
 import AddShoppingCart from "@mui/icons-material/AddShoppingCart";
+// import InsertPhotoIcon from "../assets/images/InsertPhotoIcon.png";
+import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 
 export default function Game() {
   const [game, setGame] = useState<OriginalGame>(emptyOriginalGame);
@@ -197,7 +207,7 @@ export default function Game() {
     }
 
     setCarouselImages(list);
-    console.log(list)
+    console.log(list);
   };
 
   const handleImgError = async (fieldName: string) => {
@@ -218,7 +228,7 @@ export default function Game() {
   useEffect(getDeveloperUser, [game.developer]);
   useEffect(getPublisherUser, [game.publisher]);
   useEffect(getBoughtGame, [user.id, game.id]);
-  useEffect(handleCarouselImages, [game.id])
+  useEffect(handleCarouselImages, [game.id]);
 
   return (
     <>
@@ -248,27 +258,51 @@ export default function Game() {
                   width: "70%",
                 }}
               >
-                  <Carousel
-                    swipeable={true}
-                    useKeyboardArrows={true}
-                    showStatus={false}
-                    thumbWidth={100}
-                    infiniteLoop={true}
-                  >
-                    {carouselImages.map(({ key, value }) => {
-                      return (
-                        <div>
-                          <img
-                            src={value}
-                            onError={() => handleImgError(key)}
-                            alt=""
-                            draggable="false"
-                            style={{ aspectRatio: 16 / 9 }}
-                          />
-                        </div>
-                      );
-                    })}
-                  </Carousel>
+                <Carousel
+                  swipeable={true}
+                  useKeyboardArrows={true}
+                  showStatus={false}
+                  thumbWidth={100}
+                  infiniteLoop={true}
+                >
+                  {carouselImages.length > 0
+                    ? carouselImages.map(({ key, value }) => {
+                        return (
+                          <div>
+                            <img
+                              src={value}
+                              onError={() => handleImgError(key)}
+                              alt=""
+                              draggable="false"
+                              style={{ aspectRatio: 16 / 9 }}
+                            />
+                          </div>
+                        );
+                      })
+                    : [
+                        <div
+                          style={{
+                            width: "100%",
+                            aspectRatio: 16 / 9,
+                          }}
+                        >
+                          <Paper 
+                            elevation={2}
+                          sx={{
+                            width: "100%",
+                            aspectRatio: 16 / 9,
+                          }}>
+                            <InsertPhotoIcon
+                              color="secondary"
+                              sx={{
+                                marginBlock: "20%",
+                                fontSize: 100
+                              }}
+                            />
+                          </Paper>
+                        </div>,
+                      ]}
+                </Carousel>
               </Box>
               <Box
                 sx={{

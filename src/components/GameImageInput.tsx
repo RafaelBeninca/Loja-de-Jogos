@@ -42,6 +42,7 @@ export default function GameImageInput({
   showRequired,
 }: GameImageInputProps) {
   const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null);
+  const [hasHandledError, setHasHandledError] = useState<boolean>(false);
 
   const image = game[name as keyof SimpleGame];
 
@@ -52,7 +53,7 @@ export default function GameImageInput({
 
     setGame((prevGame) => ({
       ...prevGame,
-      [name]: target.files[0] as File,
+      [name]: target.files[0],
     }));
     changeBgImage(target.files[0]);
   };
@@ -76,9 +77,11 @@ export default function GameImageInput({
         setGame({ ...game, [fieldName]: response.data.url });
         setBgImage(response.data.url);
         console.log(response);
+        setHasHandledError(true);
       })
       .catch((error) => {
         console.error(error);
+        setHasHandledError(true);
       });
   };
 
@@ -97,22 +100,22 @@ export default function GameImageInput({
           {label}
           {showRequired && "*"}
         </InputLabel>
-        {bgImage ? (
+        {bgImage === null && hasHandledError ? (
+          <AddPhotoAlternateIcon
+            fontSize="large"
+            sx={{
+              marginBlock: "20%",
+            }}
+          />
+        ) : (
           <Box
             component={"img"}
-            src={bgImage as string}
+            src={bgImage ? bgImage as string : ""}
             onError={() => handleImgError(name)}
             alt=""
             sx={{
               aspectRatio: 16 / 9,
               width: "100%",
-            }}
-          />
-        ) : (
-          <AddPhotoAlternateIcon
-            fontSize="large"
-            sx={{
-              marginBlock: "20%",
             }}
           />
         )}

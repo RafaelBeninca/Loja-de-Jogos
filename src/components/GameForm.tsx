@@ -57,8 +57,6 @@ export default function GameForm({ existingGame }: GameFormProps) {
   >([]);
   const navigate = useNavigate();
 
-  console.log(game)
-
   const isUpdating = existingGame.id !== 0;
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -100,7 +98,7 @@ export default function GameForm({ existingGame }: GameFormProps) {
       const field = game[`preview_image_${i}` as keyof SimpleGame];
 
       if (field && field instanceof File) {
-        formData.append(`preview_image_${i}`, field as File);
+        formData.append(`preview_image_${i}`, field);
       }
     }
 

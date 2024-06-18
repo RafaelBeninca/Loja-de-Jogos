@@ -5,13 +5,13 @@ import { FormUser } from "../types/types"
 interface UserImageInputProps {
     name: string,
     id: string,
-    setUser: (arg0: FormUser) => void,
+    setUser: React.Dispatch<React.SetStateAction<FormUser>>,
     user: FormUser,
     defaultImage: string,
     required: boolean
 }
 
-export default function UserImageInput({ name, id, setUser, user, defaultImage, required }: UserImageInputProps) {
+export default function UserImageInput({ name, id, setUser, defaultImage, required }: UserImageInputProps) {
     const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null)
     
     const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
@@ -19,7 +19,10 @@ export default function UserImageInput({ name, id, setUser, user, defaultImage, 
             files: FileList
         }
 
-        setUser({...user, [id]: target.files[0]});
+        setUser((prevUser) => ({
+          ...prevUser,
+          [id]: target.files[0],
+        }));
         changeBgImage(target.files[0])
     }
 

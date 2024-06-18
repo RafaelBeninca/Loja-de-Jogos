@@ -14,6 +14,7 @@ import "../styles/imageCarousel.css";
 import { Link } from "react-router-dom";
 import { getCartItems } from "../funcs/async/CartFunctions.tsx";
 import { getWishlistItems } from "../funcs/async/WishlistFunctions.tsx";
+import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 
 export default function UserHome() {
   const [games, setGames] = useState<OriginalGame[]>([]);
@@ -72,11 +73,8 @@ export default function UserHome() {
       });
   };
 
-  const handleMainImgError = (
-    game: OriginalGame,
-    fieldName: string
-  ) => {
-    console.log("img error")
+  const handleMainImgError = (game: OriginalGame, fieldName: string) => {
+    console.log("img error");
     if (!mainGame) return;
 
     axiosInstance
@@ -116,9 +114,8 @@ export default function UserHome() {
   useEffect(() => {
     if (!mainGame || mainGame.banner_image) return;
 
-    handleMainImgError(mainGame, "banner_image")
-
-  }, [mainGame?.banner_image])
+    handleMainImgError(mainGame, "banner_image");
+  }, [mainGame?.banner_image]);
 
   return (
     <Box
@@ -232,13 +229,15 @@ export default function UserHome() {
               <GameCarousel
                 games={games.filter(
                   (game) =>
-                    gameGenres
-                      .filter(
-                        ({ title, genres }) =>
-                          game.title === title && genres.length > 0
-                      )[0]
-                      .genres.filter(({ name }) => name === genre.name)[0]
+                    gameGenres.filter(
+                      ({ title, genres }) =>
+                        game.title === title &&
+                        genres.length > 0 &&
+                        genres.filter(({ name }) => name === genre.name)
+                          .length > 0
+                    ).length > 0
                 )}
+                setGames={setGames}
                 title={genre.name.toUpperCase()}
                 cartItems={cartItems}
                 setCartItems={setCartItems}
@@ -247,6 +246,15 @@ export default function UserHome() {
                 key={index}
               />
             ))}
+            <GameCarousel
+              games={games}
+              setGames={setGames}
+              title={"TODOS"}
+              cartItems={cartItems}
+              setCartItems={setCartItems}
+              wishlistItems={wishlistItems}
+              setWishlistItems={setWishlistItems}
+            />
           </Box>
         </Box>
       )}

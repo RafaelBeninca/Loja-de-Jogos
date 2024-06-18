@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { CartItem, OriginalGame, WishlistItem } from "../types/types";
 import axiosInstance from "../utils/axiosInstance";
-import { useContext } from "react";
+import React, { useContext } from "react";
 import UserContext from "../contexts/UserContext";
 import { onRemoveFromWishlist } from "../funcs/async/WishlistFunctions";
 import { onRemoveFromCart } from "../funcs/async/CartFunctions";
@@ -13,6 +13,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
 export interface GameCarouselProps {
   games: OriginalGame[];
+  setGames: React.Dispatch<React.SetStateAction<OriginalGame[]>>;
   title: string;
   cartItems: CartItem[];
   setCartItems: (cartItems: CartItem[]) => void;
@@ -22,6 +23,7 @@ export interface GameCarouselProps {
 
 export default function GameCarousel({
   games,
+  setGames,
   title,
   cartItems,
   setCartItems,
@@ -85,6 +87,27 @@ export default function GameCarousel({
       });
   };
 
+  const handleImgError = (
+    game: OriginalGame,
+    fieldName: string
+  ) => {
+    axiosInstance
+      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+      .then((response) => {
+        setGames(
+          games.map((oldGame) =>
+            oldGame.id === game.id
+              ? { ...game, [fieldName]: response.data.url }
+              : oldGame
+          )
+        );
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   const getCartItem = (game: OriginalGame) => {
     const cartItem = cartItems.find((item) => item.game_id === game.id);
 
@@ -122,18 +145,20 @@ export default function GameCarousel({
           padding: 2,
         }}
       >
-        {games.map((game) => (
+        {games.map((game, index) => (
           <Link
             to={`/game/${game.title}`}
             style={{
               textDecoration: "none",
               color: "inherit",
             }}
+            key={index}
           >
             <Card key={game.id} elevation={3}>
               <Box
                 component={"img"}
-                src={game.banner_image}
+                src={game.banner_image ? game.banner_image : ""}
+                onError={() => handleImgError(game, "banner_image")}
                 alt=""
                 sx={{
                   width: 200,
