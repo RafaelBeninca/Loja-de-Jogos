@@ -74,6 +74,9 @@ const darkTheme = createTheme({
     subtitle1: {
       fontSize: 20,
     },
+    subtitle2: {
+      fontSize: 12,
+    },
   },
 });
 

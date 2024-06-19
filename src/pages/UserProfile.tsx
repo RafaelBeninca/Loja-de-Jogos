@@ -140,15 +140,16 @@ export default function UserProfile() {
                 }}>
                 {games?.map((game) => (
                   <Link key={game.id} to={`/game/${game.title}`}>
-                    <Card key={game.id} sx={{textDecoration: "none", height: "7rem", backgroundColor: "primary.main"}}>
+                    <Card key={game.id} sx={{textDecoration: "none", height: "8rem", backgroundColor: "secondary.main", marginTop: "2rem"}}>
                       <img
                         src={game.banner_image}
                         alt=""
-                        style={{ width: "6rem" }}
+                        style={{ width: "10rem", aspectRatio: "16/9"}}
                       />
                       <br />
-
-                      {game.title}
+                      <Box sx={{backgroundColor: "secondary.dark", textAlign: "center", textDecoration: "none"}}>
+                      <Typography sx={{}} variant="subtitle2">{game.title}</Typography>
+                      </Box>
                       <br />
                     </Card>
                     <br />
