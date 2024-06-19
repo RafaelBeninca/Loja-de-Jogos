@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import UserContext from "../contexts/UserContext.tsx";
 import axiosInstance from "../utils/axiosInstance.tsx";
 import { FormUser, UserContextInterface } from "../types/types.tsx";
@@ -10,6 +10,9 @@ import {
   // Divider,
   Paper,
   Typography,
+  Dialog,
+  DialogTitle,
+  DialogActions,
 } from "@mui/material";
 import Button from "@mui/material/Button";
 
@@ -28,6 +31,8 @@ export default function Signup() {
   const [passwordErrorMSG, setPasswordErrorMSG] = useState("");
   const [generalErrorMSG, setGeneralErrorMSG] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogText, setDialogText] = useState("");
   const { getUser, logoutUser, loginUser } =
     useContext<UserContextInterface>(UserContext);
   const navigate = useNavigate();
@@ -43,7 +48,8 @@ export default function Signup() {
       .then((response) => {
         console.log(response);
 
-        alert("Conta criada com sucesso!");
+        setShowDialog(true);
+        setDialogText("Conta criada com sucesso.");
         navigate("/login");
       })
       .catch((error) => {
@@ -63,7 +69,8 @@ export default function Signup() {
             );
           }
         } else {
-          alert("Erro");
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
 
         console.error(error);
@@ -221,6 +228,22 @@ export default function Signup() {
                       Submit
                     </Button>
                   )}
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      marginTop: 2,
+                    }}
+                  >
+                    Já possui uma conta?{" "}
+                    <Link
+                      to={"/login"}
+                      style={{
+                        color: "#354097",
+                      }}
+                    >
+                      Login
+                    </Link>
+                  </Typography>
                 </FormControl>
               </Box>
             </Paper>
@@ -230,6 +253,17 @@ export default function Signup() {
               </Typography>
             </Box>
           </Paper>
+          <Dialog
+            open={showDialog}
+            onClose={() => setShowDialog(false)}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
+            <DialogActions>
+              <Button onClick={() => setShowDialog(false)}>Ok</Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       )}
     </>

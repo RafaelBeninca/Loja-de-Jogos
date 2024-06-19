@@ -1,26 +1,31 @@
 import { useContext, useEffect, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import UserContext from "../contexts/UserContext";
 import axiosInstance from "../utils/axiosInstance";
 import { OriginalGame, User } from "../types/types";
 import IconButton from "@mui/material/IconButton";
-import SettingsIcon from '@mui/icons-material/Settings';
-import DefaultPFP from "../../Assets/images/DefaultPFP.jpg"
+import SettingsIcon from "@mui/icons-material/Settings";
+import DefaultPFP from "../../Assets/images/DefaultPFP.jpg";
 import {
   Box,
-  // Divider,
   Paper,
   Typography,
   Card,
+  Backdrop,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
 
 export default function UserProfile() {
   const { getUser, loginUser, user, logoutUser } = useContext(UserContext);
   const [profileUser, setProfileUser] = useState<User>();
   const [games, setGames] = useState<OriginalGame[]>();
   const [isLoading, setIsLoading] = useState(true);
-  const navigate = useNavigate();
+  const [showAlert, setShowAlert] = useState(false);
+
   const params = useParams();
+  const { state } = useLocation();
 
   const isActiveUserProfile = user.id === profileUser?.id;
 
@@ -36,7 +41,7 @@ export default function UserProfile() {
 
   const getUserWithUsername = () => {
     if (!params.username) return;
-    
+
     axiosInstance
       .get(`/api/users?username=${params.username}`)
       .then((response) => {
@@ -64,103 +69,208 @@ export default function UserProfile() {
       });
   };
 
+  const handleImgError = (game: OriginalGame, fieldName: string) => {
+    axiosInstance
+      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+      .then((response) => {
+        setGames(
+          games?.map((oldGame) =>
+            oldGame.id === game.id
+              ? { ...game, [fieldName]: response.data.url }
+              : oldGame
+          )
+        );
+        console.log(response);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+  
   useEffect(loginIfToken, []);
   useEffect(getUserWithUsername, []);
   useEffect(fetchProfileUserBoughtGames, [isLoading]);
+  useEffect(() => {
+    if (state?.alert) {
+      setShowAlert(true);
+    }
+  }, []);
 
   return (
     <>
-      {isLoading ? (
-        <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
+      {!profileUser ? (
+        <Typography fontWeight={"bold"}>Não achamos este usuário...</Typography>
       ) : (
-        <>
-          {!profileUser ? (
-            <p>
-              <b>Não achamos este usuário...</b>
-            </p>
-          ) : (
-            <Box 
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-              }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Paper
+            elevation={2}
+            sx={{
+              borderRadius: "0.5rem",
+              alignItems: "left",
+              marginBlock: "6rem",
+              width: "85%",
+              height: "30rem",
+            }}
+          >
             <Paper
-              elevation={2}
               sx={{
-                borderRadius: "0.5rem",
-                alignItems: "left",
-                marginBlock: "6rem",
-                width: "85%",
-                height: "30rem",
-              }}>
-              <Paper
+                width: "69.7rem",
+                height: "15rem",
+                marginTop: "1rem",
+                marginLeft: "1rem",
+                display: "flex",
+                flexDirection: "row",
+              }}
+            >
+              <Box
+                component={"img"}
                 sx={{
-                  width: "69.7rem",
-                  height: "15rem",
-                  marginTop: "1rem",
-                  marginLeft: "1rem",
-                  display: "flex",
-                  flexDirection: "row",
-                }}>
-                <Box
-                    component={"img"}
-                    sx={{
-                      width: "10rem",
-                      height: "10rem",
-                      borderRadius: "50rem",
-                      marginLeft: "3rem",
-                      marginTop: "2rem"
-                    }}
-                    src={profileUser.profile_picture ? profileUser.profile_picture : DefaultPFP}
-                    alt=""
-                  />
-              <Box sx={{display: "flex", flexDirection: "column"}}>
-                <> 
-                  <Box sx={{display: "flex"}}>
-                    <Typography sx={{marginTop: "3rem", marginLeft: "2rem"}} variant="h1">{profileUser.username}</Typography>
+                  width: "10rem",
+                  height: "10rem",
+                  borderRadius: "50rem",
+                  marginLeft: "3rem",
+                  marginTop: "2rem",
+                }}
+                src={
+                  profileUser.profile_picture
+                    ? profileUser.profile_picture
+                    : DefaultPFP
+                }
+                alt=""
+              />
+              <Box sx={{ display: "flex", flexDirection: "column" }}>
+                <>
+                  <Box sx={{ display: "flex" }}>
+                    <Typography
+                      sx={{ marginTop: "3rem", marginLeft: "2rem" }}
+                      variant="h1"
+                    >
+                      {profileUser.username}
+                    </Typography>
                     {isActiveUserProfile && (
-                      <IconButton size="large" aria-label="settings" color="secondary" href="/settings/profile" sx={{height: "2rem", width: "2rem", marginTop: "2rem"}}>
+                      <IconButton
+                        size="large"
+                        aria-label="settings"
+                        color="secondary"
+                        href="/settings/profile"
+                        sx={{
+                          height: "2rem",
+                          width: "2rem",
+                          marginTop: "2rem",
+                        }}
+                      >
                         <SettingsIcon />
                       </IconButton>
                     )}
                   </Box>
-                  <Typography sx={{marginTop: "0.1rem", marginLeft: "2rem"}} variant="subtitle1">{profileUser.email_address}</Typography>
-                  <Typography sx={{marginTop: "1.5rem", marginLeft: "2rem", maxWidth: "30rem", textOverflow: "ellipsis", display: "inline-block", overflow: "hidden"}} variant="subtitle2">{profileUser.summary}</Typography>
+                  <Typography
+                    sx={{ marginTop: "0.1rem", marginLeft: "2rem" }}
+                    variant="subtitle1"
+                  >
+                    {profileUser.email_address}
+                  </Typography>
+                  <Typography
+                    sx={{
+                      marginTop: "1.5rem",
+                      marginLeft: "2rem",
+                      maxWidth: "30rem",
+                      textOverflow: "ellipsis",
+                      display: "inline-block",
+                      overflow: "hidden",
+                    }}
+                    variant="subtitle2"
+                  >
+                    {profileUser.summary}
+                  </Typography>
                 </>
               </Box>
             </Paper>
-              <Typography sx={{marginTop: "1rem", marginLeft: "1rem"}} variant="subtitle1">Jogos comprados:</Typography>
-              <Paper sx={{ height: "10rem", alignItems: "center", display: "flex"}}>
-                <Box sx={{ 
+            <Typography
+              sx={{ marginTop: "1rem", marginLeft: "1rem" }}
+              variant="subtitle1"
+            >
+              Jogos comprados:
+            </Typography>
+            <Paper
+              sx={{ height: "10rem", alignItems: "center", display: "flex" }}
+            >
+              <Box
+                sx={{
                   display: "flex",
                   flexDirection: "row",
                   gap: "1rem",
                   width: "97%",
                   marginLeft: "1rem",
-                }}>
+                }}
+              >
                 {games?.map((game) => (
                   <Link key={game.id} to={`/game/${game.title}`}>
-                    <Card key={game.id} sx={{textDecoration: "none", height: "8rem", backgroundColor: "secondary.main", marginTop: "2rem"}}>
+                    <Card
+                      key={game.id}
+                      sx={{
+                        textDecoration: "none",
+                        height: "8rem",
+                        backgroundColor: "secondary.main",
+                        marginTop: "2rem",
+                      }}
+                    >
                       <img
                         src={game.banner_image}
+                        onError={() => handleImgError(game, "banner_image")}
                         alt=""
-                        style={{ width: "10rem", aspectRatio: "16/9"}}
+                        style={{ width: "10rem", aspectRatio: "16/9" }}
                       />
                       <br />
-                      <Box sx={{backgroundColor: "secondary.dark", textAlign: "center", textDecoration: "none"}}>
-                      <Typography sx={{}} variant="subtitle2">{game.title}</Typography>
+                      <Box
+                        sx={{
+                          backgroundColor: "secondary.dark",
+                          textAlign: "center",
+                          textDecoration: "none",
+                        }}
+                      >
+                        <Typography
+                          sx={{}}
+                          color={"common.white"}
+                          variant="subtitle2"
+                        >
+                          {game.title}
+                        </Typography>
                       </Box>
                       <br />
                     </Card>
                     <br />
                   </Link>
                 ))}
-                </Box>
-              </Paper>
+              </Box>
             </Paper>
-            </Box>
-          )}
-        </>
+          </Paper>
+          <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={isLoading}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>
+          {showAlert && (
+        <Alert
+          icon={<CheckIcon fontSize="inherit" />}
+          severity="success"
+          onClose={() => {setShowAlert(false); window.history.replaceState({}, '')}}
+          sx={{
+            position: "fixed",
+            bottom: "3vh",
+            left: "50%",
+            transform: "translate(-50%)",
+          }}
+        >
+          {state.alert}
+        </Alert>
+      )}
+        </Box>
       )}
     </>
   );

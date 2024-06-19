@@ -103,16 +103,15 @@ export default function UserHome() {
       });
   };
 
-  const handleMainImgError = (game: OriginalGame, fieldName: string) => {
-    console.log("img error");
+  const handleMainImgError = () => {
     if (!mainGame) return;
 
     axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+      .get(`/api/games?game_title=${mainGame.title}&&field_name=banner_image`)
       .then((response) => {
         setMainGame({
           ...mainGame,
-          [fieldName]: response.data.url,
+          banner_image: response.data.url,
         });
         console.log(response);
       })
@@ -155,7 +154,7 @@ export default function UserHome() {
   useEffect(() => {
     if (!mainGame || mainGame.banner_image) return;
 
-    handleMainImgError(mainGame, "banner_image");
+    handleMainImgError();
   }, [mainGame?.banner_image]);
   useEffect(getReviews, [mainGame?.id]);
   useEffect(() => {
@@ -204,7 +203,7 @@ export default function UserHome() {
               <Paper
                 component={"img"}
                 src={mainGame.banner_image}
-                onError={() => handleMainImgError(mainGame, "banner_image")}
+                onError={handleMainImgError}
                 sx={{
                   width: "70%",
                   aspectRatio: 16 / 9,

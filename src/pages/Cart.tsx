@@ -10,6 +10,9 @@ import {
   Box,
   Button,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   Typography,
 } from "@mui/material";
 
@@ -21,6 +24,7 @@ export default function Cart() {
   const [isLoading, setIsLoading] = useState(true);
   const [gamesAverage, setGamesAverage] = useState<GameAverage[]>([]);
   const [gameGenres, setGameGenres] = useState<GameGenre[]>([]);
+  const [showDialog, setShowDialog] = useState(false);
   const navigate = useNavigate();
 
   const loginIfToken = () => {
@@ -62,7 +66,7 @@ export default function Cart() {
           logoutUser();
           navigate("/login", { relative: "route" });
         }
-        alert("Erro. \n\nTente novamente.");
+        setShowDialog(true)
       });
   };
 
@@ -138,6 +142,17 @@ export default function Cart() {
           >
             <CircularProgress color="inherit" />
           </Backdrop>
+          <Dialog
+            open={showDialog}
+            onClose={() => setShowDialog(false)}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">Erro.</DialogTitle>
+            <DialogActions>
+              <Button onClick={() => setShowDialog(false)}>Ok</Button>
+            </DialogActions>
+          </Dialog>
         </Box>
       )}
     </>

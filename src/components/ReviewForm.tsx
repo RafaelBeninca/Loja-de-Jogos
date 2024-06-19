@@ -3,7 +3,7 @@ import { OriginalGame, Review } from "../types/types";
 import axiosInstance from "../utils/axiosInstance";
 import { useContext, useState } from "react";
 import { emptyUserReview } from "../utils/defaultValues";
-import { Avatar, Box, Button, Rating, Typography } from "@mui/material";
+import { Avatar, Box, Button, Dialog, DialogActions, DialogTitle, Rating, Typography } from "@mui/material";
 import UserContext from "../contexts/UserContext";
 import TextField from "@mui/material/TextField";
 
@@ -29,6 +29,8 @@ export default function ReviewForm({
     created_at: userReview.created_at,
     updated_at: userReview.updated_at,
   });
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogText, setDialogText] = useState("");
   const { user, logoutUser } = useContext(UserContext);
 
   const navigate = useNavigate();
@@ -56,7 +58,6 @@ export default function ReviewForm({
       .post(`/api/reviews`, data, config)
       .then((response) => {
         console.log(response);
-        alert("Review criada com sucesso!");
         getReviews();
       })
       .catch((error) => {
@@ -65,7 +66,8 @@ export default function ReviewForm({
           logoutUser()
           navigate("/");
         } else {
-          alert(`Erro. \n\nTente novamente.`);
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
@@ -88,9 +90,12 @@ export default function ReviewForm({
       .patch(`/api/reviews?review_id=${newReview.id}`, body, config)
       .then((response) => {
         console.log(response);
-        alert("Review alterada com sucesso!");
+        
         setIsUpdatingReview!(false);
         getReviews();
+
+        // setShowDialog(true);
+        // setDialogText("Review alterada com sucesso.");
       })
       .catch((error) => {
         console.error(error);
@@ -98,7 +103,8 @@ export default function ReviewForm({
           logoutUser()
           navigate("/");
         } else {
-          alert(`Erro. \n\nTente novamente.`);
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
@@ -175,6 +181,19 @@ export default function ReviewForm({
           {isUpdatingReview ? "Alterar" : "Postar"}
         </Button>
       </form>
+      <Dialog
+          open={showDialog}
+          onClose={() => setShowDialog(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {dialogText}
+          </DialogTitle>
+          <DialogActions>
+            <Button onClick={() => setShowDialog(false)}>Ok</Button>
+          </DialogActions>
+        </Dialog>
     </Box>
   );
 }

@@ -4,8 +4,12 @@ import axiosInstance from "../utils/axiosInstance";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import {
   Box,
+  Button,
   Card,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   IconButton,
   Menu,
   MenuItem,
@@ -32,6 +36,9 @@ export default function PartnerHomeGameList({
   const [partnerGenres, setPartnerGenres] = useState<GameGenre[]>([]);
   const [selectedGame, setSelectedGame] = useState<OriginalGame | null>(null);
   const [gamesAverage, setGamesAverage] = useState<GameAverage[]>([]);
+  const [showDialog, setShowDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [dialogText, setDialogText] = useState("");
   const { user, logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
 
@@ -51,16 +58,7 @@ export default function PartnerHomeGameList({
       });
   };
 
-  const onDelete = (event: React.MouseEvent<HTMLElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (confirm("Tem certeza que deseja excluir esse jogo?")) {
-      // Continuar
-    } else {
-      // Cancelar
-      return;
-    }
-
+  const onDelete = () => {
     const config = {
       headers: {
         Authorization: "Bearer " + (localStorage.getItem("token") || ""),
@@ -72,9 +70,10 @@ export default function PartnerHomeGameList({
         console.log(response);
         setGameMoreAnchorEl(null);
         setSelectedGame(null);
-        updateCallback();
-
-        alert(`Jogo deletado com sucesso.`);
+        navigate("/partner", {
+          state: { alert: "Jogo deletado com sucesso." },
+        });
+        window.location.reload();
       })
       .catch((error) => {
         console.log(error);
@@ -82,13 +81,14 @@ export default function PartnerHomeGameList({
         setSelectedGame(null);
 
         if (error.response.status === 401) {
-          logoutUser()
+          logoutUser();
           navigate("/");
         }
         if (error.response.status === 403) {
           console.error("Usuário não tem permissão para excluir esse jogo");
         } else {
-          alert(`${error.response.data}. \n\nTente novamente.`);
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
@@ -160,7 +160,15 @@ export default function PartnerHomeGameList({
       onClose={(e) => handleGameMenuClose(e)}
     >
       <MenuItem>
-        <Typography onClick={onDelete} color={"error"} fontSize={"medium"}>
+        <Typography
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowDeleteDialog(true);
+          }}
+          color={"error"}
+          fontSize={"medium"}
+        >
           Excluir
         </Typography>
       </MenuItem>
@@ -303,6 +311,38 @@ export default function PartnerHomeGameList({
           </Card>
         </Link>
       ))}
+      <Dialog
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setShowDialog(false)}>Ok</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-delete-dialog-title">
+          Tem certeza que deseja deletar este jogo?
+        </DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setShowDeleteDialog(false)}>Não</Button>
+          <Button
+            onClick={() => {
+              setShowDeleteDialog(false);
+              onDelete();
+            }}
+          >
+            Sim
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

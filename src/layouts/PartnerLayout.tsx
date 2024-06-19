@@ -160,7 +160,7 @@ export default function UserLayout() {
       <MenuItem
         onClick={() => {
           handleMenuClose();
-          navigate(`/user/${user.username}`);
+          navigate(`/partner/${user.username}`);
         }}
         key={"btnProfile"}
       >

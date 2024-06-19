@@ -1,11 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { CartItem, OriginalGame, WishlistItem } from "../types/types";
 import axiosInstance from "../utils/axiosInstance";
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import UserContext from "../contexts/UserContext";
 import { onRemoveFromWishlist } from "../funcs/async/WishlistFunctions";
 import { onRemoveFromCart } from "../funcs/async/CartFunctions";
-import { Box, Card, IconButton, Paper, Typography } from "@mui/material";
+import { Box, Button, Card, Dialog, DialogActions, DialogTitle, IconButton, Paper, Typography } from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -32,6 +32,9 @@ export default function GameCarousel({
 }: GameCarouselProps) {
   const { logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogText, setDialogText] = useState("");
+
 
   const onAddToCart = (game: OriginalGame) => {
     const data = {
@@ -54,9 +57,11 @@ export default function GameCarousel({
           logoutUser();
           navigate("/login");
         } else if (error.response.status === 409) {
-          alert("Você já comprou este jogo");
+          setShowDialog(true)
+          setDialogText("Você já comprou este jogo.")
         } else {
-          alert(`Erro. \n\nTente novamente.`);
+          setShowDialog(true)
+          setDialogText("Erro.")
         }
       });
   };
@@ -82,7 +87,8 @@ export default function GameCarousel({
           logoutUser();
           navigate("/login");
         } else {
-          alert(`${error.response.data}. \n\nTente novamente.`);
+          setShowDialog(true)
+          setDialogText("Erro.")
         }
       });
   };
@@ -221,6 +227,19 @@ export default function GameCarousel({
           </Link>
         ))}
       </Box>
+      <Dialog
+          open={showDialog}
+          onClose={() => setShowDialog(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {dialogText}
+          </DialogTitle>
+          <DialogActions>
+            <Button onClick={() => setShowDialog(false)}>Ok</Button>
+          </DialogActions>
+        </Dialog>
     </Paper>
   );
 }

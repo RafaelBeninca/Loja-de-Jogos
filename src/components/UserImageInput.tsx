@@ -1,17 +1,38 @@
 import React, { useEffect, useState } from "react"
 import AddPhotoAlternateIcon from '@mui/icons-material/AddPhotoAlternate';
 import { FormUser } from "../types/types"
+import { Avatar, InputLabel, alpha, styled } from "@mui/material";
 
 interface UserImageInputProps {
+    label: string,
     name: string,
-    id: string,
     setUser: React.Dispatch<React.SetStateAction<FormUser>>,
     user: FormUser,
     defaultImage: string,
     required: boolean
 }
 
-export default function UserImageInput({ name, id, setUser, defaultImage, required }: UserImageInputProps) {
+const StyledImageInput = styled(InputLabel)(({ theme }) => ({
+  position: "relative",
+  overflow: "visible",
+  marginTop: 20,
+  border: "1px solid",
+  borderColor:
+    theme.palette.mode === "dark" ? alpha("#fff", 0.2) : alpha("#000", 0.2),
+  borderRadius: "50rem",
+  display: "inline-block",
+  textAlign: "center",
+  cursor: "pointer",
+  width: "8.125rem",
+  height: "8.125rem",
+  zIndex: 10,
+  ":hover": {
+    borderColor: theme.palette.mode === "dark" ? "#fff" : "#000",
+    color: theme.palette.mode === "dark" ? "#fff" : "#000",
+  },
+}));
+
+export default function UserImageInput({ label, name, setUser, defaultImage, required }: UserImageInputProps) {
     const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null)
     
     const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
@@ -21,7 +42,7 @@ export default function UserImageInput({ name, id, setUser, defaultImage, requir
 
         setUser((prevUser) => ({
           ...prevUser,
-          [id]: target.files[0],
+          [name]: target.files[0],
         }));
         changeBgImage(target.files[0])
     }
@@ -41,13 +62,45 @@ export default function UserImageInput({ name, id, setUser, defaultImage, requir
     useEffect(() => setBgImage(defaultImage), [])
 
     return (
-        <label htmlFor={id} className="custom-file-upload">
-            {name}
-            {bgImage ? 
-                <img style={{borderRadius: "50rem", width: "5rem", height: "5rem", marginTop: "1rem"}} src={bgImage as string} alt="" className="bg-image"/> :
-                <AddPhotoAlternateIcon />
-            }
-            <input type="file" name={id} id={id} accept="image/*" hidden required={required} onChange={handleOnChange}/>
-        </label>
+      <>
+      <StyledImageInput>
+        <InputLabel
+          sx={{
+            position: "absolute",
+            top: -22,
+            left: "50%",
+            transform: "translateX(-50%)",
+            color: "inherit",
+          }}
+        >
+          {label}
+        </InputLabel>
+        {bgImage ? (
+          <Avatar
+            src={bgImage ? (bgImage as string) : ""}
+            onError={() => console.log("Erro na profile picture")}
+            sx={{
+              width: "8rem",
+              height: "8rem"
+            }}
+          />
+        ) : (
+          <AddPhotoAlternateIcon
+            fontSize="large"
+            sx={{
+              marginBlock: "35%",
+            }}
+          />
+        )}
+        <input
+          type="file"
+          name={name}
+          hidden
+          accept="image/*"
+          required={required}
+          onChange={handleOnChange}
+        />
+      </StyledImageInput>
+        </>
     )
 }

@@ -18,6 +18,9 @@ import {
   Button,
   Card,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   IconButton,
   Menu,
   MenuItem,
@@ -56,8 +59,9 @@ export default function Game() {
   );
   const [wishlistItem, setWishlistItem] = useState<WishlistItem | null>(null);
   const [cartItem, setCartItem] = useState<CartItem | null>(null);
-  // const [hasHandledError, setHasHandledError] = useState<boolean>(false);
   const { getUser, loginUser, logoutUser, user } = useContext(UserContext);
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogText, setDialogText] = useState("");
   const params = useParams();
   const navigate = useNavigate();
 
@@ -186,7 +190,8 @@ export default function Game() {
         } else if (error.response.status === 409) {
           navigate("/cart", { relative: "route" });
         } else {
-          alert(`Erro. \n\nTente novamente.`);
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
@@ -202,7 +207,8 @@ export default function Game() {
       .delete(`/api/reviews?review_id=${reviewId}`, config)
       .then((response) => {
         console.log(response);
-        alert("Review excluída com sucesso!");
+        setShowDialog(true);
+        setDialogText("Review excluída com sucesso.");
         getReviews();
       })
       .catch((error) => {
@@ -211,7 +217,8 @@ export default function Game() {
           logoutUser()
           navigate("/");
         } else {
-          alert(`Erro. \n\nTente novamente.`);
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
@@ -341,9 +348,11 @@ export default function Game() {
           logoutUser();
           navigate("/login");
         } else if (error.response.status === 409) {
-          alert("Você já comprou este jogo");
+          setShowDialog(true)
+          setDialogText("Você já comprou este jogo.")
         } else {
-          alert(`Erro. \n\nTente novamente.`);
+          setShowDialog(true)
+          setDialogText("Erro.")
         }
       });
   };
@@ -369,7 +378,8 @@ export default function Game() {
           logoutUser();
           navigate("/login");
         } else {
-          alert(`${error.response.data}. \n\nTente novamente.`);
+          setShowDialog(true)
+          setDialogText("Erro.")
         }
       });
   };
@@ -791,6 +801,19 @@ export default function Game() {
             </Box>
           </>
         )}
+        <Dialog
+          open={showDialog}
+          onClose={() => setShowDialog(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {dialogText}
+          </DialogTitle>
+          <DialogActions>
+            <Button onClick={() => setShowDialog(false)}>Ok</Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </>
   );

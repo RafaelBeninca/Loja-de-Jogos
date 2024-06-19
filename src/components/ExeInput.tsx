@@ -1,7 +1,19 @@
 import React, { useEffect, useState } from "react";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import { SimpleGame } from "../types/types";
-import { Box, InputLabel, Typography, alpha, styled } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  InputLabel,
+  Typography,
+  alpha,
+  styled,
+} from "@mui/material";
 import axiosInstance from "../utils/axiosInstance";
 
 interface ExeInputProps {
@@ -41,6 +53,7 @@ export default function ExeInput({
   showRequired,
 }: ExeInputProps) {
   const [filename, setFilename] = useState<string | undefined>();
+  const [showDialog, setShowDialog] = useState(false);
 
   const handleOnChange = (e: React.FormEvent<HTMLInputElement>) => {
     const target = e.target as HTMLInputElement & {
@@ -48,7 +61,7 @@ export default function ExeInput({
     };
 
     if (target.files[0].name.length >= 200) {
-      alert("O nome do arquivo é muito grande! \n\nTente novamente.");
+      setShowDialog(true)
       return;
     }
 
@@ -125,6 +138,24 @@ export default function ExeInput({
           required={required}
           onChange={handleOnChange}
         />
+        <Dialog
+          open={showDialog}
+          onClose={() => setShowDialog(false)}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+        >
+          <DialogTitle id="alert-dialog-title">
+            {"O nome do arquivo é muito grande."}
+          </DialogTitle>
+          <DialogContent>
+            <DialogContentText id="alert-dialog-description">
+            Mude o nome do arquivo ou selecione outro e tente novamente.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setShowDialog(false)}>Ok</Button>
+          </DialogActions>
+        </Dialog>
       </StyledExeInput>
     </Box>
   );

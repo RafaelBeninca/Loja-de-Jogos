@@ -13,6 +13,9 @@ import {
   Button,
   Chip,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogTitle,
   TextField,
   Typography,
 } from "@mui/material";
@@ -58,6 +61,8 @@ export default function GameForm({ existingGame }: GameFormProps) {
     React.ReactElement[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
+  const [dialogText, setDialogText] = useState("");
   const navigate = useNavigate();
 
   const isUpdating = existingGame.id !== 0;
@@ -128,7 +133,11 @@ export default function GameForm({ existingGame }: GameFormProps) {
         console.log(response);
         setIsLoading(false);
 
-        navigate("/partner", {state: {"alert": `Jogo ${isUpdating ? "alterado" : "criado"} com sucesso.`}});
+        navigate("/partner", {
+          state: {
+            alert: `Jogo ${isUpdating ? "alterado" : "criado"} com sucesso.`,
+          },
+        });
       })
       .catch((error) => {
         console.log(error);
@@ -138,9 +147,11 @@ export default function GameForm({ existingGame }: GameFormProps) {
           logoutUser();
           navigate("/");
         } else if (error.response.data.reason === "existing_name") {
-          alert("Um jogo com este nome já existe. \n\nTente novamente.");
+          setShowDialog(true);
+          setDialogText("Um jogo com este nome já existe.");
         } else {
-          alert(`Erro. \n\nTente novamente.`);
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
@@ -199,11 +210,7 @@ export default function GameForm({ existingGame }: GameFormProps) {
         const label = labelArray.join(" ");
 
         inputList.push(
-          <div
-            key={key}
-            style={{
-            }}
-          >
+          <div key={key} style={{}}>
             <GameImageInput
               label={label}
               name={key}
@@ -423,6 +430,17 @@ export default function GameForm({ existingGame }: GameFormProps) {
       >
         <CircularProgress color="inherit" />
       </Backdrop>
+      <Dialog
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setShowDialog(false)}>Ok</Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
