@@ -44,7 +44,7 @@ export default function UserImageInput({ name, id, setUser, defaultImage, requir
         <label htmlFor={id} className="custom-file-upload">
             {name}
             {bgImage ? 
-                <img src={bgImage as string} alt="" className="bg-image"/> :
+                <img style={{borderRadius: "50rem", width: "5rem", height: "5rem", marginTop: "1rem"}} src={bgImage as string} alt="" className="bg-image"/> :
                 <AddPhotoAlternateIcon />
             }
             <input type="file" name={id} id={id} accept="image/*" hidden required={required} onChange={handleOnChange}/>

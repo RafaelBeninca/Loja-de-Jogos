@@ -4,6 +4,14 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { FormUser } from "../types/types";
 import UserImageInput from "../components/UserImageInput";
+import {
+  Box,
+  Paper,
+  Typography,
+  TextField,
+  FormControl,
+  Button
+} from "@mui/material";
 
 export default function ProfileConfig() {
   const { user, getUser, loginUser, logoutUser } = useContext(UserContext);
@@ -129,8 +137,19 @@ export default function ProfileConfig() {
   return (
     <>
       {isLoggedIn && (
-        <div style={{marginTop: "10rem"}}>
-          <form onSubmit={onSubmit} encType="multipart/form-data">
+       <Box sx={{marginTop: "10rem", display: "flex", justifyContent: "center"}}>
+       <Paper elevation={2} sx={{width: "40%", height: "40rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
+       <Typography variant="h1">OPÇÕES DO USUÁRIO</Typography>
+       <Box
+          component={"form"}
+          sx={{
+            marginTop: "1rem",
+            marginLeft: "1rem",
+          }}
+          onSubmit={onSubmit}
+        >
+         <FormControl sx={{width: "50%"}}>
+          <Box sx={{width: "5rem", height: "5rem", backgroundColor: "primary"}}>
             <UserImageInput
               name="Profile Picture"
               id="profile_picture"
@@ -139,60 +158,76 @@ export default function ProfileConfig() {
               defaultImage={user.profile_picture}
               required={false}
             />
-            <br />
-            <br />
-            <input
-              type="text"
-              placeholder="Nome de usuário"
-              required
-              value={formUser.username}
-              onChange={(e) =>
-                setFormUser({ ...formUser, username: e.target.value })
-              }
-            />
-            <br />
-            <br />
+          </Box>
+           <br />
+           <br />
+           <TextField
+             value={formUser.username}
+             type="text"
+             required
+             onChange={(e) =>
+               setFormUser({
+                 ...formUser,
+                 username: e.target.value,
+               })
+             }
+             label="Novo Nome:"
+             variant="standard"
+             size="small"
+             sx={{ width: 350, marginTop: "2rem" }}
+           />
+           <TextField
+             value={formUser.email_address}
+             type="text"
+             required
+             onChange={(e) =>
+               setFormUser({
+                 ...formUser,
+                 email_address: e.target.value,
+               })
+             }
+             id="email-input"
+             label="Novo E-Mail:"
+             variant="standard"
+             size="small"
+             sx={{ width: 350, marginTop: "2rem" }}
+           />
+           <TextField
+             value={formUser.password}
+             type="password"
+             required
+             onChange={(e) =>
+               setFormUser({
+                 ...formUser,
+                 password: e.target.value,
+               })
+             }
+             id="password-input"
+             label="Nova Senha:"
+             variant="standard"
+             size="small"
+             sx={{ width: 350, marginTop: "2rem" }}
+           />  
 
-            <input
-              type="text"
-              placeholder="Email"
-              required
-              value={formUser.email_address}
-              onChange={(e) =>
-                setFormUser({ ...formUser, email_address: e.target.value })
-              }
-            />
-            <br />
-            <br />
-
-            <input
-              type="password"
-              placeholder="Senha"
-              value={formUser.password}
-              onChange={(e) =>
-                setFormUser({ ...formUser, password: e.target.value })
-              }
-            />
-            <br />
-            <br />
-            <textarea
-              placeholder="Sobre você"
-              value={formUser.summary}
-              onChange={(e) =>
-                setFormUser({ ...formUser, summary: e.target.value })
-              }
-            />
-            <br />
-            <br />
-            <button type="submit">Alterar informações</button>
-            <br />
-            <br />
-            <br />
-          </form>
-          <button type="button" onClick={onDeleteAccount}>
-            Excluir Conta
-          </button>
-        </div>
+          <TextField 
+            variant="outlined"
+            color="secondary"
+            fullWidth
+            value={formUser.summary}
+            onChange={(e) =>
+              setFormUser({ ...formUser, summary: e.target.value })
+            }
+            label="Sobre Você"
+            sx={{width: "22rem", marginTop: "3rem"}}>
+           </TextField>
+              <Box sx={{display: "flex", flexDirection: "row", width: "22rem", justifyContent: "center", gap: "2rem", marginTop: "2rem"}}>
+                <Button variant="contained" type="submit">Alterar informações</Button>
+                <Button variant="contained" type="button" onClick={onDeleteAccount}> Excluir Conta </Button>
+              </Box>
+              </FormControl>
+              </Box>
+          </Paper>
+        </Box>
       )}
     </>
   );

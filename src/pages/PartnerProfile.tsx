@@ -19,8 +19,6 @@ export default function PartnerProfile() {
     const navigate = useNavigate()
     const params = useParams();
 
-    const isActiveUserProfile = user.id === profileUser?.id;
-
     const loginIfToken = () => {
         getUser().then(({ user, token }) => {
             if (token) {
