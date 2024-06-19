@@ -158,7 +158,7 @@ export default function LibraryGameList() {
                   }}
                 >
                   <Typography variant="h2" component={"p"} color={"primary"}>
-                    R${game.price}
+                    R${game.price.toFixed(2)}
                   </Typography>
                   <Box
                     sx={{

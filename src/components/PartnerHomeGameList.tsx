@@ -268,7 +268,7 @@ export default function PartnerHomeGameList({
                 }}
               >
                 <Typography variant="h2" component="p">
-                  R${game.price}
+                  R${game.price.toFixed(2)}
                 </Typography>
                 <Box
                   sx={{

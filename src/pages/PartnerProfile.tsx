@@ -194,6 +194,7 @@ export default function PartnerProfile() {
                   gap: "1rem",
                   width: "97%",
                   marginLeft: "1rem",
+                  overflow: "scroll",
                 }}
               >
                 {games?.map((game) => (

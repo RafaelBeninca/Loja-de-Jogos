@@ -650,7 +650,7 @@ export default function Game() {
                         }}
                       >
                         <AddShoppingCart />
-                        R${game.price}
+                        R${game.price.toFixed(2)}
                       </Button>
                     )}
                   </Typography>
@@ -772,6 +772,14 @@ export default function Game() {
                                 }}
                               >
                                 <Button
+                                  color="primary"
+                                  variant="contained"
+                                  size="small"
+                                  onClick={() => setIsUpdatingReview(true)}
+                                >
+                                  Alterar
+                                </Button>
+                                <Button
                                   color="error"
                                   variant="outlined"
                                   size="small"
@@ -780,14 +788,6 @@ export default function Game() {
                                   }
                                 >
                                   Excluir
-                                </Button>
-                                <Button
-                                  color="info"
-                                  variant="contained"
-                                  size="small"
-                                  onClick={() => setIsUpdatingReview(true)}
-                                >
-                                  Alterar
                                 </Button>
                               </Box>
                               {!userReview && setUserReview(review)}

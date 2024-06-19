@@ -247,8 +247,9 @@ export default function ProfileConfig() {
                   Alterar informações
                 </Button>
                 <Button
-                  variant="contained"
+                  variant="outlined"
                   type="button"
+                  color="error"
                   onClick={() => setShowDeleteDialog(true)}
                 >
                   {" "}

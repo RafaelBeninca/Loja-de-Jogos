@@ -247,7 +247,7 @@ export default function UserHome() {
                 }}
               >
                 <Typography variant="h2" component={"p"} color={"primary"}>
-                  R${mainGame?.price}
+                  R${mainGame?.price.toFixed(2)}
                 </Typography>
                 <Box
                   sx={{

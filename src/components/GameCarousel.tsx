@@ -174,7 +174,7 @@ export default function GameCarousel({
                 }}
               >
                 <Typography variant="h3">{game.title}</Typography>
-                <Typography>R${game.price}</Typography>
+                <Typography>R${game.price.toFixed(2)}</Typography>
                 {getCartItem(game) ? (
                   <IconButton
                     onClick={(e) => {

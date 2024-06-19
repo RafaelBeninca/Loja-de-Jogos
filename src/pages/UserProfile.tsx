@@ -86,7 +86,7 @@ export default function UserProfile() {
         console.error(error);
       });
   };
-  
+
   useEffect(loginIfToken, []);
   useEffect(getUserWithUsername, []);
   useEffect(fetchProfileUserBoughtGames, [isLoading]);
@@ -206,6 +206,7 @@ export default function UserProfile() {
                   gap: "1rem",
                   width: "97%",
                   marginLeft: "1rem",
+                  overflow: "scroll",
                 }}
               >
                 {games?.map((game) => (
@@ -256,20 +257,23 @@ export default function UserProfile() {
             <CircularProgress color="inherit" />
           </Backdrop>
           {showAlert && (
-        <Alert
-          icon={<CheckIcon fontSize="inherit" />}
-          severity="success"
-          onClose={() => {setShowAlert(false); window.history.replaceState({}, '')}}
-          sx={{
-            position: "fixed",
-            bottom: "3vh",
-            left: "50%",
-            transform: "translate(-50%)",
-          }}
-        >
-          {state.alert}
-        </Alert>
-      )}
+            <Alert
+              icon={<CheckIcon fontSize="inherit" />}
+              severity="success"
+              onClose={() => {
+                setShowAlert(false);
+                window.history.replaceState({}, "");
+              }}
+              sx={{
+                position: "fixed",
+                bottom: "3vh",
+                left: "50%",
+                transform: "translate(-50%)",
+              }}
+            >
+              {state.alert}
+            </Alert>
+          )}
         </Box>
       )}
     </>
