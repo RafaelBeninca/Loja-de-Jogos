@@ -8,30 +8,42 @@ from controllers.games_controller import replace_media_links
 
 
 def get_cart_controller(user_id):
-        try:
-            from controllers.reviews_controller import get_game_avgs
-            from controllers.genres_controller import get_game_genres
+    try:
+        from controllers.reviews_controller import get_game_avgs
+        from controllers.genres_controller import get_game_genres
+
+        cart: Shop_Order = Shop_Order.query.filter(Shop_Order.user_id == user_id, Shop_Order.status == "pending").one()
+
+        game_id = request.args.get('game_id')
+        if game_id:
+            hasItem = Order_Item.query.filter(Order_Item.game_id == game_id, Order_Item.shop_order_id == cart.id).all()
+
+            if not hasItem:
+                return jsonify({'message': 'usuário não tem este jogo no carrinho'}), 400
             
-            cart: Shop_Order = Shop_Order.query.filter(Shop_Order.user_id == user_id, Shop_Order.status == "pending").one()
-            data: list[Order_Item] = Order_Item.query.filter(Order_Item.shop_order_id == cart.id).all()
+            item = hasItem[0].to_dict()
 
-            cart_items = [cart_item.to_dict() for cart_item in data]
-            games = []
+            return jsonify({"item": item})
+        
+        data: list[Order_Item] = Order_Item.query.filter(Order_Item.shop_order_id == cart.id).all()
 
-            for cart_item in cart_items:
-                game: Game = Game.query.filter(Game.id == cart_item['game_id']).one()
-                games.append(game.to_dict())
-            
-            avgs = []
-            game_genres = []
-            for game in games:
-                replace_media_links(game)
-                avgs.append(get_game_avgs(game))
-                game_genres.append(get_game_genres(game))
+        cart_items = [cart_item.to_dict() for cart_item in data]
+        games = []
 
-            return jsonify({"items": cart_items, "games": games, "avgs": avgs, "game_genres": game_genres})
-        except Exception as e:
-            return jsonify({"message": f"{str(e)}"}), 500
+        for cart_item in cart_items:
+            game: Game = Game.query.filter(Game.id == cart_item['game_id']).one()
+            games.append(game.to_dict())
+        
+        avgs = []
+        game_genres = []
+        for game in games:
+            replace_media_links(game)
+            avgs.append(get_game_avgs(game))
+            game_genres.append(get_game_genres(game))
+
+        return jsonify({"items": cart_items, "games": games, "avgs": avgs, "game_genres": game_genres})
+    except Exception as e:
+        return jsonify({"message": f"{str(e)}"}), 500
         
 
 def post_cart_item_controller(user_id):

@@ -13,13 +13,27 @@ from datetime import datetime
 import json
 import os
 
+attributes = [
+    ('game_file', 'game_file_link'),
+    ('banner_image', 'banner_image_link'),
+    ('trailer_1', 'trailer_1_link'),
+    ('trailer_2', 'trailer_2_link'),
+    ('trailer_3', 'trailer_3_link'),
+    ('preview_image_1', 'preview_image_1_link'),
+    ('preview_image_2', 'preview_image_2_link'),
+    ('preview_image_3', 'preview_image_3_link'),
+    ('preview_image_4', 'preview_image_4_link'),
+    ('preview_image_5', 'preview_image_5_link'),
+    ('preview_image_6', 'preview_image_6_link')
+]
+
 def game_controller(user_id):
     if request.method == 'POST':
         try:
             isRepeatedTitle = Game.query.filter(Game.title == request.form['title']).all()
 
             if isRepeatedTitle: 
-                return jsonify({"message": "um jogo com esse nome já existe"}), 400
+                return jsonify({"message": "um jogo com esse nome já existe", "reason": "existing_name"}), 400
 
         except Exception as e:
             return jsonify({"message": f"{str(e)}"}), 400
@@ -59,16 +73,21 @@ def game_controller(user_id):
             return jsonify({"message": f"{str(e)}"}), 400
         
         try:
-            game = Game(request.form.get('creator_id'), request.form.get('publisher'), request.form.get('developer'), request.form.get('title'), request.form.get('price'), release_date, request.form.get('summary'), request.form.get('about'), media.get('game_file'), media.get('banner_image'), media.get('trailer_1'), media.get('trailer_2'), media.get('trailer_3'), media.get('preview_image_1'), media.get('preview_image_2'), media.get('preview_image_3'), media.get('preview_image_4'), media.get('preview_image_5'), media.get('preview_image_6'), f"games/{now_str}/")
+            new_game = Game(request.form.get('creator_id'), request.form.get('publisher'), request.form.get('developer'), request.form.get('title'), request.form.get('price'), release_date, request.form.get('summary'), request.form.get('about'), media.get('game_file'), media.get('banner_image'), media.get('trailer_1'), media.get('trailer_2'), media.get('trailer_3'), media.get('preview_image_1'), media.get('preview_image_2'), media.get('preview_image_3'), media.get('preview_image_4'), media.get('preview_image_5'), media.get('preview_image_6'), f"games/{now_str}/")
             
-            db.session.add(game)
+            db.session.add(new_game)
             db.session.commit()
+
+            game = Game.query.filter(Game.title == request.form.get('title')).one()
 
             tags_str = request.form.get("genres")
             tags = json.loads(tags_str)
-            tag_result = post_genres_controller(tags, Game.query.filter(Game.title == request.form.get('title')).one().id)
+            tag_result = post_genres_controller(tags, game.id)
             if isinstance(tag_result, Exception):
                 raise Exception(tag_result)
+            
+            set_media_links(game)
+
         except Exception as e:
             return jsonify({"message": f"{str(e)}"}), 500
 
@@ -150,6 +169,8 @@ def game_controller(user_id):
             if isinstance(tag_result, Exception):
                 raise Exception(tag_result)
             
+            set_media_links(game)
+            
         except Exception as e:
             return jsonify({"message": f"{str(e)}"}), 500
         
@@ -185,8 +206,8 @@ def get_games_controller():
         if game_title and field_name:
             test: Game = Game.query.filter(Game.title == game_title).one()
             
-            if not hasattr(test, field_name):
-                return jsonify({"message": "imagem não existe"}), 200
+            if not getattr(test, field_name):
+                return jsonify({"message": "imagem não existe"}), 400
             
             url = generate_download_signed_url_v4("fgs-data", getattr(test, field_name))
             setattr(test, field_name + "_link", url)
@@ -227,32 +248,20 @@ def get_games_controller():
         return jsonify({"gameList": games}), 200
     except Exception as e:
         return jsonify({"message": f"{str(e)}"}), 500
+    
+
+def set_media_links(game: Game):
+    for attr, link_attr in attributes:
+        blob_name = getattr(game, attr, None)
+        if blob_name:
+            setattr(game, link_attr, generate_download_signed_url_v4('fgs-data', blob_name))
+
+    db.session.commit()
 
     
 def replace_media_links(game: dict[str, any]):
-    game["game_file"] = game['game_file_link']
-    game["banner_image"] = game['banner_image_link']
-    game["trailer_1"] = game['trailer_1_link']
-    game["trailer_2"] = game['trailer_2_link']
-    game["trailer_3"] = game['trailer_3_link']
-    
-    game["preview_image_1"] = game['preview_image_1_link']
-    game["preview_image_2"] = game['preview_image_2_link']
-    game["preview_image_3"] = game['preview_image_3_link']
-    game["preview_image_4"] = game['preview_image_4_link']
-    game["preview_image_5"] = game['preview_image_5_link']
-    game["preview_image_6"] = game['preview_image_6_link']
+    for attr, link_attr in attributes:
+        game[attr] = game[link_attr]
 
-
-    del game['game_file_link']
-    del game['banner_image_link']
-    del game['trailer_1_link']
-    del game['trailer_2_link']
-    del game['trailer_3_link']
-    
-    del game['preview_image_1_link']
-    del game['preview_image_2_link']
-    del game['preview_image_3_link']
-    del game['preview_image_4_link']
-    del game['preview_image_5_link']
-    del game['preview_image_6_link']
+    for _, link_attr in attributes:
+        del game[link_attr]

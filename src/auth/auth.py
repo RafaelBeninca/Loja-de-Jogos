@@ -12,23 +12,26 @@ def get_user_by_email(email):
         return e
 
 def auth(app):
-    auth = request.get_json()
-    if not auth or not auth.get('email_address') or not auth.get('password'):
-        return jsonify({'message': 'não foi possível verificar', 'WWW-Authenticate': 'Basic auth="Login required"'}), 401
-    
-    user: User = get_user_by_email(auth['email_address'])
+    try:
+        auth = request.get_json()
+        if not auth or not auth.get('email_address') or not auth.get('password'):
+            return jsonify({'message': 'não foi possível verificar', 'WWW-Authenticate': 'Basic auth="Login required"'}), 401
+        
+        user: User = get_user_by_email(auth['email_address'])
 
-    if not isinstance(user, User):
-        return jsonify({'message': 'usuário não encontrado', 'cause': 'email_address'}), 401
-    
-    if check_password_hash(user.password, auth['password']):
-        token = jwt.encode({'email_address': user.email_address, 'exp': datetime.now() + timedelta(hours=12)}, 
-                           app.config['JWT_SECRET_KEY'])
+        if not isinstance(user, User):
+            return jsonify({'message': 'usuário não encontrado', 'cause': 'email_address'}), 401
+        
+        if check_password_hash(user.password, auth['password']):
+            token = jwt.encode({'email_address': user.email_address, 'exp': datetime.now() + timedelta(hours=12)}, 
+                            app.config['JWT_SECRET_KEY'])
 
-        return jsonify({'message': 'validado com sucesso', 'token': token,
-                        'exp': datetime.now() + timedelta(hours=12), 'user': user.to_dict()}), 200
-    
-    return jsonify({'message': 'senha incorreta', 'WWW-Authenticate': 'Basic auth="Login required"', 'cause': 'password'}), 401
+            return jsonify({'message': 'validado com sucesso', 'token': token,
+                            'exp': datetime.now() + timedelta(hours=12), 'user': user.to_dict()}), 200
+        
+        return jsonify({'message': 'senha incorreta', 'WWW-Authenticate': 'Basic auth="Login required"', 'cause': 'password'}), 401
+    except Exception as e:
+        return jsonify({'message': f'{str(e)}', 'data': {}}), 500
 
 def token_required(app):
     def decorator(f):
