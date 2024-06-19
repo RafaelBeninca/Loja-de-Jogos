@@ -1,4 +1,6 @@
-# FrontEnd
+#![Logo_Long](https://github.com/RafaelBeninca/Loja-de-Jogos/assets/133908919/c3b83477-9e8b-43d3-a612-a5fe29fc63b0)
+
+ FrontEnd
 
 O Trabalho tem como objetivo emular uma loja de jogos a partir do uso de TypeScript, React e Material UI como FrontEnd.
 
