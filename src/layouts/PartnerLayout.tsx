@@ -47,7 +47,7 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   justifyContent: "center",
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(() => ({
   "& fieldset": {
     borderColor: "rgba(255, 255, 255, 0.6)",
   },
@@ -82,7 +82,7 @@ export default function UserLayout() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     useState<null | HTMLElement>(null);
-  const { user } = useContext(UserContext);
+  const { user, logoutUser } = useContext(UserContext);
   const { darkMode, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
 
@@ -90,7 +90,7 @@ export default function UserLayout() {
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const handleChange = (
-    event: React.SyntheticEvent<Element, Event>,
+    _: React.SyntheticEvent<Element, Event>,
     newValue: unknown
   ) => {
     setInputValue(""); // Reset the input value
@@ -187,7 +187,8 @@ export default function UserLayout() {
       <MenuItem
         onClick={() => {
           handleMenuClose();
-          navigate(`/logout`);
+          logoutUser()
+          navigate(`/`);
         }}
         key={"btnLogout"}
       >
@@ -233,7 +234,7 @@ export default function UserLayout() {
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="sticky">
+        <AppBar position="fixed">
           <Toolbar sx={{ width: "70%", margin: "auto", padding: { md: 0 } }}>
             <Link to={"/"}>
               <HeaderLogo />

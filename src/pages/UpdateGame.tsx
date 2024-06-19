@@ -12,7 +12,7 @@ import { OriginalGame } from "../types/types";
 export default function UpdateGame() {
   const [game, setGame] = useState<OriginalGame>(emptyOriginalGame);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { getUser, loginUser } = useContext(UserContext);
+  const { getUser, loginUser, logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
   const params = useParams();
 
@@ -22,8 +22,8 @@ export default function UpdateGame() {
         setIsLoggedIn(true);
         loginUser(token, user);
       } else {
-        setIsLoggedIn(false);
-        navigate("/logout");
+        logoutUser();
+        navigate("/");
       }
     });
   };
@@ -43,7 +43,7 @@ export default function UpdateGame() {
 
   useEffect(loginIfToken, []);
   useEffect(getGameWithTitle, [params.title]);
-  
+
   return (
     <>
       {isLoggedIn && (
@@ -53,12 +53,13 @@ export default function UpdateGame() {
             marginInline: "auto",
             display: "flex",
             flexDirection: "column",
-            paddingBlock: 5,
+            marginBlock: 5,
+            marginTop: 12,
           }}
         >
-          <GameForm existingGame={game} key={game.id}/>
+          <GameForm existingGame={game} key={game.id} />
         </Box>
       )}
     </>
-  )
+  );
 }

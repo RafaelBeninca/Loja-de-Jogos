@@ -15,7 +15,7 @@ export default function ErrorLayout() {
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="sticky">
+        <AppBar position="fixed">
           <Toolbar sx={{ width: "70%", margin: "auto", padding: { md: 0 } }}>
             <Link to={"/"}>
               <HeaderLogo />

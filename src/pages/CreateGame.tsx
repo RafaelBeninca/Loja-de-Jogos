@@ -9,7 +9,7 @@ import { emptyOriginalGame } from "../utils/defaultValues";
 
 export default function CreateGame() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { getUser, loginUser } = useContext(UserContext);
+  const { getUser, loginUser, logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const loginIfToken = () => {
@@ -18,8 +18,8 @@ export default function CreateGame() {
         setIsLoggedIn(true);
         loginUser(token, user);
       } else {
-        setIsLoggedIn(false);
-        navigate("/logout");
+        logoutUser();
+        navigate("/");
       }
     });
   };
@@ -35,10 +35,11 @@ export default function CreateGame() {
             marginInline: "auto",
             display: "flex",
             flexDirection: "column",
-            paddingBlock: 5,
+            marginBlock: 5,
+            marginTop: 12,
           }}
         >
-          <GameForm existingGame={emptyOriginalGame}/>
+          <GameForm existingGame={emptyOriginalGame} />
         </Box>
       )}
     </>

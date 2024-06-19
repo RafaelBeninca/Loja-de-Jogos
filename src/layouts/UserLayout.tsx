@@ -4,8 +4,6 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
-import InputBase from "@mui/material/InputBase";
-// import Badge from "@mui/material/Badge";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
@@ -50,7 +48,7 @@ const SearchIconWrapper = styled("div")(({ theme }) => ({
   justifyContent: "center",
 }));
 
-const StyledTextField = styled(TextField)(({ theme }) => ({
+const StyledTextField = styled(TextField)(() => ({
   "& fieldset": {
     borderColor: "rgba(255, 255, 255, 0.6)",
   },
@@ -86,13 +84,13 @@ export default function UserLayout() {
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     useState<null | HTMLElement>(null);
 
-  const { user } = useContext(UserContext);
+  const { user, logoutUser } = useContext(UserContext);
   const { darkMode, toggleTheme } = useContext(ThemeContext);
 
   const navigate = useNavigate();
 
   const handleChange = (
-    event: React.SyntheticEvent<Element, Event>,
+    _: React.SyntheticEvent<Element, Event>,
     newValue: unknown
   ) => {
     setInputValue(""); // Reset the input value
@@ -182,7 +180,8 @@ export default function UserLayout() {
             <MenuItem
               onClick={() => {
                 handleMenuClose();
-                navigate(`/logout`);
+                logoutUser()
+                navigate(`/`);
               }}
               key={"btnLogout"}
             >

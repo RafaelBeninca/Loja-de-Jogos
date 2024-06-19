@@ -6,7 +6,7 @@ export default function NoPage() {
       sx={{
         width: "70%",
         marginInline: "auto",
-        marginTop: 4,
+        marginTop: 15,
       }}
     >
       <Typography variant="h1">404</Typography>

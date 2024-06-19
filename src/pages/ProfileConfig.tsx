@@ -4,10 +4,9 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { FormUser } from "../types/types";
 import UserImageInput from "../components/UserImageInput";
-import { MarginTwoTone } from "@mui/icons-material";
 
 export default function ProfileConfig() {
-  const { user, getUser, loginUser } = useContext(UserContext);
+  const { user, getUser, loginUser, logoutUser } = useContext(UserContext);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [formUser, setFormUser] = useState<FormUser>({
     username: "",
@@ -24,8 +23,8 @@ export default function ProfileConfig() {
         setIsLoggedIn(true);
         loginUser(token, user);
       } else {
-        setIsLoggedIn(false);
-        navigate("/logout");
+        logoutUser()
+        navigate("/");
       }
     });
   };
@@ -64,7 +63,8 @@ export default function ProfileConfig() {
       .catch((error) => {
         console.error(error);
         if (error.response.status === 401) {
-          navigate("/logout");
+          logoutUser()
+          navigate("/");
         } else {
           alert(`Erro. \n\nTente novamente.`);
         }
@@ -95,13 +95,15 @@ export default function ProfileConfig() {
         console.log(response);
 
         alert("Conta deletada com sucesso!");
-        navigate("/logout");
+        logoutUser()
+        navigate("/");
       })
       .catch((error) => {
         console.error(error);
 
         if (error.response.status === 401) {
-          navigate("/logout");
+          logoutUser()
+          navigate("/");
         }
         if (error.response.status === 403) {
           console.error("Usuário não tem permissão para excluir essa conta");

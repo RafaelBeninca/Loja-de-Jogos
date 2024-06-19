@@ -32,7 +32,7 @@ export default function PartnerHomeGameList({
   const [partnerGenres, setPartnerGenres] = useState<GameGenre[]>([]);
   const [selectedGame, setSelectedGame] = useState<OriginalGame | null>(null);
   const [gamesAverage, setGamesAverage] = useState<GameAverage[]>([]);
-  const { user } = useContext(UserContext);
+  const { user, logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
 
   const isGameMenuOpen = Boolean(gameMoreAnchorEl);
@@ -82,7 +82,8 @@ export default function PartnerHomeGameList({
         setSelectedGame(null);
 
         if (error.response.status === 401) {
-          navigate("/logout");
+          logoutUser()
+          navigate("/");
         }
         if (error.response.status === 403) {
           console.error("Usuário não tem permissão para excluir esse jogo");

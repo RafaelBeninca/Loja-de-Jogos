@@ -24,7 +24,7 @@ const StyledImageInput = styled(InputLabel)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   display: "inline-block",
   textAlign: "center",
-  aspectRatio: "16 / 9",
+  aspectRatio: 16 / 9,
   cursor: "pointer",
   width: "100%",
   ":hover": {
@@ -42,7 +42,6 @@ export default function GameImageInput({
   showRequired,
 }: GameImageInputProps) {
   const [bgImage, setBgImage] = useState<string | ArrayBuffer | null>(null);
-  const [hasHandledError, setHasHandledError] = useState<boolean>(false);
 
   const image = game[name as keyof SimpleGame];
 
@@ -77,11 +76,9 @@ export default function GameImageInput({
         setGame({ ...game, [fieldName]: response.data.url });
         setBgImage(response.data.url);
         console.log(response);
-        setHasHandledError(true);
       })
       .catch((error) => {
         console.error(error);
-        setHasHandledError(true);
       });
   };
 
@@ -100,22 +97,22 @@ export default function GameImageInput({
           {label}
           {showRequired && "*"}
         </InputLabel>
-        {bgImage === null && hasHandledError ? (
-          <AddPhotoAlternateIcon
-            fontSize="large"
-            sx={{
-              marginBlock: "20%",
-            }}
-          />
-        ) : (
+        {bgImage ? (
           <Box
             component={"img"}
-            src={bgImage ? bgImage as string : ""}
+            src={bgImage ? (bgImage as string) : ""}
             onError={() => handleImgError(name)}
             alt=""
             sx={{
               aspectRatio: 16 / 9,
               width: "100%",
+            }}
+          />
+        ) : (
+          <AddPhotoAlternateIcon
+            fontSize="large"
+            sx={{
+              marginBlock: "20%",
             }}
           />
         )}

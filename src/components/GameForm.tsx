@@ -8,9 +8,11 @@ import GameImageInput from "./GameImageInput";
 import ExeInput from "./ExeInput";
 import {
   Autocomplete,
+  Backdrop,
   Box,
   Button,
   Chip,
+  CircularProgress,
   TextField,
   Typography,
 } from "@mui/material";
@@ -22,7 +24,7 @@ interface GameFormProps {
 }
 
 export default function GameForm({ existingGame }: GameFormProps) {
-  const { user } = useContext(UserContext);
+  const { user, logoutUser } = useContext(UserContext);
   const [game, setGame] = useState<SimpleGame>({
     id: existingGame.id || 0,
     creator_id: parseInt(user.id),
@@ -55,12 +57,15 @@ export default function GameForm({ existingGame }: GameFormProps) {
   const [carouselThumbImages, setCarouselThumbImages] = useState<
     React.ReactElement[]
   >([]);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const isUpdating = existingGame.id !== 0;
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    setIsLoading(true);
 
     if (!parseFloat(game.price)) {
       return;
@@ -121,14 +126,19 @@ export default function GameForm({ existingGame }: GameFormProps) {
     request(url, formData, config)
       .then((response) => {
         console.log(response);
+        setIsLoading(false);
 
-        alert(`Jogo ${isUpdating ? "alterado" : "criado"} com sucesso.`);
-        navigate("/partner");
+        navigate("/partner", {state: {"alert": `Jogo ${isUpdating ? "alterado" : "criado"} com sucesso.`}});
       })
       .catch((error) => {
         console.log(error);
+        setIsLoading(false);
+
         if (error.response.status === 401) {
-          navigate("/logout");
+          logoutUser();
+          navigate("/");
+        } else if (error.response.data.reason === "existing_name") {
+          alert("Um jogo com este nome já existe. \n\nTente novamente.");
         } else {
           alert(`Erro. \n\nTente novamente.`);
         }
@@ -163,9 +173,7 @@ export default function GameForm({ existingGame }: GameFormProps) {
       });
   };
 
-  const handleImgError = (
-    fieldName: string
-  ) => {
+  const handleImgError = (fieldName: string) => {
     axiosInstance
       .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
       .then((response) => {
@@ -194,8 +202,6 @@ export default function GameForm({ existingGame }: GameFormProps) {
           <div
             key={key}
             style={{
-              width: "100%",
-              aspectRatio: "16 / 9",
             }}
           >
             <GameImageInput
@@ -238,182 +244,185 @@ export default function GameForm({ existingGame }: GameFormProps) {
   useEffect(getGenres, []);
 
   return (
-    <form onSubmit={onSubmit} encType="multipart/form-data">
-      <TextField
-        label={"Título:"}
-        sx={{
-          marginBlock: 2,
-        }}
-        required
-        value={game.title}
-        onChange={(e) => {
-          if (e.target.value.length >= 100) return;
-          setGame({ ...game, title: e.target.value });
-        }}
-      />
-      <Box
-        sx={{
-          display: "flex",
-          gap: 3,
-        }}
-      >
-        <Box
+    <>
+      <form onSubmit={onSubmit} encType="multipart/form-data">
+        <TextField
+          label={"Título:"}
           sx={{
-            width: "70%",
+            marginBlock: 2,
           }}
-        >
-          <Carousel
-            swipeable={true}
-            useKeyboardArrows={true}
-            showStatus={false}
-            thumbWidth={120}
-            width={"101%"}
-            renderThumbs={() => carouselThumbImages}
-            showThumbs={false}
-          >
-            {carouselImages}
-          </Carousel>
-        </Box>
+          required
+          value={game.title}
+          onChange={(e) => {
+            if (e.target.value.length >= 100) return;
+            setGame({ ...game, title: e.target.value });
+          }}
+        />
         <Box
           sx={{
             display: "flex",
-            flexDirection: "column",
-            gap: 2,
-            width: "30%",
+            gap: 3,
           }}
         >
-          <GameImageInput
-            label="Banner"
-            name="banner_image"
-            setGame={setGame}
-            game={game}
-            required={isUpdating ? false : true}
-            showRequired
-          />
+          <Box
+            sx={{
+              width: "70%",
+            }}
+          >
+            <Carousel
+              swipeable={true}
+              useKeyboardArrows={true}
+              showStatus={false}
+              thumbWidth={120}
+              width={"99.99%"}
+              renderThumbs={() => carouselThumbImages}
+              showThumbs={false}
+            >
+              {carouselImages}
+            </Carousel>
+          </Box>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              width: "30%",
+            }}
+          >
+            <GameImageInput
+              label="Banner"
+              name="banner_image"
+              setGame={setGame}
+              game={game}
+              required={isUpdating ? false : true}
+              showRequired
+            />
+            <TextField
+              label={"Resumo"}
+              name="summary"
+              required
+              multiline
+              size="small"
+              value={game.summary}
+              onChange={(e) => {
+                if (e.target.value.length >= 500) return;
+                setGame({ ...game, summary: e.target.value });
+              }}
+            />
+            <TextField
+              type="datetime-local"
+              name="release_date"
+              label={"Data de lançamento"}
+              InputLabelProps={{ shrink: true }}
+              size="small"
+              value={game.release_date}
+              onChange={(e) =>
+                setGame({ ...game, release_date: e.target.value })
+              }
+            />
+            <TextField
+              label={"Desenvolvedor"}
+              name="developer"
+              size="small"
+              required
+              value={game.developer}
+              onChange={(e) => {
+                if (e.target.value.length >= 500) return;
+                setGame({ ...game, developer: e.target.value });
+              }}
+            />
+            <TextField
+              label={"Distribuidora"}
+              name="publisher"
+              size="small"
+              required
+              value={game.publisher}
+              onChange={(e) => {
+                if (e.target.value.length >= 500) return;
+                setGame({ ...game, publisher: e.target.value });
+              }}
+            />
+            <TextField
+              label={"Preço"}
+              name="price"
+              size="small"
+              required
+              value={game.price}
+              onChange={(e) => {
+                if (e.target.value.length >= 10) return;
+                setGame({ ...game, price: e.target.value });
+              }}
+            />
+            <Autocomplete
+              multiple
+              id="tags-filled"
+              options={genres.map((genre) => genre.name)}
+              freeSolo
+              value={selectedGenres.map((genre) => genre)}
+              onChange={(e, value) => {
+                if (value.length >= 20) return;
+                setSelectedGenres(value);
+              }}
+              renderTags={(value: readonly string[], getTagProps) =>
+                value.map((option: string, index: number) => {
+                  const { key, ...tagProps } = getTagProps({ index });
+                  return (
+                    <Chip
+                      variant="outlined"
+                      label={option}
+                      key={key}
+                      {...tagProps}
+                    />
+                  );
+                })
+              }
+              renderInput={(params) => (
+                <TextField {...params} variant="outlined" label="Tags" />
+              )}
+            />
+            <ExeInput
+              label="Game File"
+              name="game_file"
+              required={isUpdating ? false : true}
+              showRequired
+              game={game}
+              setGame={setGame}
+            />
+          </Box>
+        </Box>
+        <Box>
+          <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 3 }}>
+            Sobre
+          </Typography>
           <TextField
-            label={"Resumo"}
-            name="summary"
-            required
+            label={"Sobre"}
+            value={game.about}
             multiline
-            size="small"
-            value={game.summary}
-            onChange={(e) => {
-              if (e.target.value.length >= 500) return;
-              setGame({ ...game, summary: e.target.value });
-            }}
-          />
-
-          {/* <Typography>
-            Data de lançamento:{" "}
-            {game.release_date
-              ? getFormattedDatetime(game.release_date)
-              : "Não definida"}
-          </Typography> */}
-          <TextField
-            type="datetime-local"
-            name="release_date"
-            label={"Data de lançamento"}
-            InputLabelProps={{ shrink: true }}
-            size="small"
-            value={game.release_date}
-            onChange={(e) => setGame({ ...game, release_date: e.target.value })}
-          />
-          <TextField
-            label={"Desenvolvedor"}
-            name="developer"
-            size="small"
+            fullWidth
+            maxRows={15}
             required
-            value={game.developer}
             onChange={(e) => {
-              if (e.target.value.length >= 500) return;
-              setGame({ ...game, developer: e.target.value });
+              if (e.target.value.length >= 10000) return;
+              setGame({ ...game, about: e.target.value });
             }}
-          />
-          <TextField
-            label={"Distribuidora"}
-            name="publisher"
-            size="small"
-            required
-            value={game.publisher}
-            onChange={(e) => {
-              if (e.target.value.length >= 500) return;
-              setGame({ ...game, publisher: e.target.value });
-            }}
-          />
-          <TextField
-            label={"Preço"}
-            name="price"
-            size="small"
-            required
-            value={game.price}
-            onChange={(e) => {
-              if (e.target.value.length >= 10) return;
-              setGame({ ...game, price: e.target.value });
-            }}
-          />
-          <Autocomplete
-            multiple
-            id="tags-filled"
-            options={genres.map((genre) => genre.name)}
-            freeSolo
-            value={selectedGenres.map((genre) => genre)}
-            onChange={(e, value) => {
-              if (value.length >= 20) return;
-              setSelectedGenres(value);
-            }}
-            renderTags={(value: readonly string[], getTagProps) =>
-              value.map((option: string, index: number) => {
-                const { key, ...tagProps } = getTagProps({ index });
-                return (
-                  <Chip
-                    variant="outlined"
-                    label={option}
-                    key={key}
-                    {...tagProps}
-                  />
-                );
-              })
-            }
-            renderInput={(params) => (
-              <TextField {...params} variant="outlined" label="Tags" />
-            )}
-          />
-          <ExeInput
-            label="Game File"
-            name="game_file"
-            required={isUpdating ? false : true}
-            showRequired
-            game={game}
-            setGame={setGame}
           />
         </Box>
-      </Box>
-      <Box>
-        <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 3 }}>
-          Sobre
-        </Typography>
-        <TextField
-          label={"Sobre"}
-          value={game.about}
-          multiline
-          fullWidth
-          maxRows={15}
-          required
-          onChange={(e) => {
-            if (e.target.value.length >= 10000) return;
-            setGame({ ...game, about: e.target.value });
+        <Button
+          type="submit"
+          variant="contained"
+          sx={{
+            marginTop: 3,
           }}
-        />
-      </Box>
-      <Button
-        type="submit"
-        variant="contained"
-        sx={{
-          marginTop: 3,
-        }}
+        >
+          {isUpdating ? "Alterar" : "Publicar"} Jogo
+        </Button>
+      </form>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
       >
-        {isUpdating ? "Alterar" : "Publicar"} Jogo
-      </Button>
-    </form>
+        <CircularProgress color="inherit" />
+      </Backdrop>
+    </>
   );
 }

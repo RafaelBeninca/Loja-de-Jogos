@@ -29,7 +29,7 @@ export default function ReviewForm({
     created_at: userReview.created_at,
     updated_at: userReview.updated_at,
   });
-  const { user } = useContext(UserContext);
+  const { user, logoutUser } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -62,7 +62,8 @@ export default function ReviewForm({
       .catch((error) => {
         console.error(error);
         if (error.response.status === 401) {
-          navigate("/logout");
+          logoutUser()
+          navigate("/");
         } else {
           alert(`Erro. \n\nTente novamente.`);
         }
@@ -94,7 +95,8 @@ export default function ReviewForm({
       .catch((error) => {
         console.error(error);
         if (error.response.status === 401) {
-          navigate("/logout");
+          logoutUser()
+          navigate("/");
         } else {
           alert(`Erro. \n\nTente novamente.`);
         }

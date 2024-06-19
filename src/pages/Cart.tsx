@@ -5,7 +5,13 @@ import { useNavigate } from "react-router-dom";
 import axiosInstance from "../utils/axiosInstance";
 import { CartItem, GameAverage, GameGenre, OriginalGame } from "../types/types";
 import { getCartItems } from "../funcs/async/CartFunctions";
-import { Box, Button, Typography } from "@mui/material";
+import {
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 
 export default function Cart() {
   const { getUser, loginUser, logoutUser } = useContext(UserContext);
@@ -30,6 +36,8 @@ export default function Cart() {
   };
 
   const handlePurchase = () => {
+    setIsLoading(true);
+
     const config = {
       headers: {
         Authorization: "Bearer " + (localStorage.getItem("token") || ""),
@@ -43,11 +51,13 @@ export default function Cart() {
       .post("/api/bought_games", data, config)
       .then((response) => {
         console.log(response);
+        setIsLoading(false);
         getCartItems(setCartItems, setGames);
-        alert("Compra realizada com sucesso!");
+        navigate("/", { state: { alert: "Compra realizada com sucesso!" } });
       })
       .catch((error) => {
         console.error(error);
+        setIsLoading(false);
         if (error.response.status === 401) {
           logoutUser();
           navigate("/login", { relative: "route" });
@@ -90,9 +100,7 @@ export default function Cart() {
           >
             Carrinho
           </Typography>
-          {isLoading ? (
-            <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
-          ) : (
+          {!isLoading && (
             <Box>
               <CartItems
                 setCartItems={setCartItems}
@@ -103,9 +111,14 @@ export default function Cart() {
                 gamesAverage={gamesAverage}
               />
               {cartItems.length > 0 ? (
-                <Button variant="contained" size="large" onClick={handlePurchase} sx={{
-                  marginBlock: 5
-                }}>
+                <Button
+                  variant="contained"
+                  size="large"
+                  onClick={handlePurchase}
+                  sx={{
+                    marginBlock: 5,
+                  }}
+                >
                   Comprar
                 </Button>
               ) : (
@@ -119,6 +132,12 @@ export default function Cart() {
               )}
             </Box>
           )}
+          <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={isLoading}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>
         </Box>
       )}
     </>

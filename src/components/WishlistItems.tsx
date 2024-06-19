@@ -11,9 +11,11 @@ import {
 } from "../funcs/async/WishlistFunctions";
 import { Link } from "react-router-dom";
 import {
+  Backdrop,
   Box,
   Card,
   Chip,
+  CircularProgress,
   IconButton,
   Paper,
   Rating,
@@ -61,143 +63,153 @@ export default function WishlistItems() {
 
   return (
     <>
-      {isLoading ? (
-        <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
-      ) : (
-        <Box sx={{
+      <Box
+        sx={{
           display: "flex",
           flexDirection: "column",
           gap: 3,
-        }}>
-          {games.map((game, index) => (
-            <Link
-              to={`/game/${game.title}`}
-              style={{
-                textDecoration: "none",
-                color: "inherit",
+        }}
+      >
+        {games.map((game, index) => (
+          <Link
+            to={`/game/${game.title}`}
+            style={{
+              textDecoration: "none",
+              color: "inherit",
+            }}
+            key={index}
+          >
+            <Card
+              sx={{
+                position: "relative",
+                display: "flex",
+                gap: 3,
+                padding: 3,
               }}
-              key={index}
+              elevation={2}
             >
-              <Card
+              {game && (
+                <Paper
+                  component={"img"}
+                  src={game.banner_image}
+                  onError={() => handleImgError(game, "banner_image")}
+                  sx={{
+                    width: "34%",
+                    aspectRatio: 16 / 9,
+                    borderRadius: 1,
+                  }}
+                  elevation={4}
+                />
+              )}
+              <Box
                 sx={{
-                  position: "relative",
                   display: "flex",
-                  gap: 3,
-                  padding: 3,
+                  flexDirection: "column",
+                  flexGrow: 1,
+                  justifyContent: "space-between",
+                  width: "66%",
                 }}
-                elevation={2}
               >
-                {game && (
-                  <Paper
-                    component={"img"}
-                    src={game.banner_image}
-                    onError={() => handleImgError(game, "banner_image")}
+                <Box>
+                  <Typography variant="h2">{game.title}</Typography>
+                  {gamesAverage?.map(
+                    (gameAverage) =>
+                      gameAverage.title === game.title && (
+                        <Typography>
+                          {gameAverage.avg.toPrecision(2) + " "}
+                          <Rating
+                            value={gameAverage.avg}
+                            precision={0.1}
+                            readOnly
+                            size="small"
+                            sx={{
+                              position: "relative",
+                              top: 4,
+                            }}
+                          />{" "}
+                          ({gameAverage.num_of_reviews})
+                        </Typography>
+                      )
+                  )}
+                  <Typography
                     sx={{
-                      width: "34%",
-                      aspectRatio: 16 / 9,
-                      borderRadius: 1,
+                      marginBlock: 1,
                     }}
-                    elevation={4}
-                  />
-                )}
+                  >
+                    {game.summary.length >= 190
+                      ? game.summary.substring(0, 186) + "..."
+                      : game.summary}
+                  </Typography>
+                </Box>
                 <Box
                   sx={{
                     display: "flex",
                     flexDirection: "column",
-                    flexGrow: 1,
-                    justifyContent: "space-between",
-                    width: "66%",
+                    gap: 0.6,
                   }}
                 >
-                  <Box>
-                    <Typography variant="h2">{game.title}</Typography>
-                    {gamesAverage?.map(
-                      (gameAverage) =>
-                        gameAverage.title === game.title && (
-                          <Typography>
-                            {gameAverage.avg.toPrecision(2) + " "}
-                            <Rating
-                              value={gameAverage.avg}
-                              precision={0.1}
-                              readOnly
-                              size="small"
-                              sx={{
-                                position: "relative",
-                                top: 4,
-                              }}
-                            />{" "}
-                            ({gameAverage.num_of_reviews})
-                          </Typography>
-                        )
-                    )}
-                    <Typography sx={{
-                      marginBlock: 1
-                    }}>{game.summary.length >= 190 ? game.summary.substring(0, 186) + "..." : game.summary}</Typography>
-                  </Box>
+                  <Typography variant="h2" component={"p"} color={"primary"}>
+                    R${game.price}
+                  </Typography>
                   <Box
                     sx={{
                       display: "flex",
-                      flexDirection: "column",
-                      gap: 0.6,
+                      gap: 1,
                     }}
                   >
-                    <Typography variant="h2" component={"p"} color={"primary"}>
-                      R${game.price}
-                    </Typography>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 1,
-                      }}
-                    >
-                      {gameGenres
-                        ?.find(
-                          ({ title, genres }) =>
-                            game.title === title && genres.length > 0
-                        )
-                        ?.genres.map((genre, index) => (
-                          <Chip
-                            key={index}
-                            label={genre.name}
-                            size="small"
-                            variant="outlined"
-                            color="secondary"
-                          />
-                        ))}
-                    </Box>
+                    {gameGenres
+                      ?.find(
+                        ({ title, genres }) =>
+                          game.title === title && genres.length > 0
+                      )
+                      ?.genres.map((genre, index) => (
+                        <Chip
+                          key={index}
+                          label={genre.name}
+                          size="small"
+                          variant="outlined"
+                          color="secondary"
+                        />
+                      ))}
                   </Box>
                 </Box>
-                <IconButton
-                  sx={{
-                    position: "absolute",
-                    top: 10,
-                    right: 10
-                  }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onRemoveFromWishlist(
-                      setWishlistItems,
-                      wishlistItems,
-                      wishlistItems.find(
-                        (wishlistItem) => wishlistItem.game_id === game.id
-                      )!,
-                      setGames,
-                      games
-                    );
-                  }}
-                >
-                  <FavoriteIcon />
-                </IconButton>
-              </Card>
-            </Link>
-          ))}
-          {wishlistItems.length === 0 && (
-            <Typography sx={{ fontWeight: "bold" }}>
-              Parece que você não tem nenhum item na sua wishlist...
-            </Typography>
-          )}
-        </Box>
-      )}
+              </Box>
+              <IconButton
+                sx={{
+                  position: "absolute",
+                  top: 10,
+                  right: 10,
+                }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  onRemoveFromWishlist({
+                    setWishlistItems: setWishlistItems,
+                    wishlistItems: wishlistItems,
+                    delWishlistItem: wishlistItems.find(
+                      (wishlistItem) => wishlistItem.game_id === game.id
+                    )!,
+                    setGames: setGames,
+                    games: games,
+                  });
+                }}
+              >
+                <FavoriteIcon />
+              </IconButton>
+            </Card>
+          </Link>
+        ))}
+        {wishlistItems.length === 0 && !isLoading && (
+          <Typography sx={{ fontWeight: "bold" }}>
+            Parece que você não tem nenhum item na sua wishlist...
+          </Typography>
+        )}
+        <Backdrop
+          sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          open={isLoading}
+        >
+          <CircularProgress color="inherit" />
+        </Backdrop>
+      </Box>
     </>
   );
 }

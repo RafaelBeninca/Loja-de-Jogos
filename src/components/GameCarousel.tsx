@@ -87,10 +87,7 @@ export default function GameCarousel({
       });
   };
 
-  const handleImgError = (
-    game: OriginalGame,
-    fieldName: string
-  ) => {
+  const handleImgError = (game: OriginalGame, fieldName: string) => {
     axiosInstance
       .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
       .then((response) => {
@@ -176,11 +173,11 @@ export default function GameCarousel({
                   <IconButton
                     onClick={(e) => {
                       e.preventDefault();
-                      onRemoveFromCart(
-                        setCartItems,
-                        cartItems,
-                        getCartItem(game)
-                      );
+                      onRemoveFromCart({
+                        setCartItems: setCartItems,
+                        cartItems: cartItems,
+                        delCartItem: getCartItem(game),
+                      });
                     }}
                   >
                     <RemoveShoppingCartIcon />
@@ -199,10 +196,11 @@ export default function GameCarousel({
                   <IconButton
                     onClick={(e) => {
                       e.preventDefault();
-                      onRemoveFromWishlist(
-                        setWishlistItems,
-                        wishlistItems,
-                        getWishlistItem(game)
+                      onRemoveFromWishlist({
+                        setWishlistItems: setWishlistItems,
+                        wishlistItems: wishlistItems,
+                        delWishlistItem: getWishlistItem(game)
+                      }
                       );
                     }}
                   >

@@ -162,13 +162,15 @@ export default function CartItems({
               <IconButton
                 onClick={(e) => {
                   e.preventDefault();
-                  onRemoveFromCart(
-                    setCartItems,
-                    cartItems,
-                    cartItems.find((cartItem) => cartItem.game_id == game.id)!,
-                    setGames,
-                    games
-                  );
+                  onRemoveFromCart({
+                    setCartItems: setCartItems,
+                    cartItems: cartItems,
+                    delCartItem: cartItems.find(
+                      (cartItem) => cartItem.game_id == game.id
+                    )!,
+                    setGames: setGames,
+                    games: games,
+                  });
                 }}
                 sx={{
                   position: "absolute",

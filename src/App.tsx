@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { UserProvider } from "./contexts/UserContext";
 import UserLogin from "./pages/UserLogin";
-import Logout from "./pages/Logout";
 import UserLayout from "./layouts/UserLayout";
 import NoPage from "./pages/NoPage";
 import UserHome from "./pages/UserHome";
@@ -29,7 +28,6 @@ export default function App() {
           <Routes>
             <Route path="/" element={<LoginLayout />}>
               <Route path="login" element={<UserLogin />} />
-              <Route path="logout" element={<Logout />} />
               <Route path="signup" element={<Signup />} />
             </Route>
             <Route path="/" element={<UserLayout />}>

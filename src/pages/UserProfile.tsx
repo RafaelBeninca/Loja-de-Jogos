@@ -35,6 +35,8 @@ export default function UserProfile() {
   };
 
   const getUserWithUsername = () => {
+    if (!params.username) return;
+    
     axiosInstance
       .get(`/api/users?username=${params.username}`)
       .then((response) => {

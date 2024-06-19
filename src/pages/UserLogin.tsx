@@ -81,28 +81,17 @@ export default function UserLogin() {
   return (
     <>
       {!isLoggedIn && (
-        <Box>
           <Box
             sx={{
               alignItems: "center",
               display: "flex",
               flexDirection: "column",
+              marginTop: 6
               // background: "linear-gradient(to right bottom, #0e1129, #162b27)",
             }}
           >
             {/* Logo e "Div" do Login */}
-
-            {/* <Box
-              component={"img"}
-              sx={{
-                maxWidth: "100%",
-                width: "15rem",
-                marginBottom: "5rem",
-                marginTop: "3rem",
-              }}
-              src={Logo}
-              alt="logo"
-            /> */}
+            
             <Paper
               elevation={2}
               sx={{
@@ -169,22 +158,42 @@ export default function UserLogin() {
                       type="password"
                       sx={{ width: 350, marginTop: "3rem" }}
                     />
-                    <Button
-                      variant="contained"
-                      type="submit"
-                      onClick={() => {
-                        setEmailErrorMSG("");
-                        setPasswordErrorMSG("");
-                        setGeneralErrorMSG("");
-                      }}
-                      sx={{
-                        width: "5rem",
-                        // bgcolor: "secondary.dark",
-                        marginTop: "2rem",
-                      }}
-                    >
-                      Submit
-                    </Button>
+                    {!formUser.email_address || !formUser.password ? (
+                      <Button
+                        variant="contained"
+                        type="submit"
+                        disabled
+                        onClick={() => {
+                          setEmailErrorMSG("");
+                          setPasswordErrorMSG("");
+                          setGeneralErrorMSG("");
+                        }}
+                        sx={{
+                          width: "5rem",
+                          // bgcolor: "secondary.dark",
+                          marginTop: "2rem",
+                        }}
+                      >
+                        Submit
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="contained"
+                        type="submit"
+                        onClick={() => {
+                          setEmailErrorMSG("");
+                          setPasswordErrorMSG("");
+                          setGeneralErrorMSG("");
+                        }}
+                        sx={{
+                          width: "5rem",
+                          // bgcolor: "secondary.dark",
+                          marginTop: "2rem",
+                        }}
+                      >
+                        Submit
+                      </Button>
+                    )}
                   </FormControl>
                 </Box>
               </Paper>
@@ -212,7 +221,6 @@ export default function UserLogin() {
               </Paper>
             </Paper>
           </Box>
-        </Box>
       )}
     </>
   );

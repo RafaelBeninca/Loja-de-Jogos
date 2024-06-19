@@ -56,6 +56,7 @@ export default function Game() {
   );
   const [wishlistItem, setWishlistItem] = useState<WishlistItem | null>(null);
   const [cartItem, setCartItem] = useState<CartItem | null>(null);
+  // const [hasHandledError, setHasHandledError] = useState<boolean>(false);
   const { getUser, loginUser, logoutUser, user } = useContext(UserContext);
   const params = useParams();
   const navigate = useNavigate();
@@ -73,11 +74,37 @@ export default function Game() {
   };
 
   const getWishlistItem = () => {
+    const config = {
+      headers: {
+        Authorization: "Bearer " + (localStorage.getItem("token") || ""),
+      },
+    };
+    if (game.id === 0 || user.id === "") return;
+
     axiosInstance
-      .get(`/api/wishlist?game_id=${game.id}`)
+      .get(`/api/wishlist?game_id=${game.id}`, config)
       .then((response) => {
         console.log(response);
         setWishlistItem(response.data.item);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
+  const getCartItem = () => {
+    const config = {
+      headers: {
+        Authorization: "Bearer " + (localStorage.getItem("token") || ""),
+      },
+    };
+    if (game.id === 0 || user.id === "") return;
+
+    axiosInstance
+      .get(`/api/carts?game_id=${game.id}`, config)
+      .then((response) => {
+        console.log(response);
+        setCartItem(response.data.item);
       })
       .catch((error) => {
         console.error(error);
@@ -181,7 +208,8 @@ export default function Game() {
       .catch((error) => {
         console.error(error);
         if (error.response.status === 401) {
-          navigate("/logout");
+          logoutUser()
+          navigate("/");
         } else {
           alert(`Erro. \n\nTente novamente.`);
         }
@@ -207,6 +235,8 @@ export default function Game() {
   };
 
   const getPublisherUser = () => {
+    if (!game.publisher) return;
+
     axiosInstance
       .get(`/api/users?username=${game.publisher}`)
       .then((response) => {
@@ -228,6 +258,9 @@ export default function Game() {
   };
 
   const handleCarouselImages = () => {
+    if (game.id === 0) return;
+    // if (!hasHandledError) return;
+
     const list: { key: string; value: string }[] = [];
     for (const key in game) {
       const value = game[key as keyof OriginalGame];
@@ -251,8 +284,10 @@ export default function Game() {
       );
       setGame({ ...game, [fieldName]: response.data.url });
       console.log(response);
+      // setHasHandledError((prevVal) => !prevVal);
     } catch (error) {
       console.error(error);
+      // setHasHandledError((prevVal) => !prevVal);
     }
   };
 
@@ -271,9 +306,7 @@ export default function Game() {
     }
   };
 
-  const handleGameMenuOpen = (
-    event: React.MouseEvent<HTMLElement>,
-  ) => {
+  const handleGameMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation();
     event.preventDefault();
     setGameMoreAnchorEl(event.currentTarget);
@@ -367,7 +400,7 @@ export default function Game() {
           }}
           sx={{
             display: "flex",
-            gap: 1
+            gap: 1,
           }}
         >
           <RemoveShoppingCartIcon />
@@ -381,7 +414,7 @@ export default function Game() {
           }}
           sx={{
             display: "flex",
-            gap: 1
+            gap: 1,
           }}
         >
           <AddShoppingCart />
@@ -399,7 +432,7 @@ export default function Game() {
           }}
           sx={{
             display: "flex",
-            gap: 1
+            gap: 1,
           }}
         >
           <FavoriteIcon />
@@ -413,7 +446,7 @@ export default function Game() {
           }}
           sx={{
             display: "flex",
-            gap: 1
+            gap: 1,
           }}
         >
           <FavoriteBorderIcon />
@@ -426,7 +459,8 @@ export default function Game() {
   useEffect(loginIfToken, []);
   useEffect(getGameWithTitle, [params.title]);
   useEffect(getReviews, [game.id]);
-  useEffect(getWishlistItem, [game.id]);
+  useEffect(getWishlistItem, [game.id, user.id]);
+  useEffect(getCartItem, [game.id, user.id]);
   useEffect(getDeveloperUser, [game.developer]);
   useEffect(getPublisherUser, [game.publisher]);
   useEffect(getBoughtGame, [user.id, game.id]);
@@ -481,7 +515,7 @@ export default function Game() {
                           return (
                             <div>
                               <img
-                                src={value}
+                                src={value ? value : ""}
                                 onError={() => handleImgError(key)}
                                 alt=""
                                 draggable="false"
@@ -701,15 +735,9 @@ export default function Game() {
                           }}
                           precision={0.5}
                         />
-                        {/* <Paper elevation={4} sx={{
-                        paddingInline: 1,
-                        paddingBlock: 1,
-                        marginBlock: 2
-                      }}> */}
                         <Typography sx={{ fontSize: 14, marginBlock: 2 }}>
                           {review.comment}
                         </Typography>
-                        {/* </Paper> */}
                         <Typography
                           variant="caption"
                           sx={{

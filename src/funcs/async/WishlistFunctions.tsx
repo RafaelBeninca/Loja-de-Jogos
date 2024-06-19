@@ -36,21 +36,12 @@ const getWishlistItems = (
 
 interface OnRemoveFromWishlistParams {
   delWishlistItem?: WishlistItem | null;
-  setWishlistItems?: React.Dispatch<React.SetStateAction<WishlistItem[]>>;
+  setWishlistItems?: (items: WishlistItem[]) => void;
   wishlistItems?: WishlistItem[];
-  setGames?: React.Dispatch<React.SetStateAction<OriginalGame[]>>;
+  setGames?: (items: OriginalGame[]) => void;
   games?: OriginalGame[];
   setWishlistItem?: React.Dispatch<React.SetStateAction<WishlistItem | null>>;
 }
-
-// const OnRemoveFromWishlistDefault = {
-//   delWishlistItem: undefined,
-//   setWishlistItems: undefined,
-//   wishlistItems: undefined,
-//   setGames: undefined,
-//   games: undefined,
-//   setWishlistItem: undefined
-// }
 
 const onRemoveFromWishlist = ({
   delWishlistItem = undefined,

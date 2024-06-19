@@ -2,20 +2,31 @@ import { useContext, useEffect, useState } from "react";
 import { OriginalGame } from "../types/types.tsx";
 import PartnerHomeGameList from "../components/PartnerHomeGameList.tsx";
 import axiosInstance from "../utils/axiosInstance.tsx";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import UserContext from "../contexts/UserContext.tsx";
-import { Box, Button, Typography } from "@mui/material";
+import {
+  Alert,
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
+import CheckIcon from "@mui/icons-material/Check";
 
 export default function PartnerHome() {
   const [games, setGames] = useState<OriginalGame[]>([]);
-  const { getUser, loginUser, user } = useContext(UserContext);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { getUser, loginUser, user, logoutUser } = useContext(UserContext);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showAlert, setShowAlert] = useState(false);
 
   const navigate = useNavigate();
+  const { state } = useLocation();
+
+  const isLoggedIn = Boolean(user.id);
 
   function fetchPartnerGames() {
-    if (!isLoggedIn || !user.id) return;
+    if (!user.id) return;
 
     const token = localStorage.getItem("token");
     const config = {
@@ -28,7 +39,7 @@ export default function PartnerHome() {
       .get(`/api/games?creator_id=${user.id}`, config)
       .then((response) => {
         setGames(response.data.gameList);
-        setLoading(false);
+        setIsLoading(false);
         console.log(response);
       })
       .catch((error) => {
@@ -42,11 +53,10 @@ export default function PartnerHome() {
   const loginIfToken = () => {
     getUser().then(({ user, token }) => {
       if (token) {
-        setIsLoggedIn(true);
         loginUser(token, user);
       } else {
-        setIsLoggedIn(false);
-        navigate("/logout");
+        logoutUser();
+        navigate("/");
       }
     });
   };
@@ -54,7 +64,12 @@ export default function PartnerHome() {
   useEffect(() => {
     loginIfToken();
   }, []);
-  useEffect(fetchPartnerGames, [isLoggedIn]);
+  useEffect(fetchPartnerGames, [user.id]);
+  useEffect(() => {
+    if (state?.alert) {
+      setShowAlert(true);
+    }
+  }, []);
 
   return (
     <>
@@ -63,7 +78,8 @@ export default function PartnerHome() {
           sx={{
             width: "70%",
             marginInline: "auto",
-            paddingBlock: 5,
+            marginBlock: 5,
+            marginTop: 15,
           }}
         >
           <Typography
@@ -76,17 +92,11 @@ export default function PartnerHome() {
           </Typography>
           {games.length === 0 ? (
             <>
-              {loading ? (
+              {!isLoading && (
                 <Typography sx={{ fontWeight: "bold" }}>
-                  Carregando...
+                  Parece que você ainda não criou nenhum jogo...
                 </Typography>
-              ) : (
-                <>
-                  <Typography sx={{ fontWeight: "bold" }}>
-                    Parece que você ainda não criou nenhum jogo...
-                  </Typography>
-                </>
-              )}{" "}
+              )}
             </>
           ) : (
             <PartnerHomeGameList
@@ -104,8 +114,29 @@ export default function PartnerHome() {
               marginBlock: 5,
             }}
           >
-            Criar
+            Novo Jogo
           </Button>
+          {showAlert && (
+            <Alert
+              icon={<CheckIcon fontSize="inherit" />}
+              severity="success"
+              onClose={() => {setShowAlert(false); window.history.replaceState({}, '')}}
+              sx={{
+                position: "fixed",
+                bottom: "3vh",
+                left: "50%",
+                transform: "translate(-50%)",
+              }}
+            >
+              {state.alert}
+            </Alert>
+          )}
+          <Backdrop
+            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+            open={isLoading}
+          >
+            <CircularProgress color="inherit" />
+          </Backdrop>
         </Box>
       )}
     </>
