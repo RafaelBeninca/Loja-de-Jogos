@@ -18,6 +18,7 @@ import {
   Rating,
   Typography,
 } from "@mui/material";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 export default function LibraryGameList() {
   const [games, setGames] = useState<OriginalGame[]>([]);
@@ -27,22 +28,26 @@ export default function LibraryGameList() {
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(UserContext);
 
-  const handleImgError = (game: OriginalGame, fieldName: string) => {
-    axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-      .then((response) => {
-        setGames(
-          games.map((oldGame) =>
-            oldGame.id === game.id
-              ? { ...game, [fieldName]: response.data.url }
-              : oldGame
-          )
-        );
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  // const handleImgError = (game: OriginalGame, fieldName: string) => {
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+  //     .then((response) => {
+  //       setGames(
+  //         games.map((oldGame) =>
+  //           oldGame.id === game.id
+  //             ? { ...game, [fieldName]: response.data.url }
+  //             : oldGame
+  //         )
+  //       );
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+
+  const handleImgError = async (game: OriginalGame, fieldName: string) => {
+    await handleNewImageUrl(game, fieldName, setGames);
   };
 
   const getGames = () => {
@@ -64,7 +69,11 @@ export default function LibraryGameList() {
         setIsLoading(false);
       })
       .catch((error) => {
-        console.error(error);
+        if (error.response.status === 400) {
+          return;
+        } else {
+          console.error(error);
+        }
       });
   };
 
@@ -102,6 +111,7 @@ export default function LibraryGameList() {
                   component={"img"}
                   src={game.banner_image}
                   onError={() => handleImgError(game, "banner_image")}
+                  loading="lazy"
                   sx={{
                     width: "34%",
                     aspectRatio: 16 / 9,

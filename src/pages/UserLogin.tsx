@@ -17,6 +17,7 @@ import Button from "@mui/material/Button";
 // import Logo from "../../Assets/images/Logo_Title.png";
 
 import "../styles/userLogin.css";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions.tsx";
 
 export default function UserLogin() {
   const [formUser, setFormUser] = useState({
@@ -82,24 +83,28 @@ export default function UserLogin() {
       });
   };
 
-  const handleImgError = (game: OriginalGame | null) => {
-    if (!game) return;
+  // const handleImgError = (game: OriginalGame | null) => {
+  //   if (!game) return;
 
-    axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=banner_image`)
-      .then((response) => {
-        setGames(
-          games.map((oldGame) =>
-            oldGame.id === game.id
-              ? { ...game, banner_image: response.data.url }
-              : oldGame
-          )
-        );
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${game.title}&&field_name=banner_image`)
+  //     .then((response) => {
+  //       setGames(
+  //         games.map((oldGame) =>
+  //           oldGame.id === game.id
+  //             ? { ...game, banner_image: response.data.url }
+  //             : oldGame
+  //         )
+  //       );
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+
+  const handleImgError = async (game: OriginalGame) => {
+    await handleNewImageUrl(game, "banner_image", setGames);
   };
 
   const loginIfToken = () => {
@@ -258,21 +263,35 @@ export default function UserLogin() {
                 </FormControl>
               </Box>
             </Paper>
-            <Paper
-              component={"div"}
-              elevation={5}
-              sx={{
-                width: "42rem",
-                height: "28rem",
-                marginTop: "1rem",
-                marginLeft: "1rem",
-                bgcolor: "primary.dark",
-                background: `url(${displayGame?.banner_image})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-              onError={() => handleImgError(displayGame)}
-            />
+            {displayGame?.banner_image ? (
+              <Paper
+                component={"div"}
+                elevation={5}
+                sx={{
+                  width: "42rem",
+                  height: "28rem",
+                  marginTop: "1rem",
+                  marginLeft: "1rem",
+                  bgcolor: "primary.dark",
+                  background: `url(${displayGame.banner_image})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+                onError={() => handleImgError(displayGame)}
+              />
+            ) : (
+              <Paper
+                component={"div"}
+                elevation={5}
+                sx={{
+                  width: "42rem",
+                  height: "28rem",
+                  marginTop: "1rem",
+                  marginLeft: "1rem",
+                  bgcolor: "primary.dark",
+                }}
+              />
+            )}
           </Paper>
           <Backdrop
             sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}

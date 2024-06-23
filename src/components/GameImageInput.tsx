@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { SimpleGame } from "../types/types";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import { Box, InputLabel, alpha, styled } from "@mui/material";
-import axiosInstance from "../utils/axiosInstance";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 interface GameImageInputProps {
   label: string;
@@ -68,18 +68,25 @@ export default function GameImageInput({
 
     reader.readAsDataURL(image);
   };
+  
+  // const handleImgError = (fieldName: string) => {
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+  //     .then((response) => {
+  //       setGame({ ...game, [fieldName]: response.data.url });
+  //       setBgImage(response.data.url);
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
 
-  const handleImgError = (fieldName: string) => {
-    axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-      .then((response) => {
-        setGame({ ...game, [fieldName]: response.data.url });
-        setBgImage(response.data.url);
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  const handleImgError = async (fieldName: string) => {
+    const url = await handleNewImageUrl(game, fieldName);
+
+    setGame({ ...game, [fieldName]: url });
+    setBgImage(url);
   };
 
   useEffect(() => setBgImage(image as string), [image]);
@@ -102,6 +109,7 @@ export default function GameImageInput({
             component={"img"}
             src={bgImage ? (bgImage as string) : ""}
             onError={() => handleImgError(name)}
+            loading="lazy"
             alt=""
             sx={{
               aspectRatio: 16 / 9,

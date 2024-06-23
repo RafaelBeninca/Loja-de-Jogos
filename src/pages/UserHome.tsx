@@ -25,6 +25,7 @@ import { Link, useLocation } from "react-router-dom";
 import { getCartItems } from "../funcs/async/CartFunctions.tsx";
 import { getWishlistItems } from "../funcs/async/WishlistFunctions.tsx";
 import CheckIcon from "@mui/icons-material/Check";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions.tsx";
 
 export default function UserHome() {
   const [games, setGames] = useState<OriginalGame[]>([]);
@@ -103,21 +104,32 @@ export default function UserHome() {
       });
   };
 
-  const handleMainImgError = () => {
+  // const handleMainImgError = () => {
+  //   if (!mainGame) return;
+
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${mainGame.title}&&field_name=banner_image`)
+  //     .then((response) => {
+  //       setMainGame({
+  //         ...mainGame,
+  //         banner_image: response.data.url,
+  //       });
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+
+  const handleMainImgError = async () => {
     if (!mainGame) return;
 
-    axiosInstance
-      .get(`/api/games?game_title=${mainGame.title}&&field_name=banner_image`)
-      .then((response) => {
-        setMainGame({
-          ...mainGame,
-          banner_image: response.data.url,
-        });
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    const url = await handleNewImageUrl(mainGame, "banner_image", setGames);
+
+    setMainGame({
+      ...mainGame,
+      banner_image: url,
+    });
   };
 
   const getGenreGames = (genre: Genre) => {
@@ -204,6 +216,7 @@ export default function UserHome() {
                 component={"img"}
                 src={mainGame.banner_image}
                 onError={handleMainImgError}
+                loading="lazy"
                 sx={{
                   width: "70%",
                   aspectRatio: 16 / 9,
@@ -311,7 +324,10 @@ export default function UserHome() {
         <Alert
           icon={<CheckIcon fontSize="inherit" />}
           severity="success"
-          onClose={() => {setShowAlert(false); window.history.replaceState({}, '')}}
+          onClose={() => {
+            setShowAlert(false);
+            window.history.replaceState({}, "");
+          }}
           sx={{
             position: "fixed",
             bottom: "3vh",

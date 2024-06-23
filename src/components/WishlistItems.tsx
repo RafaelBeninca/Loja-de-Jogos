@@ -21,8 +21,8 @@ import {
   Rating,
   Typography,
 } from "@mui/material";
-import axiosInstance from "../utils/axiosInstance";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 export default function WishlistItems() {
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
@@ -31,22 +31,26 @@ export default function WishlistItems() {
   const [gamesAverage, setGamesAverage] = useState<GameAverage[]>([]);
   const [gameGenres, setGameGenres] = useState<GameGenre[]>([]);
 
-  const handleImgError = (game: OriginalGame, fieldName: string) => {
-    axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-      .then((response) => {
-        setGames(
-          games.map((oldGame) =>
-            oldGame.id === game.id
-              ? { ...game, [fieldName]: response.data.url }
-              : oldGame
-          )
-        );
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  // const handleImgError = (game: OriginalGame, fieldName: string) => {
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+  //     .then((response) => {
+  //       setGames(
+  //         games.map((oldGame) =>
+  //           oldGame.id === game.id
+  //             ? { ...game, [fieldName]: response.data.url }
+  //             : oldGame
+  //         )
+  //       );
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+
+  const handleImgError = async (game: OriginalGame, fieldName: string) => {
+    await handleNewImageUrl(game, fieldName, setGames);
   };
 
   useEffect(
@@ -93,6 +97,7 @@ export default function WishlistItems() {
                   component={"img"}
                   src={game.banner_image}
                   onError={() => handleImgError(game, "banner_image")}
+                  loading="lazy"
                   sx={{
                     width: "34%",
                     aspectRatio: 16 / 9,

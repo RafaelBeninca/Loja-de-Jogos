@@ -11,12 +11,13 @@ import {
   Typography,
 } from "@mui/material";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
-import axiosInstance from "../utils/axiosInstance";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
+import React from "react";
 
 interface CartItemsProps {
-  setCartItems: (items: CartItem[]) => void;
+  setCartItems: (items: React.SetStateAction<CartItem[]>) => void;
   cartItems: CartItem[];
-  setGames: (games: OriginalGame[]) => void;
+  setGames: (games: React.SetStateAction<OriginalGame[]>) => void;
   games: OriginalGame[];
   gameGenres: GameGenre[];
   gamesAverage: GameAverage[];
@@ -30,22 +31,26 @@ export default function CartItems({
   gameGenres,
   gamesAverage,
 }: CartItemsProps) {
-  const handleImgError = (game: OriginalGame, fieldName: string) => {
-    axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-      .then((response) => {
-        setGames(
-          games.map((oldGame) =>
-            oldGame.id === game.id
-              ? { ...game, [fieldName]: response.data.url }
-              : oldGame
-          )
-        );
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  // const handleImgError = (game: OriginalGame, fieldName: string) => {
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+  //     .then((response) => {
+  //       setGames(
+  //         games.map((oldGame) =>
+  //           oldGame.id === game.id
+  //             ? { ...game, [fieldName]: response.data.url }
+  //             : oldGame
+  //         )
+  //       );
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+  
+  const handleImgError = async (game: OriginalGame, fieldName: string) => {
+    await handleNewImageUrl(game, fieldName, setGames);
   };
 
   return (
@@ -84,6 +89,7 @@ export default function CartItems({
                   aspectRatio: 16 / 9,
                   borderRadius: 1,
                 }}
+                loading="lazy"
                 elevation={4}
               />
             )}

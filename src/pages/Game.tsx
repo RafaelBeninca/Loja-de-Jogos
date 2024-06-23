@@ -39,6 +39,7 @@ import InsertPhotoIcon from "@mui/icons-material/InsertPhoto";
 import { onRemoveFromCart } from "../funcs/async/CartFunctions";
 import { onRemoveFromWishlist } from "../funcs/async/WishlistFunctions";
 import MoreIcon from "@mui/icons-material/MoreVert";
+import ImageComponent from "../components/ImageComponent";
 
 export default function Game() {
   const [game, setGame] = useState<OriginalGame>(emptyOriginalGame);
@@ -51,9 +52,14 @@ export default function Game() {
   const [isBoughtGame, setIsBoughtGame] = useState(false);
   const [developerUser, setDeveloperUser] = useState<User>();
   const [publisherUser, setPublisherUser] = useState<User>();
-  const [carouselImages, setCarouselImages] = useState<
+  const [carouselImagesSrc, setCarouselImagesSrc] = useState<
     { key: string; value: string }[]
   >([]);
+  const [carouselImages, setCarouselImages] = useState<React.ReactElement[]>(
+    []
+  );
+  const [hasHandledCarouselImages, setHasHandledCarouselImages] =
+    useState(false);
   const [gameMoreAnchorEl, setGameMoreAnchorEl] = useState<null | HTMLElement>(
     null
   );
@@ -92,7 +98,11 @@ export default function Game() {
         setWishlistItem(response.data.item);
       })
       .catch((error) => {
-        console.error(error);
+        if (error.response.status === 400) {
+          return;
+        } else {
+          console.error(error);
+        }
       });
   };
 
@@ -111,7 +121,11 @@ export default function Game() {
         setCartItem(response.data.item);
       })
       .catch((error) => {
-        console.error(error);
+        if (error.response.status === 400) {
+          return;
+        } else {
+          console.error(error);
+        }
       });
   };
 
@@ -162,7 +176,11 @@ export default function Game() {
         setIsBoughtGame(true);
       })
       .catch((error) => {
-        console.error(error);
+        if (error.response.status === 400) {
+          return;
+        } else {
+          console.error(error);
+        }
       });
   };
 
@@ -214,7 +232,7 @@ export default function Game() {
       .catch((error) => {
         console.error(error);
         if (error.response.status === 401) {
-          logoutUser()
+          logoutUser();
           navigate("/");
         } else {
           setShowDialog(true);
@@ -266,7 +284,6 @@ export default function Game() {
 
   const handleCarouselImages = () => {
     if (game.id === 0) return;
-    // if (!hasHandledError) return;
 
     const list: { key: string; value: string }[] = [];
     for (const key in game) {
@@ -280,23 +297,92 @@ export default function Game() {
       }
     }
 
-    setCarouselImages(list);
+    setCarouselImagesSrc(list);
+    setHasHandledCarouselImages(true);
     console.log(list);
   };
 
-  const handleImgError = async (fieldName: string) => {
-    try {
-      const response = await axiosInstance.get(
-        `/api/games?game_title=${game.title}&&field_name=${fieldName}`
+  const createCarouselImages = () => {
+    if (!hasHandledCarouselImages) return;
+
+    const list: React.ReactElement[] = [];
+
+    if (carouselImagesSrc.length > 0) {
+      carouselImagesSrc.map(({ key, value }, index) => {
+        list.push(
+          <div key={index}>
+            {/* <img
+              src={"value"}
+              onError={(e) => handleImgError(e, key)}
+              alt=""
+              draggable="false"
+              loading="lazy"
+              style={{ aspectRatio: 16 / 9 }}
+            /> */}
+            <ImageComponent
+              game={game}
+              setGame={setGame}
+              fieldName={key}
+              src={value}
+              setCarouselImagesSrc={setCarouselImagesSrc}
+            />
+          </div>
+        );
+      });
+    } else {
+      list.push(
+        <div
+          style={{
+            width: "100%",
+            aspectRatio: 16 / 9,
+          }}
+        >
+          <Paper
+            elevation={2}
+            sx={{
+              width: "100%",
+              aspectRatio: 16 / 9,
+            }}
+          >
+            <InsertPhotoIcon
+              color="secondary"
+              sx={{
+                marginBlock: "20%",
+                fontSize: 100,
+              }}
+            />
+          </Paper>
+        </div>
       );
-      setGame({ ...game, [fieldName]: response.data.url });
-      console.log(response);
-      // setHasHandledError((prevVal) => !prevVal);
-    } catch (error) {
-      console.error(error);
-      // setHasHandledError((prevVal) => !prevVal);
     }
+
+    setCarouselImages(list);
   };
+
+  // const handleImgError = async (fieldName: string) => {
+  //   try {
+  //     const response = await axiosInstance.get(
+  //       `/api/games?game_title=${game.title}&&field_name=${fieldName}`
+  //     );
+  //     setGame({ ...game, [fieldName]: response.data.url });
+  //     console.log(response);
+  //     // setHasHandledError((prevVal) => !prevVal);
+  //   } catch (error) {
+  //     console.error(error);
+  //     // setHasHandledError((prevVal) => !prevVal);
+  //   }
+  // };
+
+  // const handleImgError = async (
+  //   e: React.SyntheticEvent<HTMLImageElement>,
+  //   fieldName: string
+  // ) => {
+  //   const url = await handleNewImageUrl(game, fieldName);
+
+  //   e.src = url;
+  //   console.log(url);
+  //   setGame({ ...game, [fieldName]: url });
+  // };
 
   const getGameFileLink = async () => {
     if (game.id === 0) return;
@@ -348,11 +434,11 @@ export default function Game() {
           logoutUser();
           navigate("/login");
         } else if (error.response.status === 409) {
-          setShowDialog(true)
-          setDialogText("Você já comprou este jogo.")
+          setShowDialog(true);
+          setDialogText("Você já comprou este jogo.");
         } else {
-          setShowDialog(true)
-          setDialogText("Erro.")
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
@@ -378,8 +464,8 @@ export default function Game() {
           logoutUser();
           navigate("/login");
         } else {
-          setShowDialog(true)
-          setDialogText("Erro.")
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
@@ -477,7 +563,8 @@ export default function Game() {
   useEffect(handleCarouselImages, [game.id]);
   useEffect(() => {
     getGameFileLink();
-  }, [game.game_file]);
+  }, []);
+  useEffect(createCarouselImages, [hasHandledCarouselImages]);
 
   return (
     <>
@@ -519,45 +606,19 @@ export default function Game() {
                     showStatus={false}
                     thumbWidth={100}
                     infiniteLoop={true}
+                    renderThumbs={() =>
+                      carouselImagesSrc.map(({ value }) => {
+                        return (
+                          <img
+                            src={value}
+                            loading="lazy"
+                            style={{ aspectRatio: 16 / 9 }}
+                          />
+                        );
+                      })
+                    }
                   >
-                    {carouselImages.length > 0
-                      ? carouselImages.map(({ key, value }) => {
-                          return (
-                            <div>
-                              <img
-                                src={value ? value : ""}
-                                onError={() => handleImgError(key)}
-                                alt=""
-                                draggable="false"
-                                style={{ aspectRatio: 16 / 9 }}
-                              />
-                            </div>
-                          );
-                        })
-                      : [
-                          <div
-                            style={{
-                              width: "100%",
-                              aspectRatio: 16 / 9,
-                            }}
-                          >
-                            <Paper
-                              elevation={2}
-                              sx={{
-                                width: "100%",
-                                aspectRatio: 16 / 9,
-                              }}
-                            >
-                              <InsertPhotoIcon
-                                color="secondary"
-                                sx={{
-                                  marginBlock: "20%",
-                                  fontSize: 100,
-                                }}
-                              />
-                            </Paper>
-                          </div>,
-                        ]}
+                    {carouselImages}
                   </Carousel>
                 </Box>
                 <Box
@@ -568,14 +629,21 @@ export default function Game() {
                     width: "30%",
                   }}
                 >
-                  <Box
+                  {/* <Box
                     component={"img"}
                     src={game.banner_image}
-                    onError={() => handleImgError("banner_image")}
+                    onError={(e) => handleImgError(e, "banner_image")}
+                    loading="lazy"
                     alt=""
                     sx={{
                       aspectRatio: 16 / 9,
                     }}
+                  /> */}
+                  <ImageComponent
+                    game={game}
+                    setGame={setGame}
+                    fieldName={"banner_image"}
+                    src={game.banner_image}
                   />
                   <Typography>{game.summary}</Typography>
 
@@ -625,6 +693,7 @@ export default function Game() {
                   >
                     {genres.map((genre) => (
                       <Chip
+                        key={genre.id}
                         label={genre.name}
                         size="small"
                         variant="outlined"
@@ -714,9 +783,9 @@ export default function Game() {
                           borderRadius: 1,
                           marginBottom: 3,
                         }}
+                        key={review.id}
                       >
                         <Link
-                          key={review.id}
                           to={`/user/${getReviewUser(review).username}`}
                           style={{
                             display: "flex",
@@ -807,9 +876,7 @@ export default function Game() {
           aria-labelledby="alert-dialog-title"
           aria-describedby="alert-dialog-description"
         >
-          <DialogTitle id="alert-dialog-title">
-            {dialogText}
-          </DialogTitle>
+          <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
           <DialogActions>
             <Button onClick={() => setShowDialog(false)}>Ok</Button>
           </DialogActions>

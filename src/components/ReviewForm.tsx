@@ -3,7 +3,16 @@ import { OriginalGame, Review } from "../types/types";
 import axiosInstance from "../utils/axiosInstance";
 import { useContext, useState } from "react";
 import { emptyUserReview } from "../utils/defaultValues";
-import { Avatar, Box, Button, Dialog, DialogActions, DialogTitle, Rating, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  Rating,
+  Typography,
+} from "@mui/material";
 import UserContext from "../contexts/UserContext";
 import TextField from "@mui/material/TextField";
 
@@ -63,7 +72,7 @@ export default function ReviewForm({
       .catch((error) => {
         console.error(error);
         if (error.response.status === 401) {
-          logoutUser()
+          logoutUser();
           navigate("/");
         } else {
           setShowDialog(true);
@@ -90,7 +99,7 @@ export default function ReviewForm({
       .patch(`/api/reviews?review_id=${newReview.id}`, body, config)
       .then((response) => {
         console.log(response);
-        
+
         setIsUpdatingReview!(false);
         getReviews();
 
@@ -100,7 +109,7 @@ export default function ReviewForm({
       .catch((error) => {
         console.error(error);
         if (error.response.status === 401) {
-          logoutUser()
+          logoutUser();
           navigate("/");
         } else {
           setShowDialog(true);
@@ -129,10 +138,12 @@ export default function ReviewForm({
             color: "inherit",
           }}
         >
-          <Avatar src={user.profile_picture} alt="" />
-          <Typography sx={{ fontWeight: "bold" }}>
-            {user.username}
-          </Typography>
+          <Avatar
+            src={user.profile_picture}
+            alt=""
+            slotProps={{ img: { loading: "lazy" } }}
+          />
+          <Typography sx={{ fontWeight: "bold" }}>{user.username}</Typography>
         </Link>
         {isUpdatingReview && (
           <Button
@@ -149,7 +160,7 @@ export default function ReviewForm({
           value={newReview.rating}
           size="small"
           sx={{
-            marginBlock: 1
+            marginBlock: 1,
           }}
           onChange={(e, newValue) =>
             setNewReview({ ...newReview, rating: newValue! })
@@ -175,25 +186,23 @@ export default function ReviewForm({
           variant="contained"
           sx={{
             marginTop: 1,
-            marginBottom: 5
+            marginBottom: 5,
           }}
         >
           {isUpdatingReview ? "Alterar" : "Postar"}
         </Button>
       </form>
       <Dialog
-          open={showDialog}
-          onClose={() => setShowDialog(false)}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">
-            {dialogText}
-          </DialogTitle>
-          <DialogActions>
-            <Button onClick={() => setShowDialog(false)}>Ok</Button>
-          </DialogActions>
-        </Dialog>
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setShowDialog(false)}>Ok</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }

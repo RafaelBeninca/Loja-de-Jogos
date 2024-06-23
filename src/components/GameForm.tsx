@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import { Carousel } from "react-responsive-carousel";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 interface GameFormProps {
   existingGame: OriginalGame;
@@ -184,16 +185,21 @@ export default function GameForm({ existingGame }: GameFormProps) {
       });
   };
 
-  const handleImgError = (fieldName: string) => {
-    axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-      .then((response) => {
-        setGame({ ...game, [fieldName]: response.data.url });
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  // const handleImgError = (fieldName: string) => {
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+  //     .then((response) => {
+  //       setGame({ ...game, [fieldName]: response.data.url });
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+
+  const handleImgError = async (fieldName: string) => {
+    const url = await handleNewImageUrl(game, fieldName);
+    setGame({ ...game, [fieldName]: url });
   };
 
   const handleCarouselImages = () => {
@@ -233,7 +239,11 @@ export default function GameForm({ existingGame }: GameFormProps) {
             }}
           >
             {value ? (
-              <img src={value} onError={() => handleImgError(key)} />
+              <img
+                src={value}
+                onError={() => handleImgError(key)}
+                loading="lazy"
+              />
             ) : (
               <AddPhotoAlternateIcon fontSize="small" />
             )}

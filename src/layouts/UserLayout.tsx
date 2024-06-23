@@ -180,7 +180,7 @@ export default function UserLayout() {
             <MenuItem
               onClick={() => {
                 handleMenuClose();
-                logoutUser()
+                logoutUser();
                 navigate(`/`);
               }}
               key={"btnLogout"}
@@ -357,7 +357,10 @@ export default function UserLayout() {
                 color="inherit"
               >
                 {user.profile_picture ? (
-                  <Avatar src={user.profile_picture} />
+                  <Avatar
+                    src={user.profile_picture}
+                    slotProps={{ img: { loading: "lazy" } }}
+                  />
                 ) : (
                   <AccountCircle />
                 )}

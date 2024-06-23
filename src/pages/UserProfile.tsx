@@ -16,11 +16,12 @@ import {
   Alert,
 } from "@mui/material";
 import CheckIcon from "@mui/icons-material/Check";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 export default function UserProfile() {
   const { getUser, loginUser, user, logoutUser } = useContext(UserContext);
   const [profileUser, setProfileUser] = useState<User>();
-  const [games, setGames] = useState<OriginalGame[]>();
+  const [games, setGames] = useState<OriginalGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
 
@@ -65,26 +66,34 @@ export default function UserProfile() {
         setGames(response.data.games);
       })
       .catch((error) => {
-        console.error(error);
+        if (error.response.status === 400) {
+          return;
+        } else {
+          console.error(error);
+        }
       });
   };
 
-  const handleImgError = (game: OriginalGame, fieldName: string) => {
-    axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-      .then((response) => {
-        setGames(
-          games?.map((oldGame) =>
-            oldGame.id === game.id
-              ? { ...game, [fieldName]: response.data.url }
-              : oldGame
-          )
-        );
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  // const handleImgError = (game: OriginalGame, fieldName: string) => {
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+  //     .then((response) => {
+  //       setGames(
+  //         games?.map((oldGame) =>
+  //           oldGame.id === game.id
+  //             ? { ...game, [fieldName]: response.data.url }
+  //             : oldGame
+  //         )
+  //       );
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+
+  const handleImgError = async (game: OriginalGame, fieldName: string) => {
+    await handleNewImageUrl(game, fieldName, setGames);
   };
 
   useEffect(loginIfToken, []);
@@ -141,6 +150,7 @@ export default function UserProfile() {
                     ? profileUser.profile_picture
                     : DefaultPFP
                 }
+                loading="lazy"
                 alt=""
               />
               <Box sx={{ display: "flex", flexDirection: "column" }}>
@@ -223,6 +233,7 @@ export default function UserProfile() {
                       <img
                         src={game.banner_image}
                         onError={() => handleImgError(game, "banner_image")}
+                        loading="lazy"
                         alt=""
                         style={{ width: "10rem", aspectRatio: "16/9" }}
                       />

@@ -14,11 +14,12 @@ import {
   IconButton,
 } from "@mui/material";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 export default function PartnerProfile() {
   const { getUser, loginUser, user, logoutUser } = useContext(UserContext);
   const [profileUser, setProfileUser] = useState<User>();
-  const [games, setGames] = useState<OriginalGame[]>();
+  const [games, setGames] = useState<OriginalGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
 
@@ -62,22 +63,26 @@ export default function PartnerProfile() {
       });
   };
 
-  const handleImgError = (game: OriginalGame, fieldName: string) => {
-    axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-      .then((response) => {
-        setGames(
-          games?.map((oldGame) =>
-            oldGame.id === game.id
-              ? { ...game, [fieldName]: response.data.url }
-              : oldGame
-          )
-        );
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  // const handleImgError = (game: OriginalGame, fieldName: string) => {
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+  //     .then((response) => {
+  //       setGames(
+  //         games?.map((oldGame) =>
+  //           oldGame.id === game.id
+  //             ? { ...game, [fieldName]: response.data.url }
+  //             : oldGame
+  //         )
+  //       );
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+
+  const handleImgError = async (game: OriginalGame, fieldName: string) => {
+    await handleNewImageUrl(game, fieldName, setGames);
   };
 
   useEffect(loginIfToken, []);
@@ -211,6 +216,7 @@ export default function PartnerProfile() {
                       <img
                         src={game.banner_image}
                         onError={() => handleImgError(game, "banner_image")}
+                        loading="lazy"
                         alt=""
                         style={{ width: "12rem", aspectRatio: "16/9" }}
                       />

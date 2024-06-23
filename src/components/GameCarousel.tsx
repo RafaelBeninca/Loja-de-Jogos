@@ -5,11 +5,22 @@ import React, { useContext, useState } from "react";
 import UserContext from "../contexts/UserContext";
 import { onRemoveFromWishlist } from "../funcs/async/WishlistFunctions";
 import { onRemoveFromCart } from "../funcs/async/CartFunctions";
-import { Box, Button, Card, Dialog, DialogActions, DialogTitle, IconButton, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Card,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  IconButton,
+  Paper,
+  Typography,
+} from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import RemoveShoppingCartIcon from "@mui/icons-material/RemoveShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 export interface GameCarouselProps {
   games: OriginalGame[];
@@ -35,7 +46,6 @@ export default function GameCarousel({
   const [showDialog, setShowDialog] = useState(false);
   const [dialogText, setDialogText] = useState("");
 
-
   const onAddToCart = (game: OriginalGame) => {
     const data = {
       game_id: game.id,
@@ -57,11 +67,11 @@ export default function GameCarousel({
           logoutUser();
           navigate("/login");
         } else if (error.response.status === 409) {
-          setShowDialog(true)
-          setDialogText("Você já comprou este jogo.")
+          setShowDialog(true);
+          setDialogText("Você já comprou este jogo.");
         } else {
-          setShowDialog(true)
-          setDialogText("Erro.")
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
@@ -87,28 +97,32 @@ export default function GameCarousel({
           logoutUser();
           navigate("/login");
         } else {
-          setShowDialog(true)
-          setDialogText("Erro.")
+          setShowDialog(true);
+          setDialogText("Erro.");
         }
       });
   };
 
-  const handleImgError = (game: OriginalGame, fieldName: string) => {
-    axiosInstance
-      .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-      .then((response) => {
-        setGames(
-          games.map((oldGame) =>
-            oldGame.id === game.id
-              ? { ...game, [fieldName]: response.data.url }
-              : oldGame
-          )
-        );
-        console.log(response);
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+  // const handleImgError = (game: OriginalGame, fieldName: string) => {
+  //   axiosInstance
+  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
+  //     .then((response) => {
+  //       setGames(
+  //         games.map((oldGame) =>
+  //           oldGame.id === game.id
+  //             ? { ...game, [fieldName]: response.data.url }
+  //             : oldGame
+  //         )
+  //       );
+  //       console.log(response);
+  //     })
+  //     .catch((error) => {
+  //       console.error(error);
+  //     });
+  // };
+
+  const handleImgError = async (game: OriginalGame, fieldName: string) => {
+    await handleNewImageUrl(game, fieldName, setGames);
   };
 
   const getCartItem = (game: OriginalGame) => {
@@ -162,6 +176,7 @@ export default function GameCarousel({
                 component={"img"}
                 src={game.banner_image ? game.banner_image : ""}
                 onError={() => handleImgError(game, "banner_image")}
+                loading="lazy"
                 alt=""
                 sx={{
                   width: 200,
@@ -205,9 +220,8 @@ export default function GameCarousel({
                       onRemoveFromWishlist({
                         setWishlistItems: setWishlistItems,
                         wishlistItems: wishlistItems,
-                        delWishlistItem: getWishlistItem(game)
-                      }
-                      );
+                        delWishlistItem: getWishlistItem(game),
+                      });
                     }}
                   >
                     <FavoriteIcon />
@@ -228,18 +242,16 @@ export default function GameCarousel({
         ))}
       </Box>
       <Dialog
-          open={showDialog}
-          onClose={() => setShowDialog(false)}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">
-            {dialogText}
-          </DialogTitle>
-          <DialogActions>
-            <Button onClick={() => setShowDialog(false)}>Ok</Button>
-          </DialogActions>
-        </Dialog>
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setShowDialog(false)}>Ok</Button>
+        </DialogActions>
+      </Dialog>
     </Paper>
   );
 }

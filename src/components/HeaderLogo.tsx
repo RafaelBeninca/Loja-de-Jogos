@@ -11,6 +11,7 @@ export default function HeaderLogo() {
         filter: "drop-shadow(0px 0px 2px #222)",
       }}
       alt="logo"
+      loading="lazy"
       src={LogoLong}
     />
   );
