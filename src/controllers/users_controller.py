@@ -141,7 +141,7 @@ def users_controller():
 
         return jsonify({'message': 'usuário criado com sucesso', 'user': user.to_dict(), 'cart': cart.to_dict()}), 200
 
-def get_user_with_pic_link(user):
+def get_user_with_pic_link(user: User):
     try:
         user_dict = user.to_dict()
         if user_dict['profile_picture']:

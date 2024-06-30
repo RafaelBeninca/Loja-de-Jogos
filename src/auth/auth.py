@@ -4,6 +4,7 @@ from werkzeug.security import check_password_hash
 from flask import request, jsonify
 from functools import wraps
 from models.user_model import User
+from controllers.users_controller import get_user_with_pic_link
 
 def get_user_by_email(email):
     try:
@@ -26,8 +27,10 @@ def auth(app):
             token = jwt.encode({'email_address': user.email_address, 'exp': datetime.now() + timedelta(hours=12)}, 
                             app.config['JWT_SECRET_KEY'])
 
+            user_dict = get_user_with_pic_link(user)
+
             return jsonify({'message': 'validado com sucesso', 'token': token,
-                            'exp': datetime.now() + timedelta(hours=12), 'user': user.to_dict()}), 200
+                            'exp': datetime.now() + timedelta(hours=12), 'user': user_dict}), 200
         
         return jsonify({'message': 'senha incorreta', 'WWW-Authenticate': 'Basic auth="Login required"', 'cause': 'password'}), 401
     except Exception as e:
