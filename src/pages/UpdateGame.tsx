@@ -1,6 +1,5 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useContext, useEffect, useState } from "react";
-import UserContext from "../contexts/UserContext";
+import { useEffect, useState } from "react";
 import { Box } from "@mui/material";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import "../styles/imageCarousel.css";
@@ -11,26 +10,12 @@ import { OriginalGame } from "../types/types";
 
 export default function UpdateGame() {
   const [game, setGame] = useState<OriginalGame>(emptyOriginalGame);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { getUser, loginUser, logoutUser } = useContext(UserContext);
   const navigate = useNavigate();
-  const params = useParams();
-
-  const loginIfToken = () => {
-    getUser().then(({ user, token }) => {
-      if (token) {
-        setIsLoggedIn(true);
-        loginUser(token, user);
-      } else {
-        logoutUser();
-        navigate("/");
-      }
-    });
-  };
+  const { title } = useParams();
 
   const getGameWithTitle = () => {
     axiosInstance
-      .get(`/api/games?game_title=${params.title}`)
+      .get(`/api/games?game_title=${title}`)
       .then((response) => {
         console.log(response);
         setGame(response.data.game);
@@ -41,25 +26,20 @@ export default function UpdateGame() {
       });
   };
 
-  useEffect(loginIfToken, []);
-  useEffect(getGameWithTitle, [params.title]);
+  useEffect(getGameWithTitle, [title]);
 
   return (
-    <>
-      {isLoggedIn && (
-        <Box
-          sx={{
-            width: "70%",
-            marginInline: "auto",
-            display: "flex",
-            flexDirection: "column",
-            marginBlock: 5,
-            marginTop: 12,
-          }}
-        >
-          <GameForm existingGame={game} key={game.id} />
-        </Box>
-      )}
-    </>
+    <Box
+      sx={{
+        width: "70%",
+        marginInline: "auto",
+        display: "flex",
+        flexDirection: "column",
+        marginBlock: 5,
+        marginTop: 12,
+      }}
+    >
+      <GameForm existingGame={game} key={game.id} />
+    </Box>
   );
 }

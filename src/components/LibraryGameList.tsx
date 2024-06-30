@@ -22,36 +22,18 @@ import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 export default function LibraryGameList() {
   const [games, setGames] = useState<OriginalGame[]>([]);
-  // const [boughtGames, setBoughtGames] = useState<BoughtGame[]>([]);
   const [gamesAverage, setGamesAverage] = useState<GameAverage[]>([]);
   const [gameGenres, setGameGenres] = useState<GameGenre[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useContext(UserContext);
-
-  // const handleImgError = (game: OriginalGame, fieldName: string) => {
-  //   axiosInstance
-  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-  //     .then((response) => {
-  //       setGames(
-  //         games.map((oldGame) =>
-  //           oldGame.id === game.id
-  //             ? { ...game, [fieldName]: response.data.url }
-  //             : oldGame
-  //         )
-  //       );
-  //       console.log(response);
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // };
 
   const handleImgError = async (game: OriginalGame, fieldName: string) => {
     await handleNewImageUrl(game, fieldName, setGames);
   };
 
   const getGames = () => {
-    if (!user.id) return;
+    if (!user?.id) return;
+
     const config = {
       headers: {
         Authorization: "Bearer " + (localStorage.getItem("token") || ""),
@@ -63,10 +45,8 @@ export default function LibraryGameList() {
       .then((response) => {
         console.log(response);
         setGames(response.data.games);
-        // setBoughtGames(response.data.bought_games);
         setGameGenres(response.data.game_genres);
         setGamesAverage(response.data.avgs);
-        setIsLoading(false);
       })
       .catch((error) => {
         if (error.response.status === 400) {
@@ -74,10 +54,11 @@ export default function LibraryGameList() {
         } else {
           console.error(error);
         }
-      });
+      })
+      .finally(() => setIsLoading(false));
   };
 
-  useEffect(getGames, []);
+  useEffect(getGames, [user?.id]);
 
   return (
     <>

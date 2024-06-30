@@ -15,12 +15,10 @@ const UserContext = createContext<UserContextInterface>({
   },
   logoutUser: () => {},
   loginUser: () => {},
-  token: "",
 });
 
 export function UserProvider({ children }: UserProviderProps) {
-  const [user, setUser] = useState(emptyUser);
-  const [token, setToken] = useState("");
+  const [user, setUser] = useState<User | null>(emptyUser);
 
   const getUser = async () => {
     const localToken = localStorage.getItem("token") || "";
@@ -63,22 +61,18 @@ export function UserProvider({ children }: UserProviderProps) {
 
   const logoutUser = () => {
     localStorage.removeItem("token");
-    setToken("");
 
-    setUser(emptyUser);
+    setUser(null);
   };
 
   const loginUser = (newToken: string, newUser: User) => {
     localStorage.setItem("token", newToken);
-    setToken(newToken);
 
     setUser(newUser);
   };
 
   return (
-    <UserContext.Provider
-      value={{ user, getUser, logoutUser, loginUser, token }}
-    >
+    <UserContext.Provider value={{ user, getUser, logoutUser, loginUser }}>
       {children}
     </UserContext.Provider>
   );

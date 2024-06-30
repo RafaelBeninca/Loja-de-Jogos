@@ -245,8 +245,8 @@ export default function PartnerHomeGameList({
                       ?.avg.toPrecision(2) + " "}
                     <Rating
                       value={
-                        gamesAverage.find(({ title }) => title === game.title)
-                          ?.avg
+                        parseFloat(gamesAverage.find(({ title }) => title === game.title)
+                          ?.avg.toPrecision(1) || "0")
                       }
                       readOnly
                       precision={0.1}

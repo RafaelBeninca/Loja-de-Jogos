@@ -19,32 +19,22 @@ import CheckIcon from "@mui/icons-material/Check";
 import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 export default function UserProfile() {
-  const { getUser, loginUser, user, logoutUser } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [profileUser, setProfileUser] = useState<User>();
   const [games, setGames] = useState<OriginalGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAlert, setShowAlert] = useState(false);
 
-  const params = useParams();
+  const { username } = useParams();
   const { state } = useLocation();
 
-  const isActiveUserProfile = user.id === profileUser?.id;
-
-  const loginIfToken = () => {
-    getUser().then(({ user, token }) => {
-      if (token) {
-        loginUser(token, user);
-      } else {
-        logoutUser();
-      }
-    });
-  };
+  const isActiveUserProfile = user?.id === profileUser?.id;
 
   const getUserWithUsername = () => {
-    if (!params.username) return;
+    if (!username) return;
 
     axiosInstance
-      .get(`/api/users?username=${params.username}`)
+      .get(`/api/users?username=${username}`)
       .then((response) => {
         console.log(response);
         setProfileUser(response.data.user);
@@ -74,29 +64,10 @@ export default function UserProfile() {
       });
   };
 
-  // const handleImgError = (game: OriginalGame, fieldName: string) => {
-  //   axiosInstance
-  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-  //     .then((response) => {
-  //       setGames(
-  //         games?.map((oldGame) =>
-  //           oldGame.id === game.id
-  //             ? { ...game, [fieldName]: response.data.url }
-  //             : oldGame
-  //         )
-  //       );
-  //       console.log(response);
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // };
-
   const handleImgError = async (game: OriginalGame, fieldName: string) => {
     await handleNewImageUrl(game, fieldName, setGames);
   };
 
-  useEffect(loginIfToken, []);
   useEffect(getUserWithUsername, []);
   useEffect(fetchProfileUserBoughtGames, [isLoading]);
   useEffect(() => {

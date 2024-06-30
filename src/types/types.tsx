@@ -63,11 +63,10 @@ export interface FormUser {
 }
 
 export interface UserContextInterface {
-  user: User;
-  getUser: () => Promise<{ user: User; token: string }>;
+  user: User | null;
+  getUser: () => Promise<{ user: User, token: string }>;
   logoutUser: () => void;
-  loginUser: (token: string, user: User) => void;
-  token: string;
+  loginUser: (newToken: string, user: User) => void;
 }
 
 export interface ThemeContextInterface {

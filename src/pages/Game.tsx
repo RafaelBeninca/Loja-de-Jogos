@@ -65,23 +65,13 @@ export default function Game() {
   );
   const [wishlistItem, setWishlistItem] = useState<WishlistItem | null>(null);
   const [cartItem, setCartItem] = useState<CartItem | null>(null);
-  const { getUser, loginUser, logoutUser, user } = useContext(UserContext);
+  const { logoutUser, user } = useContext(UserContext);
   const [showDialog, setShowDialog] = useState(false);
   const [dialogText, setDialogText] = useState("");
-  const params = useParams();
   const navigate = useNavigate();
+  const { title } = useParams();
 
   const isGameMenuOpen = Boolean(gameMoreAnchorEl);
-
-  const loginIfToken = () => {
-    getUser().then(({ user, token }) => {
-      if (token) {
-        loginUser(token, user);
-      } else {
-        logoutUser();
-      }
-    });
-  };
 
   const getWishlistItem = () => {
     const config = {
@@ -89,7 +79,7 @@ export default function Game() {
         Authorization: "Bearer " + (localStorage.getItem("token") || ""),
       },
     };
-    if (game.id === 0 || user.id === "") return;
+    if (game.id === 0 || user?.id === "") return;
 
     axiosInstance
       .get(`/api/wishlist?game_id=${game.id}`, config)
@@ -112,7 +102,7 @@ export default function Game() {
         Authorization: "Bearer " + (localStorage.getItem("token") || ""),
       },
     };
-    if (game.id === 0 || user.id === "") return;
+    if (game.id === 0 || user?.id === "") return;
 
     axiosInstance
       .get(`/api/carts?game_id=${game.id}`, config)
@@ -148,7 +138,7 @@ export default function Game() {
 
   const getGameWithTitle = () => {
     axiosInstance
-      .get(`/api/games?game_title=${params.title}`)
+      .get(`/api/games?game_title=${title}`)
       .then((response) => {
         console.log(response);
         setGame(response.data.game);
@@ -161,7 +151,7 @@ export default function Game() {
   };
 
   const getBoughtGame = () => {
-    if (user.id === "0" || game.id === 0) return;
+    if (user?.id === "0" || game.id === 0) return;
 
     const config = {
       headers: {
@@ -170,7 +160,7 @@ export default function Game() {
     };
 
     axiosInstance
-      .get(`/api/bought_games?user_id=${user.id}&&game_id=${game.id}`, config)
+      .get(`/api/bought_games?user_id=${user?.id}&&game_id=${game.id}`, config)
       .then((response) => {
         console.log(response);
         setIsBoughtGame(true);
@@ -311,14 +301,6 @@ export default function Game() {
       carouselImagesSrc.map(({ key, value }, index) => {
         list.push(
           <div key={index}>
-            {/* <img
-              src={"value"}
-              onError={(e) => handleImgError(e, key)}
-              alt=""
-              draggable="false"
-              loading="lazy"
-              style={{ aspectRatio: 16 / 9 }}
-            /> */}
             <ImageComponent
               game={game}
               setGame={setGame}
@@ -358,31 +340,6 @@ export default function Game() {
 
     setCarouselImages(list);
   };
-
-  // const handleImgError = async (fieldName: string) => {
-  //   try {
-  //     const response = await axiosInstance.get(
-  //       `/api/games?game_title=${game.title}&&field_name=${fieldName}`
-  //     );
-  //     setGame({ ...game, [fieldName]: response.data.url });
-  //     console.log(response);
-  //     // setHasHandledError((prevVal) => !prevVal);
-  //   } catch (error) {
-  //     console.error(error);
-  //     // setHasHandledError((prevVal) => !prevVal);
-  //   }
-  // };
-
-  // const handleImgError = async (
-  //   e: React.SyntheticEvent<HTMLImageElement>,
-  //   fieldName: string
-  // ) => {
-  //   const url = await handleNewImageUrl(game, fieldName);
-
-  //   e.src = url;
-  //   console.log(url);
-  //   setGame({ ...game, [fieldName]: url });
-  // };
 
   const getGameFileLink = async () => {
     if (game.id === 0) return;
@@ -552,14 +509,13 @@ export default function Game() {
     </Menu>
   );
 
-  useEffect(loginIfToken, []);
-  useEffect(getGameWithTitle, [params.title]);
+  useEffect(getGameWithTitle, [title]);
   useEffect(getReviews, [game.id]);
-  useEffect(getWishlistItem, [game.id, user.id]);
-  useEffect(getCartItem, [game.id, user.id]);
+  useEffect(getWishlistItem, [game.id, user?.id]);
+  useEffect(getCartItem, [game.id, user?.id]);
   useEffect(getDeveloperUser, [game.developer]);
   useEffect(getPublisherUser, [game.publisher]);
-  useEffect(getBoughtGame, [user.id, game.id]);
+  useEffect(getBoughtGame, [user?.id, game.id]);
   useEffect(handleCarouselImages, [game.id]);
   useEffect(() => {
     getGameFileLink();
@@ -567,69 +523,69 @@ export default function Game() {
   useEffect(createCarouselImages, [hasHandledCarouselImages]);
 
   return (
-    <>
-      <Box
-        sx={{
-          width: "70%",
-          marginInline: "auto",
-          display: "flex",
-          flexDirection: "column",
-          paddingBlock: 5,
-          marginTop: 10,
-          gap: 4,
-        }}
-      >
-        {game.id === 0 ? (
-          <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
-        ) : (
-          <>
+    <Box
+      sx={{
+        width: "70%",
+        marginInline: "auto",
+        display: "flex",
+        flexDirection: "column",
+        paddingBlock: 5,
+        marginTop: 10,
+        gap: 4,
+      }}
+      key={title}
+    >
+      {game.id === 0 ? (
+        <Typography sx={{ fontWeight: "bold" }}>Carregando...</Typography>
+      ) : (
+        <>
+          <Box
+            sx={{
+              position: "relative",
+            }}
+          >
+            <Typography variant="h1">{title}</Typography>
             <Box
               sx={{
-                position: "relative",
+                display: "flex",
+                gap: 3,
               }}
             >
-              <Typography variant="h1">{params.title}</Typography>
+              <Box
+                sx={{
+                  width: "70%",
+                }}
+              >
+                <Carousel
+                  swipeable={true}
+                  useKeyboardArrows={true}
+                  showStatus={false}
+                  thumbWidth={100}
+                  infiniteLoop={true}
+                  renderThumbs={() =>
+                    carouselImagesSrc.map(({ value }) => {
+                      return (
+                        <img
+                          src={value}
+                          loading="lazy"
+                          style={{ aspectRatio: 16 / 9 }}
+                        />
+                      );
+                    })
+                  }
+                >
+                  {carouselImages}
+                </Carousel>
+              </Box>
               <Box
                 sx={{
                   display: "flex",
-                  gap: 3,
+                  flexDirection: "column",
+                  gap: 1,
+                  width: "30%",
                 }}
               >
-                <Box
-                  sx={{
-                    width: "70%",
-                  }}
-                >
-                  <Carousel
-                    swipeable={true}
-                    useKeyboardArrows={true}
-                    showStatus={false}
-                    thumbWidth={100}
-                    infiniteLoop={true}
-                    renderThumbs={() =>
-                      carouselImagesSrc.map(({ value }) => {
-                        return (
-                          <img
-                            src={value}
-                            loading="lazy"
-                            style={{ aspectRatio: 16 / 9 }}
-                          />
-                        );
-                      })
-                    }
-                  >
-                    {carouselImages}
-                  </Carousel>
-                </Box>
-                <Box
-                  sx={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                    width: "30%",
-                  }}
-                >
-                  {/* <Box
+                {/* <Box
                     component={"img"}
                     src={game.banner_image}
                     onError={(e) => handleImgError(e, "banner_image")}
@@ -639,249 +595,246 @@ export default function Game() {
                       aspectRatio: 16 / 9,
                     }}
                   /> */}
-                  <ImageComponent
-                    game={game}
-                    setGame={setGame}
-                    fieldName={"banner_image"}
-                    src={game.banner_image}
-                  />
-                  <Typography>{game.summary}</Typography>
+                <ImageComponent
+                  game={game}
+                  setGame={setGame}
+                  fieldName={"banner_image"}
+                  src={game.banner_image}
+                />
+                <Typography>{game.summary}</Typography>
 
+                <Typography>
+                  Análises: {reviewAverage.toPrecision(2) + " "}
+                  <Rating
+                    value={reviewAverage}
+                    precision={0.1}
+                    readOnly
+                    sx={{ fontSize: 12 }}
+                  />{" "}
+                  ({reviews.length})
+                </Typography>
+                <Typography>
+                  Data de lançamento:{" "}
+                  {game.release_date
+                    ? getFormattedDatetime(game.release_date)
+                    : "Não definida"}
+                </Typography>
+                <Box>
                   <Typography>
-                    Análises: {reviewAverage.toPrecision(2) + " "}
-                    <Rating
-                      value={reviewAverage}
-                      precision={0.1}
-                      readOnly
-                      sx={{ fontSize: 12 }}
-                    />{" "}
-                    ({reviews.length})
-                  </Typography>
-                  <Typography>
-                    Data de lançamento:{" "}
-                    {game.release_date
-                      ? getFormattedDatetime(game.release_date)
-                      : "Não definida"}
-                  </Typography>
-                  <Box>
-                    <Typography>
-                      Desenvolvedor:{" "}
-                      {developerUser ? (
-                        <Link to={`/partner/${developerUser.username}`}>
-                          {developerUser.username}
-                        </Link>
-                      ) : (
-                        game.developer
-                      )}
-                    </Typography>
-                    <Typography>
-                      Distribuidora:{" "}
-                      {publisherUser ? (
-                        <Link to={`/partner/${publisherUser.username}`}>
-                          {publisherUser.username}
-                        </Link>
-                      ) : (
-                        game.publisher
-                      )}
-                    </Typography>
-                  </Box>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 0.6,
-                    }}
-                  >
-                    {genres.map((genre) => (
-                      <Chip
-                        key={genre.id}
-                        label={genre.name}
-                        size="small"
-                        variant="outlined"
-                        color="secondary"
-                      />
-                    ))}
-                  </Box>
-                  <Typography
-                    sx={{
-                      marginBlock: 1,
-                    }}
-                  >
-                    {isBoughtGame ? (
-                      <Button variant="contained" href={game.game_file}>
-                        Download
-                      </Button>
+                    Desenvolvedor:{" "}
+                    {developerUser ? (
+                      <Link to={`/partner/${developerUser.username}`}>
+                        {developerUser.username}
+                      </Link>
                     ) : (
-                      <Button
-                        onClick={handleOnClickBuy}
-                        variant="contained"
-                        sx={{
-                          gap: 1,
-                        }}
-                      >
-                        <AddShoppingCart />
-                        R${game.price.toFixed(2)}
-                      </Button>
+                      game.developer
+                    )}
+                  </Typography>
+                  <Typography>
+                    Distribuidora:{" "}
+                    {publisherUser ? (
+                      <Link to={`/partner/${publisherUser.username}`}>
+                        {publisherUser.username}
+                      </Link>
+                    ) : (
+                      game.publisher
                     )}
                   </Typography>
                 </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 0.6,
+                  }}
+                >
+                  {genres.map((genre) => (
+                    <Chip
+                      key={genre.id}
+                      label={genre.name}
+                      size="small"
+                      variant="outlined"
+                      color="secondary"
+                    />
+                  ))}
+                </Box>
+                <Typography
+                  sx={{
+                    marginBlock: 1,
+                  }}
+                >
+                  {isBoughtGame ? (
+                    <Button variant="contained" href={game.game_file}>
+                      Download
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleOnClickBuy}
+                      variant="contained"
+                      sx={{
+                        gap: 1,
+                      }}
+                    >
+                      <AddShoppingCart />
+                      R${game.price.toFixed(2)}
+                    </Button>
+                  )}
+                </Typography>
               </Box>
-              <IconButton
-                size="large"
-                aria-label="show more"
-                aria-haspopup="true"
-                color="inherit"
-                onClick={(e) => handleGameMenuOpen(e)}
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  right: -10,
-                }}
-              >
-                <MoreIcon />
-              </IconButton>
-              {renderGameMenu}
             </Box>
-            {/* Sobre */}
+            <IconButton
+              size="large"
+              aria-label="show more"
+              aria-haspopup="true"
+              color="inherit"
+              onClick={(e) => handleGameMenuOpen(e)}
+              sx={{
+                position: "absolute",
+                top: 0,
+                right: -10,
+              }}
+            >
+              <MoreIcon />
+            </IconButton>
+            {renderGameMenu}
+          </Box>
+          {/* Sobre */}
+          <Box>
+            <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 2 }}>
+              Sobre
+            </Typography>
+            <Typography>{game.about}</Typography>
+          </Box>
+
+          {/* Reviews */}
+          <Box>
+            <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 2 }}>
+              Análises
+            </Typography>
+
+            {/* Review nova */}
+            {isBoughtGame && !userReview && (
+              <ReviewForm game={game} getReviews={getReviews} />
+            )}
+
+            {/* Update de review */}
+            {isBoughtGame && userReview && isUpdatingReview && (
+              <ReviewForm
+                game={game}
+                userReview={userReview}
+                setIsUpdatingReview={setIsUpdatingReview}
+                getReviews={getReviews}
+              />
+            )}
             <Box>
-              <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 2 }}>
-                Sobre
-              </Typography>
-              <Typography>{game.about}</Typography>
-            </Box>
-
-            {/* Reviews */}
-            <Box>
-              <Typography variant="h2" sx={{ fontSize: 24, marginBlock: 2 }}>
-                Análises
-              </Typography>
-
-              {/* Review nova */}
-              {isBoughtGame && !userReview && (
-                <ReviewForm game={game} getReviews={getReviews} />
-              )}
-
-              {/* Update de review */}
-              {isBoughtGame && userReview && isUpdatingReview && (
-                <ReviewForm
-                  game={game}
-                  userReview={userReview}
-                  setIsUpdatingReview={setIsUpdatingReview}
-                  getReviews={getReviews}
-                />
-              )}
-              <Box>
-                {reviews.length === 0 ? (
-                  <Typography>
-                    Parece que este jogo ainda não tem nenhuma análise
-                  </Typography>
-                ) : (
-                  <>
-                    {reviews.map((review) => (
-                      <Card
-                        sx={{
-                          padding: 2,
-                          borderRadius: 1,
-                          marginBottom: 3,
+              {reviews.length === 0 ? (
+                <Typography>
+                  Parece que este jogo ainda não tem nenhuma análise
+                </Typography>
+              ) : (
+                <>
+                  {reviews.map((review) => (
+                    <Card
+                      sx={{
+                        padding: 2,
+                        borderRadius: 1,
+                        marginBottom: 3,
+                      }}
+                      key={review.id}
+                    >
+                      <Link
+                        to={`/user/${getReviewUser(review).username}`}
+                        style={{
+                          display: "flex",
+                          gap: 5,
+                          width: "fit-content",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          textDecoration: "none",
+                          color: "inherit",
                         }}
-                        key={review.id}
                       >
-                        <Link
-                          to={`/user/${getReviewUser(review).username}`}
-                          style={{
-                            display: "flex",
-                            gap: 5,
-                            width: "fit-content",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            textDecoration: "none",
-                            color: "inherit",
-                          }}
-                        >
-                          <Avatar
-                            src={getReviewUser(review).profile_picture}
-                            alt=""
-                          />
-                          <Typography sx={{ fontWeight: "bold" }}>
-                            {getReviewUser(review).username}
-                          </Typography>
-                        </Link>
-                        <Rating
-                          value={review.rating}
-                          readOnly
-                          size="small"
-                          sx={{
-                            marginTop: 1,
-                          }}
-                          precision={0.5}
+                        <Avatar
+                          src={getReviewUser(review).profile_picture}
+                          alt=""
                         />
-                        <Typography sx={{ fontSize: 14, marginBlock: 2 }}>
-                          {review.comment}
+                        <Typography sx={{ fontWeight: "bold" }}>
+                          {getReviewUser(review).username}
                         </Typography>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            display: "block",
-                          }}
-                        >
-                          Publicada: {getFormattedDatetime(review.created_at)}
+                      </Link>
+                      <Rating
+                        value={review.rating}
+                        readOnly
+                        size="small"
+                        sx={{
+                          marginTop: 1,
+                        }}
+                        precision={0.5}
+                      />
+                      <Typography sx={{ fontSize: 14, marginBlock: 2 }}>
+                        {review.comment}
+                      </Typography>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          display: "block",
+                        }}
+                      >
+                        Publicada: {getFormattedDatetime(review.created_at)}
+                      </Typography>
+                      {review.updated_at && (
+                        <Typography variant="caption">
+                          Editada: {getFormattedDatetime(review.updated_at)}
                         </Typography>
-                        {review.updated_at && (
-                          <Typography variant="caption">
-                            Editada: {getFormattedDatetime(review.updated_at)}
-                          </Typography>
-                        )}
-                        {review.user_id === parseInt(user.id) &&
-                          !isUpdatingReview && (
-                            <>
-                              <Box
-                                sx={{
-                                  display: "flex",
-                                  gap: 1,
-                                  marginTop: 1,
-                                }}
+                      )}
+                      {review.user_id === parseInt(user?.id || "0") &&
+                        !isUpdatingReview && (
+                          <>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                gap: 1,
+                                marginTop: 1,
+                              }}
+                            >
+                              <Button
+                                color="primary"
+                                variant="contained"
+                                size="small"
+                                onClick={() => setIsUpdatingReview(true)}
                               >
-                                <Button
-                                  color="primary"
-                                  variant="contained"
-                                  size="small"
-                                  onClick={() => setIsUpdatingReview(true)}
-                                >
-                                  Alterar
-                                </Button>
-                                <Button
-                                  color="error"
-                                  variant="outlined"
-                                  size="small"
-                                  onClick={() =>
-                                    handleOnDeleteReview(review.id)
-                                  }
-                                >
-                                  Excluir
-                                </Button>
-                              </Box>
-                              {!userReview && setUserReview(review)}
-                            </>
-                          )}
-                      </Card>
-                    ))}
-                  </>
-                )}
-              </Box>
+                                Alterar
+                              </Button>
+                              <Button
+                                color="error"
+                                variant="outlined"
+                                size="small"
+                                onClick={() => handleOnDeleteReview(review.id)}
+                              >
+                                Excluir
+                              </Button>
+                            </Box>
+                            {!userReview && setUserReview(review)}
+                          </>
+                        )}
+                    </Card>
+                  ))}
+                </>
+              )}
             </Box>
-          </>
-        )}
-        <Dialog
-          open={showDialog}
-          onClose={() => setShowDialog(false)}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-        >
-          <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
-          <DialogActions>
-            <Button onClick={() => setShowDialog(false)}>Ok</Button>
-          </DialogActions>
-        </Dialog>
-      </Box>
-    </>
+          </Box>
+        </>
+      )}
+      <Dialog
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setShowDialog(false)}>Ok</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }

@@ -140,8 +140,8 @@ export default function LoginLayout() {
                 onClick={handleProfileMenuOpen}
                 color="inherit"
               >
-                {user.profile_picture ? (
-                  <Avatar src={user.profile_picture} />
+                {user?.profile_picture ? (
+                  <Avatar src={user?.profile_picture} />
                 ) : (
                   <AccountCircle />
                 )}

@@ -148,12 +148,12 @@ export default function UserLayout() {
       open={isMenuOpen}
       onClose={handleMenuClose}
     >
-      {user.username
+      {user?.username
         ? [
             <MenuItem
               onClick={() => {
                 handleMenuClose();
-                navigate(`/user/${user.username}`);
+                navigate(`/user/${user?.username}`);
               }}
               key={"btnProfile"}
             >
@@ -356,13 +356,13 @@ export default function UserLayout() {
                 onClick={handleProfileMenuOpen}
                 color="inherit"
               >
-                {user.profile_picture ? (
+                {user?.profile_picture ? (
                   <Avatar
                     src={user.profile_picture}
                     slotProps={{ img: { loading: "lazy" } }}
                   />
                 ) : (
-                  <AccountCircle />
+                  <AccountCircle/>
                 )}
               </IconButton>
             </Box>

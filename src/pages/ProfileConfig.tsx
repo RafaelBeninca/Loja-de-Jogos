@@ -18,8 +18,7 @@ import {
 } from "@mui/material";
 
 export default function ProfileConfig() {
-  const { user, getUser, loginUser, logoutUser } = useContext(UserContext);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { user, loginUser, logoutUser } = useContext(UserContext);
   const [formUser, setFormUser] = useState<FormUser>({
     username: "",
     email_address: "",
@@ -31,18 +30,6 @@ export default function ProfileConfig() {
   const [showDialog, setShowDialog] = useState(false);
   const [dialogText, setDialogText] = useState("");
   const navigate = useNavigate();
-
-  const loginIfToken = () => {
-    getUser().then(({ user, token }) => {
-      if (token) {
-        setIsLoggedIn(true);
-        loginUser(token, user);
-      } else {
-        logoutUser();
-        navigate("/");
-      }
-    });
-  };
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -72,7 +59,7 @@ export default function ProfileConfig() {
         console.log(response);
         loginUser(response.data.token, response.data.user);
 
-        navigate(`/user/${user.username}`, {
+        navigate(`/user/${user?.username}`, {
           state: { alert: "Informações alteradas com sucesso." },
         });
       })
@@ -119,186 +106,177 @@ export default function ProfileConfig() {
       });
   };
 
-  useEffect(loginIfToken, []);
   useEffect(
     () =>
       setFormUser({
-        username: user.username,
-        email_address: user.email_address,
+        username: user?.username || "",
+        email_address: user?.email_address || "",
         password: "",
         profile_picture: "",
-        summary: user.summary,
+        summary: user?.summary || "",
       }),
-    [isLoggedIn]
+    [user?.id]
   );
 
   return (
-    <>
-      {isLoggedIn && (
+    <Box sx={{ marginTop: "10rem", display: "flex", justifyContent: "center" }}>
+      <Paper
+        elevation={2}
+        sx={{
+          width: "40%",
+          height: "45rem",
+          display: "flex",
+          marginBottom: 5,
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography variant="h1">OPÇÕES DO USUÁRIO</Typography>
         <Box
-          sx={{ marginTop: "10rem", display: "flex", justifyContent: "center" }}
+          component={"form"}
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            marginTop: "1rem",
+            alignItems: "center",
+          }}
+          onSubmit={onSubmit}
         >
-          <Paper
-            elevation={2}
+          <Box
             sx={{
-              width: "40%",
-              height: "45rem",
-              display: "flex",
-              marginBottom: 5,
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
+              width: "fit-content",
             }}
           >
-            <Typography variant="h1">OPÇÕES DO USUÁRIO</Typography>
-            <Box
-              component={"form"}
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                marginTop: "1rem",
-                alignItems: "center",
-              }}
-              onSubmit={onSubmit}
-            >
-              <Box
-                sx={{
-                  width: "fit-content",
-                }}
-              >
-                <UserImageInput
-                  label="Imagem de Perfil"
-                  name="profile_picture"
-                  setUser={setFormUser}
-                  user={formUser}
-                  defaultImage={user.profile_picture}
-                  required={false}
-                />
-              </Box>
-              <TextField
-                value={formUser.username}
-                type="text"
-                required
-                onChange={(e) =>
-                  setFormUser({
-                    ...formUser,
-                    username: e.target.value,
-                  })
-                }
-                label="Novo Nome:"
-                variant="standard"
-                size="small"
-                sx={{ width: 350, marginTop: "1rem" }}
-              />
-              <TextField
-                value={formUser.email_address}
-                type="text"
-                required
-                onChange={(e) =>
-                  setFormUser({
-                    ...formUser,
-                    email_address: e.target.value,
-                  })
-                }
-                id="email-input"
-                label="Novo E-Mail:"
-                variant="standard"
-                size="small"
-                sx={{ width: 350, marginTop: "2rem" }}
-              />
-              <TextField
-                value={formUser.password}
-                type="password"
-                onChange={(e) =>
-                  setFormUser({
-                    ...formUser,
-                    password: e.target.value,
-                  })
-                }
-                id="password-input"
-                label="Nova Senha:"
-                variant="standard"
-                size="small"
-                sx={{ width: 350, marginTop: "2rem" }}
-              />
+            <UserImageInput
+              label="Imagem de Perfil"
+              name="profile_picture"
+              setUser={setFormUser}
+              user={formUser}
+              defaultImage={user?.profile_picture || ""}
+              required={false}
+            />
+          </Box>
+          <TextField
+            value={formUser.username}
+            type="text"
+            required
+            onChange={(e) =>
+              setFormUser({
+                ...formUser,
+                username: e.target.value,
+              })
+            }
+            label="Novo Nome:"
+            variant="standard"
+            size="small"
+            sx={{ width: 350, marginTop: "1rem" }}
+          />
+          <TextField
+            value={formUser.email_address}
+            type="text"
+            required
+            onChange={(e) =>
+              setFormUser({
+                ...formUser,
+                email_address: e.target.value,
+              })
+            }
+            id="email-input"
+            label="Novo E-Mail:"
+            variant="standard"
+            size="small"
+            sx={{ width: 350, marginTop: "2rem" }}
+          />
+          <TextField
+            value={formUser.password}
+            type="password"
+            onChange={(e) =>
+              setFormUser({
+                ...formUser,
+                password: e.target.value,
+              })
+            }
+            id="password-input"
+            label="Nova Senha:"
+            variant="standard"
+            size="small"
+            sx={{ width: 350, marginTop: "2rem" }}
+          />
 
-              <TextField
-                variant="outlined"
-                color="secondary"
-                fullWidth
-                value={formUser.summary}
-                onChange={(e) =>
-                  setFormUser({ ...formUser, summary: e.target.value })
-                }
-                label="Sobre Você"
-                sx={{ width: "22rem", marginTop: "3rem" }}
-              />
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "row",
-                  width: "22rem",
-                  justifyContent: "center",
-                  gap: "2rem",
-                  marginTop: "2rem",
-                }}
-              >
-                <Button variant="contained" type="submit">
-                  Alterar informações
-                </Button>
-                <Button
-                  variant="outlined"
-                  type="button"
-                  color="error"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  {" "}
-                  Excluir Conta{" "}
-                </Button>
-              </Box>
-            </Box>
-          </Paper>
-          <Dialog
-            open={showDialog}
-            onClose={() => setShowDialog(false)}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
+          <TextField
+            variant="outlined"
+            color="secondary"
+            fullWidth
+            value={formUser.summary}
+            onChange={(e) =>
+              setFormUser({ ...formUser, summary: e.target.value })
+            }
+            label="Sobre Você"
+            sx={{ width: "22rem", marginTop: "3rem" }}
+          />
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              width: "22rem",
+              justifyContent: "center",
+              gap: "2rem",
+              marginTop: "2rem",
+            }}
           >
-            <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
-            <DialogActions>
-              <Button onClick={() => setShowDialog(false)}>Ok</Button>
-            </DialogActions>
-          </Dialog>
-          <Dialog
-            open={showDeleteDialog}
-            onClose={() => setShowDeleteDialog(false)}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-          >
-            <DialogTitle id="alert-delete-dialog-title">
-              Tem certeza que deseja deletar sua conta?
-            </DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Todos os seus dados serão deletados (essa ação é irreversível)
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setShowDeleteDialog(false)}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={() => {
-                  setShowDeleteDialog(false);
-                  onDeleteAccount();
-                }}
-              >
-                Continuar
-              </Button>
-            </DialogActions>
-          </Dialog>
+            <Button variant="contained" type="submit">
+              Alterar informações
+            </Button>
+            <Button
+              variant="outlined"
+              type="button"
+              color="error"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              {" "}
+              Excluir Conta{" "}
+            </Button>
+          </Box>
         </Box>
-      )}
-    </>
+      </Paper>
+      <Dialog
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">{dialogText}</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setShowDialog(false)}>Ok</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-delete-dialog-title">
+          Tem certeza que deseja deletar sua conta?
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Todos os seus dados serão deletados (essa ação é irreversível)
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowDeleteDialog(false)}>Cancelar</Button>
+          <Button
+            onClick={() => {
+              setShowDeleteDialog(false);
+              onDeleteAccount();
+            }}
+          >
+            Continuar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }

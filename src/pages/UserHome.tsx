@@ -11,11 +11,9 @@ import axiosInstance from "../utils/axiosInstance.tsx";
 import UserContext from "../contexts/UserContext.tsx";
 import {
   Alert,
-  Backdrop,
   Box,
   Card,
   Chip,
-  CircularProgress,
   Paper,
   Rating,
   Typography,
@@ -33,7 +31,7 @@ export default function UserHome() {
   const [gameGenres, setGameGenres] = useState<GameGenre[]>([]);
   const [genres, setGenres] = useState<Genre[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { getUser, logoutUser, loginUser, user } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
   const [reviewAverage, setReviewAverage] = useState<number>(0);
@@ -41,16 +39,6 @@ export default function UserHome() {
   const [showAlert, setShowAlert] = useState(false);
 
   const { state } = useLocation();
-
-  const loginIfToken = () => {
-    getUser().then(({ user, token }) => {
-      if (token) {
-        loginUser(token, user);
-      } else {
-        logoutUser();
-      }
-    });
-  };
 
   const getReviews = () => {
     if (!mainGame || mainGame.id === 0) return;
@@ -104,23 +92,6 @@ export default function UserHome() {
       });
   };
 
-  // const handleMainImgError = () => {
-  //   if (!mainGame) return;
-
-  //   axiosInstance
-  //     .get(`/api/games?game_title=${mainGame.title}&&field_name=banner_image`)
-  //     .then((response) => {
-  //       setMainGame({
-  //         ...mainGame,
-  //         banner_image: response.data.url,
-  //       });
-  //       console.log(response);
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // };
-
   const handleMainImgError = async () => {
     if (!mainGame) return;
 
@@ -145,9 +116,6 @@ export default function UserHome() {
 
   useEffect(fetchGames, []);
   useEffect(() => {
-    loginIfToken();
-  }, []);
-  useEffect(() => {
     if (isLoading) return;
 
     setMainGame(games[Math.floor(Math.random() * games.length)]);
@@ -156,13 +124,13 @@ export default function UserHome() {
   useEffect(getGenres, []);
 
   useEffect(() => {
-    if (!user.id) return;
+    if (!user?.id) return;
     getCartItems(setCartItems);
-  }, [user.id]);
+  }, [user?.id]);
   useEffect(() => {
-    if (!user.id) return;
+    if (!user?.id) return;
     getWishlistItems(setWishlistItems);
-  }, [user.id]);
+  }, [user?.id]);
   useEffect(() => {
     if (!mainGame || mainGame.banner_image) return;
 
@@ -184,6 +152,7 @@ export default function UserHome() {
         flexDirection: "column",
         marginBlock: 5,
         marginTop: 15,
+        minHeight: "61vh"
       }}
     >
       <Box>
@@ -338,12 +307,6 @@ export default function UserHome() {
           {state.alert}
         </Alert>
       )}
-      <Backdrop
-        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-        open={isLoading}
-      >
-        <CircularProgress color="inherit" />
-      </Backdrop>
     </Box>
   );
 }

@@ -33,8 +33,7 @@ export default function Signup() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
   const [showDialog, setShowDialog] = useState(false);
   const [dialogText, setDialogText] = useState("");
-  const { getUser, logoutUser, loginUser } =
-    useContext<UserContextInterface>(UserContext);
+  const { user } = useContext<UserContextInterface>(UserContext);
   const navigate = useNavigate();
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -77,22 +76,13 @@ export default function Signup() {
       });
   };
 
-  const loginIfToken = () => {
-    getUser().then(({ user, token }) => {
-      if (token) {
-        setIsLoggedIn(true);
-        loginUser(token, user);
-        navigate("/");
-      } else {
-        setIsLoggedIn(false);
-        logoutUser();
-      }
-    });
-  };
-
   useEffect(() => {
-    loginIfToken();
-  }, []);
+    if (!user) {
+      setIsLoggedIn(false);
+    } else if (user.id !== "0") {
+      navigate("/");
+    }
+  }, [user?.id]);
 
   return (
     <>
@@ -103,6 +93,7 @@ export default function Signup() {
             display: "flex",
             flexDirection: "column",
             marginTop: 6,
+            minHeight: "61vh"
             // background: "linear-gradient(to right bottom, #0e1129, #162b27)",
           }}
         >

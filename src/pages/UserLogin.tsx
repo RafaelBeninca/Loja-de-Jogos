@@ -32,7 +32,7 @@ export default function UserLogin() {
   const [isLoading, setIsLoading] = useState(true);
   const [displayGame, setDisplayGame] = useState<OriginalGame | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const { getUser, logoutUser, loginUser } =
+  const { loginUser, user } =
     useContext<UserContextInterface>(UserContext);
   const navigate = useNavigate();
 
@@ -83,44 +83,18 @@ export default function UserLogin() {
       });
   };
 
-  // const handleImgError = (game: OriginalGame | null) => {
-  //   if (!game) return;
-
-  //   axiosInstance
-  //     .get(`/api/games?game_title=${game.title}&&field_name=banner_image`)
-  //     .then((response) => {
-  //       setGames(
-  //         games.map((oldGame) =>
-  //           oldGame.id === game.id
-  //             ? { ...game, banner_image: response.data.url }
-  //             : oldGame
-  //         )
-  //       );
-  //       console.log(response);
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // };
-
   const handleImgError = async (game: OriginalGame) => {
     await handleNewImageUrl(game, "banner_image", setGames);
   };
 
-  const loginIfToken = () => {
-    getUser().then(({ user, token }) => {
-      if (token) {
-        setIsLoggedIn(true);
-        loginUser(token, user);
-        navigate("/");
-      } else {
-        setIsLoggedIn(false);
-        logoutUser();
-      }
-    });
-  };
+  useEffect(() => {
+    if (!user) {
+      setIsLoggedIn(false);
+    } else if (user.id !== "0") {
+      navigate("/");
+    }
+  }, [user?.id]);
 
-  useEffect(loginIfToken, []);
   useEffect(fetchGames, []);
   useEffect(() => {
     if (isLoading) return;
@@ -137,6 +111,7 @@ export default function UserLogin() {
             display: "flex",
             flexDirection: "column",
             marginTop: 6,
+            minHeight: "61vh"
             // background: "linear-gradient(to right bottom, #0e1129, #162b27)",
           }}
         >

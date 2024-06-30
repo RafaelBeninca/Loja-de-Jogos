@@ -117,7 +117,7 @@ export default function UserLayout() {
   };
 
   function fetchPartnerGames() {
-    if (!user.id) return;
+    if (!user?.id) return;
 
     const token = localStorage.getItem("token");
     const config = {
@@ -160,7 +160,7 @@ export default function UserLayout() {
       <MenuItem
         onClick={() => {
           handleMenuClose();
-          navigate(`/partner/${user.username}`);
+          navigate(`/partner/${user?.username}`);
         }}
         key={"btnProfile"}
       >
@@ -290,8 +290,8 @@ export default function UserLayout() {
                 onClick={handleProfileMenuOpen}
                 color="inherit"
               >
-                {user.profile_picture ? (
-                  <Avatar src={user.profile_picture} />
+                {user?.profile_picture ? (
+                  <Avatar src={user?.profile_picture} />
                 ) : (
                   <AccountCircle />
                 )}

@@ -17,8 +17,7 @@ import {
 } from "@mui/material";
 
 export default function Cart() {
-  const { getUser, loginUser, logoutUser } = useContext(UserContext);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { logoutUser } = useContext(UserContext);
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [games, setGames] = useState<OriginalGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,18 +25,6 @@ export default function Cart() {
   const [gameGenres, setGameGenres] = useState<GameGenre[]>([]);
   const [showDialog, setShowDialog] = useState(false);
   const navigate = useNavigate();
-
-  const loginIfToken = () => {
-    getUser().then(({ user, token }) => {
-      if (token) {
-        setIsLoggedIn(true);
-        loginUser(token, user);
-      } else {
-        logoutUser();
-        navigate("/login");
-      }
-    });
-  };
 
   const handlePurchase = () => {
     setIsLoading(true);
@@ -66,13 +53,10 @@ export default function Cart() {
           logoutUser();
           navigate("/login", { relative: "route" });
         }
-        setShowDialog(true)
+        setShowDialog(true);
       });
   };
 
-  useEffect(() => {
-    loginIfToken();
-  }, []);
   useEffect(
     () =>
       getCartItems(
@@ -86,75 +70,72 @@ export default function Cart() {
   );
 
   return (
-    <>
-      {isLoggedIn && (
-        <Box
-          sx={{
-            marginBlock: 5,
-            marginTop: 15,
-            width: "70%",
-            marginInline: "auto",
-          }}
-        >
-          <Typography
-            variant="h1"
-            sx={{
-              marginBottom: 1,
-            }}
-          >
-            Carrinho
-          </Typography>
-          {!isLoading && (
-            <Box>
-              <CartItems
-                setCartItems={setCartItems}
-                cartItems={cartItems}
-                setGames={setGames}
-                games={games}
-                gameGenres={gameGenres}
-                gamesAverage={gamesAverage}
-              />
-              {cartItems.length > 0 ? (
-                <Button
-                  variant="contained"
-                  size="large"
-                  onClick={handlePurchase}
-                  sx={{
-                    marginBlock: 5,
-                  }}
-                >
-                  Comprar
-                </Button>
-              ) : (
-                <Typography
-                  sx={{
-                    fontWeight: "bold",
-                  }}
-                >
-                  Parece que você não tem nenhum item no carrinho...
-                </Typography>
-              )}
-            </Box>
+    <Box
+      sx={{
+        marginBlock: 5,
+        marginTop: 15,
+        width: "70%",
+        marginInline: "auto",
+        minHeight: "61vh"
+      }}
+    >
+      <Typography
+        variant="h1"
+        sx={{
+          marginBottom: 1,
+        }}
+      >
+        Carrinho
+      </Typography>
+      {!isLoading && (
+        <Box>
+          <CartItems
+            setCartItems={setCartItems}
+            cartItems={cartItems}
+            setGames={setGames}
+            games={games}
+            gameGenres={gameGenres}
+            gamesAverage={gamesAverage}
+          />
+          {cartItems.length > 0 ? (
+            <Button
+              variant="contained"
+              size="large"
+              onClick={handlePurchase}
+              sx={{
+                marginBlock: 5,
+              }}
+            >
+              Comprar
+            </Button>
+          ) : (
+            <Typography
+              sx={{
+                fontWeight: "bold",
+              }}
+            >
+              Parece que você não tem nenhum item no carrinho...
+            </Typography>
           )}
-          <Backdrop
-            sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
-            open={isLoading}
-          >
-            <CircularProgress color="inherit" />
-          </Backdrop>
-          <Dialog
-            open={showDialog}
-            onClose={() => setShowDialog(false)}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-          >
-            <DialogTitle id="alert-dialog-title">Erro.</DialogTitle>
-            <DialogActions>
-              <Button onClick={() => setShowDialog(false)}>Ok</Button>
-            </DialogActions>
-          </Dialog>
         </Box>
       )}
-    </>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
+      <Dialog
+        open={showDialog}
+        onClose={() => setShowDialog(false)}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Erro.</DialogTitle>
+        <DialogActions>
+          <Button onClick={() => setShowDialog(false)}>Ok</Button>
+        </DialogActions>
+      </Dialog>
+    </Box>
   );
 }

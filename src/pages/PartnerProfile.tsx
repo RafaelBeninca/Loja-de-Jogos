@@ -17,23 +17,13 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import { handleNewImageUrl } from "../funcs/async/ImgFunctions";
 
 export default function PartnerProfile() {
-  const { getUser, loginUser, user, logoutUser } = useContext(UserContext);
+  const { user } = useContext(UserContext);
   const [profileUser, setProfileUser] = useState<User>();
   const [games, setGames] = useState<OriginalGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const params = useParams();
 
-  const isActiveUserProfile = user.id === profileUser?.id;
-
-  const loginIfToken = () => {
-    getUser().then(({ user, token }) => {
-      if (token) {
-        loginUser(token, user);
-      } else {
-        logoutUser();
-      }
-    });
-  };
+  const isActiveUserProfile = user?.id === profileUser?.id;
 
   const getUserWithUsername = () => {
     axiosInstance
@@ -63,29 +53,10 @@ export default function PartnerProfile() {
       });
   };
 
-  // const handleImgError = (game: OriginalGame, fieldName: string) => {
-  //   axiosInstance
-  //     .get(`/api/games?game_title=${game.title}&&field_name=${fieldName}`)
-  //     .then((response) => {
-  //       setGames(
-  //         games?.map((oldGame) =>
-  //           oldGame.id === game.id
-  //             ? { ...game, [fieldName]: response.data.url }
-  //             : oldGame
-  //         )
-  //       );
-  //       console.log(response);
-  //     })
-  //     .catch((error) => {
-  //       console.error(error);
-  //     });
-  // };
-
   const handleImgError = async (game: OriginalGame, fieldName: string) => {
     await handleNewImageUrl(game, fieldName, setGames);
   };
 
-  useEffect(loginIfToken, []);
   useEffect(getUserWithUsername, []);
   useEffect(fetchProfileUserCreatedGames, [isLoading]);
 

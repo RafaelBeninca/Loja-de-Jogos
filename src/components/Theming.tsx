@@ -1,5 +1,4 @@
 import { createTheme } from "@mui/material/styles";
-// import { outlinedInputClasses } from "@mui/material/OutlinedInput";
 import "../styles/index.css";
 
 /* Cores padrões da nossa logo: */
@@ -21,7 +20,6 @@ const lightTheme = createTheme({
   },
   typography: {
     fontFamily: "Hammersmith One",
-    fontWeightRegular: 400,
     body1: {
       fontSize: 13,
     },
@@ -58,7 +56,6 @@ const darkTheme = createTheme({
   },
   typography: {
     fontFamily: "Hammersmith One",
-    fontWeightRegular: 400,
     body1: {
       fontSize: 13,
     },
