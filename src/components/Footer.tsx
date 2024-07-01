@@ -29,7 +29,9 @@ export default function Footer() {
         loading="lazy"
         src={LogoLong}
       />
-      <Typography variant="caption">contact@fgs.com</Typography>
+      <Typography variant="caption" color="common.white">
+        contact@fgs.com
+      </Typography>
     </Box>
   );
 }

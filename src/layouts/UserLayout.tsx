@@ -253,6 +253,33 @@ export default function UserLayout() {
         </IconButton>
         <p>Biblioteca</p>
       </MenuItem>
+      {darkMode ? (
+        <MenuItem onClick={toggleTheme}>
+          <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="primary-search-account-menu"
+            aria-haspopup="true"
+            color="inherit"
+          >
+            <LightModeIcon />
+          </IconButton>
+          <p>Modo Claro</p>
+        </MenuItem>
+      ) : (
+        <MenuItem onClick={toggleTheme}>
+          <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="primary-search-account-menu"
+            aria-haspopup="true"
+            color="inherit"
+          >
+            <DarkModeIcon />
+          </IconButton>
+          <p>Modo Escuro</p>
+        </MenuItem>
+      )}
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
           size="large"
