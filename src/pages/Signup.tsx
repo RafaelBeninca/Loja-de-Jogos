@@ -93,7 +93,7 @@ export default function Signup() {
             display: "flex",
             flexDirection: "column",
             marginTop: 6,
-            minHeight: "61vh"
+            minHeight: "90vh",
             // background: "linear-gradient(to right bottom, #0e1129, #162b27)",
           }}
         >

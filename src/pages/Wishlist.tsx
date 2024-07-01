@@ -10,7 +10,7 @@ export default function Wishlist() {
         marginTop: 15,
         width: "70%",
         marginInline: "auto",
-        minHeight: "61vh"
+        minHeight: "90vh",
       }}
     >
       <Typography

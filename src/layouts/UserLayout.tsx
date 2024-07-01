@@ -30,12 +30,10 @@ const Search = styled("div")(({ theme }) => ({
     backgroundColor: alpha(theme.palette.common.white, 0.25),
   },
   marginRight: theme.spacing(2),
-  marginLeft: 0,
   width: "100%",
-  [theme.breakpoints.up("sm")]: {
-    marginLeft: theme.spacing(3),
-    width: "auto",
-  },
+  maxWidth: 500,
+  flexShrink: 1,
+  marginLeft: theme.spacing(3),
 }));
 
 const SearchIconWrapper = styled("div")(({ theme }) => ({
@@ -71,9 +69,9 @@ const StyledAutocomplete = styled(Autocomplete)(({ theme }) => ({
     transition: theme.transitions.create("width"),
     width: "100%",
     color: "#fff",
-    [theme.breakpoints.up("md")]: {
-      width: "35ch",
-    },
+    // [theme.breakpoints.up("md")]: {
+    //   maxWidth: "40ch",
+    // },
   },
 }));
 
@@ -276,7 +274,16 @@ export default function UserLayout() {
     <>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="fixed">
-          <Toolbar sx={{ width: "70%", margin: "auto", padding: { md: 0 } }}>
+          <Toolbar
+            sx={{
+              display: { xs: "flex" },
+              justifyContent: "space-between",
+              width: { xs: "95%", sm: "70%" },
+              margin: "auto",
+              paddingInline: { md: 0 },
+              paddingBlock: { xs: 1, sm: 0 },
+            }}
+          >
             <Link to={"/"}>
               <HeaderLogo />
             </Link>
@@ -305,7 +312,7 @@ export default function UserLayout() {
               />
             </Search>
             <Box sx={{ flexGrow: 1 }} />
-            <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
+            <Box sx={{ display: { xs: "none", lg: "flex" }, gap: 1 }}>
               <IconButton
                 size="large"
                 aria-label="wishlist"
@@ -362,13 +369,13 @@ export default function UserLayout() {
                     slotProps={{ img: { loading: "lazy" } }}
                   />
                 ) : (
-                  <AccountCircle/>
+                  <AccountCircle />
                 )}
               </IconButton>
             </Box>
 
             {/* Mobile Menu */}
-            <Box sx={{ display: { xs: "flex", md: "none" } }}>
+            <Box sx={{ display: { xs: "flex", lg: "none" } }}>
               <IconButton
                 size="large"
                 aria-label="show more"

@@ -146,13 +146,13 @@ export default function UserHome() {
   return (
     <Box
       sx={{
-        width: "70%",
+        width: { xs: "90%", sm: "70%" },
         marginInline: "auto",
         display: "flex",
         flexDirection: "column",
         marginBlock: 5,
         marginTop: 15,
-        minHeight: "61vh"
+        minHeight: "90vh",
       }}
     >
       <Box>
@@ -174,8 +174,9 @@ export default function UserHome() {
           <Card
             sx={{
               display: "flex",
+              flexDirection: { xs: "column", md: "row" },
               gap: 3,
-              padding: 3,
+              padding: { xs: 1.5, sm: 3 },
               marginBottom: 8,
             }}
             elevation={2}
@@ -187,7 +188,7 @@ export default function UserHome() {
                 onError={handleMainImgError}
                 loading="lazy"
                 sx={{
-                  width: "70%",
+                  width: { xs: "100%", md: "70%" },
                   aspectRatio: 16 / 9,
                   borderRadius: 1,
                 }}
@@ -200,7 +201,7 @@ export default function UserHome() {
                 flexDirection: "column",
                 flexGrow: 1,
                 justifyContent: "space-between",
-                width: "30%",
+                width: { xs: "100%", md: "30%" },
               }}
             >
               <Box>
@@ -228,7 +229,14 @@ export default function UserHome() {
                   gap: 0.6,
                 }}
               >
-                <Typography variant="h2" component={"p"} color={"primary"}>
+                <Typography
+                  variant="h2"
+                  component={"p"}
+                  color={"primary"}
+                  sx={{
+                    marginTop: { xs: 2, md: 0 },
+                  }}
+                >
                   R${mainGame?.price.toFixed(2)}
                 </Typography>
                 <Box

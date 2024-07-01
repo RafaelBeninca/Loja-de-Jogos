@@ -179,7 +179,7 @@ export default function GameCarousel({
                 loading="lazy"
                 alt=""
                 sx={{
-                  width: 200,
+                  width: {xs: 150, sm: 200},
                   aspectRatio: 16 / 9,
                 }}
               />

@@ -32,8 +32,7 @@ export default function UserLogin() {
   const [isLoading, setIsLoading] = useState(true);
   const [displayGame, setDisplayGame] = useState<OriginalGame | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(true);
-  const { loginUser, user } =
-    useContext<UserContextInterface>(UserContext);
+  const { loginUser, user } = useContext<UserContextInterface>(UserContext);
   const navigate = useNavigate();
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -111,7 +110,7 @@ export default function UserLogin() {
             display: "flex",
             flexDirection: "column",
             marginTop: 6,
-            minHeight: "61vh"
+            minHeight: "90vh",
             // background: "linear-gradient(to right bottom, #0e1129, #162b27)",
           }}
         >
@@ -123,34 +122,29 @@ export default function UserLogin() {
               borderRadius: "0.5rem",
               // bgcolor: "primary.dark",
               display: "flex",
-              flexDirection: "row",
+              flexDirection: { xs: "column", md: "row" },
+              gap: 2,
               alignItems: "left",
               marginBlock: "6rem",
-              width: "70rem",
-              height: "30rem",
+              width: { xs: "85%", sm: "50%", md: "80%" },
+              padding: "1rem",
             }}
           >
             <Paper
               elevation={5}
               sx={{
-                width: "25rem",
-                height: "28rem",
-                marginTop: "1rem",
-                marginLeft: "1rem",
-                // bgcolor: "primary.main",
+                padding: 2,
+                width: { md: "40%" },
               }}
             >
               {/* Formulário */}
 
-              <Box
-                component={"form"}
-                sx={{
-                  marginTop: "1rem",
-                  marginLeft: "1rem",
-                }}
-                onSubmit={onSubmit}
-              >
-                <FormControl>
+              <Box component={"form"} onSubmit={onSubmit}>
+                <FormControl
+                  sx={{
+                    width: "100%",
+                  }}
+                >
                   <Typography variant="h1">LOGIN</Typography>
                   <TextField
                     error={error}
@@ -167,7 +161,7 @@ export default function UserLogin() {
                     variant="standard"
                     size="small"
                     type="email"
-                    sx={{ width: 350, marginTop: "2rem" }}
+                    sx={{ width: "100%", maxWidth: 250, marginTop: "2rem" }}
                   />
                   <TextField
                     error={error}
@@ -181,7 +175,7 @@ export default function UserLogin() {
                     variant="standard"
                     size="small"
                     type="password"
-                    sx={{ width: 350, marginTop: "3rem" }}
+                    sx={{ width: "100%", maxWidth: 250, marginTop: "3rem" }}
                   />
                   {!formUser.email_address || !formUser.password ? (
                     <Button
@@ -222,7 +216,7 @@ export default function UserLogin() {
                   <Typography
                     variant="caption"
                     sx={{
-                      marginTop: 2,
+                      marginBlock: 2,
                     }}
                   >
                     Não possui uma conta?{" "}
@@ -243,10 +237,9 @@ export default function UserLogin() {
                 component={"div"}
                 elevation={5}
                 sx={{
-                  width: "42rem",
-                  height: "28rem",
-                  marginTop: "1rem",
-                  marginLeft: "1rem",
+                  display: { xs: "none", md: "block" },
+                  width: "60%",
+                  height: "26rem",
                   bgcolor: "primary.dark",
                   background: `url(${displayGame.banner_image})`,
                   backgroundSize: "cover",
