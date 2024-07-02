@@ -9,16 +9,13 @@ export default function Footer() {
         alignItems: "center",
         flexDirection: "column",
         gap: 1,
-        paddingTop: 3,
+        paddingTop: 2,
         paddingBottom: 5,
         width: "100%",
         minHeight: 100,
         backgroundColor: "common.black",
       }}
     >
-      {/* <Typography variant="h2" component={"p"}>
-        FUSION GAMES STORE
-      </Typography> */}
       <Box
         component="img"
         sx={{

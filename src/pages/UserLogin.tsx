@@ -110,35 +110,30 @@ export default function UserLogin() {
             display: "flex",
             flexDirection: "column",
             marginTop: 6,
-            minHeight: "90vh",
+            minHeight: {xs: "80vh", md: "90vh"},
             // background: "linear-gradient(to right bottom, #0e1129, #162b27)",
           }}
         >
-          {/* Logo e "Div" do Login */}
-
           <Paper
             elevation={2}
             sx={{
               borderRadius: "0.5rem",
-              // bgcolor: "primary.dark",
               display: "flex",
               flexDirection: { xs: "column", md: "row" },
               gap: 2,
-              alignItems: "left",
               marginBlock: "6rem",
               width: { xs: "85%", sm: "50%", md: "80%" },
-              padding: "1rem",
+              padding: 2,
             }}
           >
             <Paper
               elevation={5}
               sx={{
-                padding: 2,
+                paddingInline: 2,
+                paddingBlock: 4,
                 width: { md: "40%" },
               }}
             >
-              {/* Formulário */}
-
               <Box component={"form"} onSubmit={onSubmit}>
                 <FormControl
                   sx={{

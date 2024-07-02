@@ -40,6 +40,7 @@ import { onRemoveFromCart } from "../funcs/async/CartFunctions";
 import { onRemoveFromWishlist } from "../funcs/async/WishlistFunctions";
 import MoreIcon from "@mui/icons-material/MoreVert";
 import ImageComponent from "../components/ImageComponent";
+import BuyButton from "../components/BuyButton";
 
 export default function Game() {
   const [game, setGame] = useState<OriginalGame>(emptyOriginalGame);
@@ -68,6 +69,7 @@ export default function Game() {
   const { logoutUser, user } = useContext(UserContext);
   const [showDialog, setShowDialog] = useState(false);
   const [dialogText, setDialogText] = useState("");
+  const [screenWidth, setScreenWidth] = useState(window.innerWidth);
   const navigate = useNavigate();
   const { title } = useParams();
 
@@ -517,15 +519,27 @@ export default function Game() {
   useEffect(getPublisherUser, [game.publisher]);
   useEffect(getBoughtGame, [user?.id, game.id]);
   useEffect(handleCarouselImages, [game.id]);
+  useEffect(createCarouselImages, [hasHandledCarouselImages]);
   useEffect(() => {
     getGameFileLink();
   }, []);
-  useEffect(createCarouselImages, [hasHandledCarouselImages]);
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    // Clean up event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [window.screen.width]);
 
   return (
     <Box
       sx={{
-        width: "70%",
+        width: { xs: "90%", sm: "70%" },
         marginInline: "auto",
         display: "flex",
         flexDirection: "column",
@@ -548,12 +562,21 @@ export default function Game() {
             <Box
               sx={{
                 display: "flex",
+                flexDirection: { xs: "column-reverse", md: "row" },
                 gap: 3,
               }}
             >
+              {screenWidth < 900 && (
+                  <BuyButton
+                    isBoughtGame={isBoughtGame}
+                    game={game}
+                    handleOnClickBuy={handleOnClickBuy}
+                  />
+                )}
               <Box
                 sx={{
-                  width: "70%",
+                  width: { xs: "100%", md: "70%" },
+                  marginTop: {xs: 2, md: 0}
                 }}
               >
                 <Carousel
@@ -582,19 +605,9 @@ export default function Game() {
                   display: "flex",
                   flexDirection: "column",
                   gap: 1,
-                  width: "30%",
+                  width: { xs: "100%", md: "30%" },
                 }}
               >
-                {/* <Box
-                    component={"img"}
-                    src={game.banner_image}
-                    onError={(e) => handleImgError(e, "banner_image")}
-                    loading="lazy"
-                    alt=""
-                    sx={{
-                      aspectRatio: 16 / 9,
-                    }}
-                  /> */}
                 <ImageComponent
                   game={game}
                   setGame={setGame}
@@ -657,28 +670,13 @@ export default function Game() {
                     />
                   ))}
                 </Box>
-                <Typography
-                  sx={{
-                    marginBlock: 1,
-                  }}
-                >
-                  {isBoughtGame ? (
-                    <Button variant="contained" href={game.game_file}>
-                      Download
-                    </Button>
-                  ) : (
-                    <Button
-                      onClick={handleOnClickBuy}
-                      variant="contained"
-                      sx={{
-                        gap: 1,
-                      }}
-                    >
-                      <AddShoppingCart />
-                      R${game.price.toFixed(2)}
-                    </Button>
-                  )}
-                </Typography>
+                {screenWidth >= 900 && (
+                  <BuyButton
+                    isBoughtGame={isBoughtGame}
+                    game={game}
+                    handleOnClickBuy={handleOnClickBuy}
+                  />
+                )}
               </Box>
             </Box>
             <IconButton
@@ -690,7 +688,7 @@ export default function Game() {
               sx={{
                 position: "absolute",
                 top: 0,
-                right: -10,
+                right: -14,
               }}
             >
               <MoreIcon />
