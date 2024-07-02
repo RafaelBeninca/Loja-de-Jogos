@@ -93,7 +93,7 @@ export default function Signup() {
             display: "flex",
             flexDirection: "column",
             marginTop: 6,
-            minHeight: "90vh",
+            minHeight: { xs: "80vh", md: "90vh" },
             // background: "linear-gradient(to right bottom, #0e1129, #162b27)",
           }}
         >
@@ -101,36 +101,30 @@ export default function Signup() {
             elevation={2}
             sx={{
               borderRadius: "0.5rem",
-              // bgcolor: "primary.dark",
               display: "flex",
               flexDirection: "column",
-              alignItems: "left",
               marginBlock: "6rem",
-              width: "27rem",
-              height: "34rem",
+              width: "85%",
+              maxWidth: 420,
+              padding: 2,
             }}
           >
             <Paper
               elevation={4}
               sx={{
-                width: "25rem",
-                height: "28rem",
-                marginTop: "1rem",
-                marginLeft: "1rem",
-                // bgcolor: "primary.main",
+                paddingBlock: 2,
+                paddingInline: 3,
               }}
             >
-              {/* Formulário */}
-
-              <Box
-                component={"form"}
-                sx={{
-                  marginTop: "1rem",
-                  marginLeft: "1rem",
-                }}
-                onSubmit={onSubmit}
-              >
-                <FormControl>
+              <Box component={"form"} onSubmit={onSubmit}>
+                <FormControl
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center"
+                  }}
+                >
                   <Typography variant="h1">SIGN UP</Typography>
                   <TextField
                     value={formUser.username}
@@ -146,7 +140,7 @@ export default function Signup() {
                     label="Username"
                     variant="standard"
                     size="small"
-                    sx={{ width: 350, marginTop: "3rem" }}
+                    sx={{ width: "100%", marginTop: "2rem" }}
                   />
                   <TextField
                     value={formUser.email_address}
@@ -163,7 +157,7 @@ export default function Signup() {
                     variant="standard"
                     size="small"
                     type="email"
-                    sx={{ width: 350, marginTop: "3rem" }}
+                    sx={{ width: "100%", marginTop: "3rem" }}
                   />
                   <TextField
                     value={formUser.password}
@@ -177,7 +171,7 @@ export default function Signup() {
                     variant="standard"
                     size="small"
                     type="password"
-                    sx={{ width: 350, marginTop: "3rem" }}
+                    sx={{ width: "100%", marginTop: "3rem" }}
                   />
                   {!formUser.email_address ||
                   !formUser.password ||
@@ -222,7 +216,7 @@ export default function Signup() {
                   <Typography
                     variant="caption"
                     sx={{
-                      marginTop: 2,
+                      marginBlock: 2,
                     }}
                   >
                     Já possui uma conta?{" "}
