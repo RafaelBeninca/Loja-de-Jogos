@@ -10,7 +10,6 @@ import SearchIcon from "@mui/icons-material/Search";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import MoreIcon from "@mui/icons-material/MoreVert";
 import FolderIcon from "@mui/icons-material/Folder";
 import UserContext from "../contexts/UserContext";
 import { Link, Outlet, useNavigate } from "react-router-dom";
@@ -21,6 +20,7 @@ import { ThemeContext } from "../contexts/ThemeContext";
 import HeaderLogo from "../components/HeaderLogo";
 import { OriginalGame } from "../types/types";
 import axiosInstance from "../utils/axiosInstance";
+import UserMobileMenu from "../components/UserMobileMenu";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -98,23 +98,19 @@ export default function UserLayout() {
   };
 
   const isMenuOpen = Boolean(anchorEl);
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
   const handleMobileMenuClose = () => {
+    setAnchorEl(null);
     setMobileMoreAnchorEl(null);
   };
 
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
-  };
-
-  const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setMobileMoreAnchorEl(event.currentTarget);
   };
 
   function fetchGames() {
@@ -206,92 +202,6 @@ export default function UserLayout() {
               Signup
             </MenuItem>,
           ]}
-    </Menu>
-  );
-
-  const mobileMenuId = "primary-search-account-menu-mobile";
-  const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-    >
-      <MenuItem>
-        <IconButton size="large" aria-label="wishlist" color="inherit">
-          {/* Notificações */}
-          {/* <Badge badgeContent={4} color="error">
-          </Badge> */}
-          <FavoriteIcon />
-        </IconButton>
-        <p>Wishlist</p>
-      </MenuItem>
-      <MenuItem>
-        <IconButton size="large" aria-label="carrinho" color="inherit">
-          {/* Notificações */}
-          {/* <Badge badgeContent={17} color="error">
-          </Badge> */}
-          <ShoppingCartIcon />
-        </IconButton>
-        <p>Carrinho</p>
-      </MenuItem>
-      <MenuItem>
-        <IconButton size="large" aria-label="biblioteca" color="inherit">
-          {/* Notificações */}
-          {/* <Badge badgeContent={17} color="error">
-          </Badge> */}
-          <FolderIcon />
-        </IconButton>
-        <p>Biblioteca</p>
-      </MenuItem>
-      {darkMode ? (
-        <MenuItem onClick={toggleTheme}>
-          <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="primary-search-account-menu"
-            aria-haspopup="true"
-            color="inherit"
-          >
-            <LightModeIcon />
-          </IconButton>
-          <p>Modo Claro</p>
-        </MenuItem>
-      ) : (
-        <MenuItem onClick={toggleTheme}>
-          <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="primary-search-account-menu"
-            aria-haspopup="true"
-            color="inherit"
-          >
-            <DarkModeIcon />
-          </IconButton>
-          <p>Modo Escuro</p>
-        </MenuItem>
-      )}
-      <MenuItem onClick={handleProfileMenuOpen}>
-        <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
-          aria-haspopup="true"
-          color="inherit"
-        >
-          <AccountCircle />
-        </IconButton>
-        <p>Perfil</p>
-      </MenuItem>
     </Menu>
   );
 
@@ -402,22 +312,16 @@ export default function UserLayout() {
             </Box>
 
             {/* Mobile Menu */}
-            <Box sx={{ display: { xs: "flex", lg: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="show more"
-                aria-controls={mobileMenuId}
-                aria-haspopup="true"
-                onClick={handleMobileMenuOpen}
-                color="inherit"
-              >
-                <MoreIcon />
-              </IconButton>
-            </Box>
+            <UserMobileMenu
+              handleMobileMenuClose={handleMobileMenuClose}
+              handleProfileMenuOpen={handleProfileMenuOpen}
+              mobileMoreAnchorEl={mobileMoreAnchorEl}
+              setMobileMoreAnchorEl={setMobileMoreAnchorEl}
+              user={user}
+            />
+            {renderMenu}
           </Toolbar>
         </AppBar>
-        {renderMobileMenu}
-        {renderMenu}
       </Box>
       <Outlet />
     </>
