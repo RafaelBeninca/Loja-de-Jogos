@@ -6,14 +6,15 @@ import IconButton from "@mui/material/IconButton";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import MoreIcon from "@mui/icons-material/MoreVert";
 import UserContext from "../contexts/UserContext";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Avatar } from "@mui/material";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import { ThemeContext } from "../contexts/ThemeContext";
-import HeaderLogo from "../components/HeaderLogo";
+// import HeaderLogo from "../components/HeaderLogo";
+import LogoLong from "../assets/images/Logo_Long.png";
+import LoginMobileMenu from "../components/LoginMobileMenu";
 
 export default function LoginLayout() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -24,7 +25,6 @@ export default function LoginLayout() {
   const navigate = useNavigate();
 
   const isMenuOpen = Boolean(anchorEl);
-  const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
   const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -37,10 +37,6 @@ export default function LoginLayout() {
   const handleMenuClose = () => {
     setAnchorEl(null);
     handleMobileMenuClose();
-  };
-
-  const handleMobileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
-    setMobileMoreAnchorEl(event.currentTarget);
   };
 
   const menuId = "primary-search-account-menu";
@@ -81,45 +77,30 @@ export default function LoginLayout() {
     </Menu>
   );
 
-  const mobileMenuId = "primary-search-account-menu-mobile";
-  const renderMobileMenu = (
-    <Menu
-      anchorEl={mobileMoreAnchorEl}
-      anchorOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      id={mobileMenuId}
-      keepMounted
-      transformOrigin={{
-        vertical: "top",
-        horizontal: "right",
-      }}
-      open={isMobileMenuOpen}
-      onClose={handleMobileMenuClose}
-    >
-      <MenuItem onClick={handleProfileMenuOpen}>
-        <IconButton
-          size="large"
-          aria-label="account of current user"
-          aria-controls="primary-search-account-menu"
-          aria-haspopup="true"
-          color="inherit"
-        >
-          <AccountCircle />
-        </IconButton>
-        <p>Perfil</p>
-      </MenuItem>
-    </Menu>
-  );
-
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="fixed">
-          <Toolbar sx={{ width: "70%", margin: "auto", padding: { md: 0 } }}>
+          <Toolbar
+            sx={{
+              display: { xs: "flex" },
+              justifyContent: "space-between",
+              width: { xs: "95%", sm: "70%" },
+              margin: "auto",
+              paddingInline: { md: 0 },
+            }}
+          >
             <Link to={"/"}>
-              <HeaderLogo />
+              <Box
+                component="img"
+                sx={{
+                  maxWidth: 250,
+                  filter: "drop-shadow(0px 0px 2px #222)",
+                }}
+                alt="logo"
+                loading="lazy"
+                src={LogoLong}
+              />
             </Link>
             <Box sx={{ flexGrow: 1 }} />
             <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1 }}>
@@ -149,22 +130,15 @@ export default function LoginLayout() {
             </Box>
 
             {/* Mobile Menu */}
-            <Box sx={{ display: { xs: "flex", md: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="show more"
-                aria-controls={mobileMenuId}
-                aria-haspopup="true"
-                onClick={handleMobileMenuOpen}
-                color="inherit"
-              >
-                <MoreIcon />
-              </IconButton>
-            </Box>
+            <LoginMobileMenu
+              handleMobileMenuClose={handleMobileMenuClose}
+              handleProfileMenuOpen={handleProfileMenuOpen}
+              mobileMoreAnchorEl={mobileMoreAnchorEl}
+              setMobileMoreAnchorEl={setMobileMoreAnchorEl}
+            />
+            {renderMenu}
           </Toolbar>
         </AppBar>
-        {renderMobileMenu}
-        {renderMenu}
       </Box>
       <Outlet />
     </>
